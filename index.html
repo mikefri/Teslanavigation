@@ -1205,11 +1205,8 @@ async function toggleScLayer(){
 //  GUIDAGE VIRAGE PAR VIRAGE
 // ════════════════════════════════════════════════════════════════
 let guidanceActive = false;
-let guidanceSteps = [];          // étapes OSRM parsées
-let guidanceStepIdx = 0;         // étape courante
-let activeRouteCoords = null;    // coordonnées de la polyligne complète
-let activeRouteTotalDist = 0;
-let activeRouteTotalDur = 0;
+let guidanceSteps = [];
+let guidanceStepIdx = 0;
 let guidanceDistTravelled = 0;
 let lastSpokenStep = -1;
 let ttsEnabled = true;
