@@ -515,7 +515,7 @@
 
         <!-- Chips POI -->
         <div id="poi-bar">
-          <div class="poi-chip" data-poi="fast_food" data-brands="McDonald's|KFC|Burger King|Quick|Five Guys" onclick="searchPOI(this)"><span class="poi-emoji">🍔</span> Fast-food</div>
+          <div class="poi-chip" data-poi="fast_food" onclick="searchPOI(this)"><span class="poi-emoji">🍔</span> Fast-food</div>
           <div class="poi-chip" data-poi="fuel"      onclick="searchPOI(this)"><span class="poi-emoji">⛽</span> Carburant</div>
           <div class="poi-chip" data-poi="cafe"      onclick="searchPOI(this)"><span class="poi-emoji">☕</span> Café</div>
           <div class="poi-chip" data-poi="supermarket" onclick="searchPOI(this)"><span class="poi-emoji">🛒</span> Supermarché</div>
@@ -523,6 +523,26 @@
           <div class="poi-chip" data-poi="hospital"  onclick="searchPOI(this)"><span class="poi-emoji">🏥</span> Hôpital</div>
           <div class="poi-chip" data-poi="parking"   onclick="searchPOI(this)"><span class="poi-emoji">🅿️</span> Parking</div>
           <div class="poi-chip" data-poi="restaurant" onclick="searchPOI(this)"><span class="poi-emoji">🍽️</span> Restaurant</div>
+        </div>
+        <!-- Recherche POI libre + rayon -->
+        <div style="display:flex;gap:6px;padding:6px 0 0;align-items:center">
+          <div style="position:relative;flex:1">
+            <input id="poi-search-input" type="text" placeholder="🔍 Rechercher un lieu…"
+              autocomplete="off"
+              style="width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:9px;padding:8px 11px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;transition:border-color .15s,box-shadow .15s;box-shadow:var(--shadow-soft);"
+              onfocus="this.style.borderColor='var(--blue)';this.style.boxShadow='0 0 0 3px rgba(26,127,212,.12)'"
+              onblur="this.style.borderColor='';this.style.boxShadow=''"
+              onkeydown="if(event.key==='Enter')searchPOIFree()"
+            />
+          </div>
+          <select id="poi-radius" style="background:var(--s2);border:1px solid var(--border2);border-radius:9px;padding:8px 8px;color:var(--text);font-size:12px;outline:none;cursor:pointer;flex-shrink:0;box-shadow:var(--shadow-soft)">
+            <option value="2000">2 km</option>
+            <option value="5000">5 km</option>
+            <option value="10000">10 km</option>
+            <option value="20000" selected>20 km</option>
+            <option value="50000">50 km</option>
+          </select>
+          <button onclick="searchPOIFree()" style="background:var(--blue);border:none;border-radius:9px;color:#fff;padding:8px 12px;cursor:pointer;font-size:14px;flex-shrink:0;box-shadow:0 2px 8px rgba(26,127,212,.3);transition:all .15s" title="Rechercher">🔍</button>
         </div>
 
         <button id="go-btn" onclick="calcRoute()" style="margin-top:7px">⚡ CALCULER L'ITINÉRAIRE</button>
@@ -2214,41 +2234,62 @@ async function searchPOI(chip){
   if(!cfg) return;
 
   // Toggle : si déjà actif, fermer
-  if(activePOIChip === chip){
-    closePOI();
-    return;
-  }
+  if(activePOIChip === chip){ closePOI(); return; }
 
-  // Désactiver l'ancien chip
   document.querySelectorAll('.poi-chip').forEach(c => c.classList.remove('active'));
   chip.classList.add('active');
   activePOIChip = chip;
 
-  // Afficher panneau avec spinner
-  const panel = document.getElementById('poi-results');
-  panel.classList.add('show');
-  document.getElementById('poi-results-title').textContent = cfg.emoji + ' ' + cfg.label + ' à proximité';
-  document.getElementById('poi-list').innerHTML =
-    `<div id="poi-loading"><div class="poi-spin"></div>Recherche en cours…</div>`;
-
+  const radius = parseInt(document.getElementById('poi-radius').value) || 20000;
   const [lng, lat] = getSearchCenter();
 
-  // Rayon de recherche : 5 km
-  const radius = 5000;
+  showPOILoading(cfg.emoji + ' ' + cfg.label + ' · ' + (radius/1000) + ' km');
 
-  const query = `[out:json][timeout:12];
+  const query = `[out:json][timeout:15];
 (
   node["${cfg.tag}"="${cfg.val}"](around:${radius},${lat},${lng});
   way["${cfg.tag}"="${cfg.val}"](around:${radius},${lat},${lng});
 );
-out center body qt 30;`;
+out center body qt 40;`;
+
+  await runPOIQuery(query, cfg, [lng, lat]);
+}
+
+async function searchPOIFree(){
+  const q = document.getElementById('poi-search-input').value.trim();
+  if(!q) return;
+
+  document.querySelectorAll('.poi-chip').forEach(c => c.classList.remove('active'));
+  activePOIChip = null;
+
+  const radius = parseInt(document.getElementById('poi-radius').value) || 20000;
+  const [lng, lat] = getSearchCenter();
+  const cfg = { emoji:'📍', label: q, color:'#1a7fd4' };
+
+  showPOILoading('🔍 "' + q + '" · ' + (radius/1000) + ' km');
+
+  // Recherche par nom OSM (name~"...") + recherche Nominatim combinée
+  const safeQ = q.replace(/"/g, '');
+  const query = `[out:json][timeout:15];
+(
+  node["name"~"${safeQ}",i](around:${radius},${lat},${lng});
+  way["name"~"${safeQ}",i](around:${radius},${lat},${lng});
+  node["brand"~"${safeQ}",i](around:${radius},${lat},${lng});
+  way["brand"~"${safeQ}",i](around:${radius},${lat},${lng});
+);
+out center body qt 40;`;
+
+  await runPOIQuery(query, cfg, [lng, lat]);
+}
+
+async function runPOIQuery(query, cfg, center){
+  const [lng, lat] = center;
 
   const mirrors = [
     'https://overpass-api.de/api/interpreter',
     'https://overpass.kumi.systems/api/interpreter',
   ];
-
-  const fetchWithTimeout = (url, opts, ms=9000) => {
+  const fetchWithTimeout = (url, opts, ms=12000) => {
     const ctrl = new AbortController();
     const tid  = setTimeout(() => ctrl.abort(), ms);
     return fetch(url, {...opts, signal: ctrl.signal}).finally(() => clearTimeout(tid));
@@ -2258,9 +2299,9 @@ out center body qt 30;`;
   for(const url of mirrors){
     try {
       const r = await fetchWithTimeout(url, {
-        method: 'POST',
-        headers: {'Content-Type':'application/x-www-form-urlencoded'},
-        body: 'data=' + encodeURIComponent(query)
+        method:'POST',
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:'data='+encodeURIComponent(query)
       });
       if(!r.ok) continue;
       data = await r.json();
@@ -2270,33 +2311,32 @@ out center body qt 30;`;
 
   if(!data || !data.elements || !data.elements.length){
     document.getElementById('poi-list').innerHTML =
-      `<div style="padding:14px 22px;font-size:12px;color:var(--muted2)">Aucun résultat dans un rayon de 5 km.</div>`;
+      `<div style="padding:14px 22px;font-size:12px;color:var(--muted2)">Aucun résultat dans cette zone. Essayez un rayon plus grand.</div>`;
     return;
   }
 
-  // Trier par distance croissante
   const items = data.elements.map(el => {
     const elLat = el.lat ?? el.center?.lat;
     const elLng = el.lon ?? el.center?.lon;
-    const dist  = hav([lng, lat], [elLng, elLat]);
-    const tags  = el.tags || {};
+    if(!elLat || !elLng) return null;
+    const dist = hav([lng, lat], [elLng, elLat]);
+    const tags = el.tags || {};
     return {
-      id    : el.id,
-      name  : tags.name || tags['name:fr'] || cfg.label,
-      brand : tags.brand || tags.operator || '',
-      addr  : [tags['addr:housenumber'], tags['addr:street'], tags['addr:city']].filter(Boolean).join(' '),
-      phone : tags.phone || tags['contact:phone'] || '',
-      open  : tags['opening_hours'] || '',
-      lat   : elLat,
-      lng   : elLng,
-      dist,
+      id   : el.id,
+      name : tags.name || tags['name:fr'] || tags.brand || cfg.label,
+      brand: tags.brand || tags.operator || '',
+      addr : [tags['addr:housenumber'], tags['addr:street'], tags['addr:city']].filter(Boolean).join(' '),
+      phone: tags.phone || tags['contact:phone'] || '',
+      open : tags['opening_hours'] || '',
+      lat  : elLat, lng: elLng, dist,
     };
-  }).sort((a,b) => a.dist - b.dist).slice(0, 20);
+  }).filter(Boolean).sort((a,b) => a.dist - b.dist).slice(0, 30);
 
-  // Supprimer anciens marqueurs POI
   clearPOIMarkers();
 
-  // Afficher la liste
+  document.getElementById('poi-results-title').textContent =
+    cfg.emoji + ' ' + items.length + ' résultat' + (items.length > 1 ? 's' : '');
+
   document.getElementById('poi-list').innerHTML = items.map((p, i) =>
     `<div class="poi-item" onclick="focusPOI(${i})">
       <div class="poi-item-icon">${cfg.emoji}</div>
@@ -2311,41 +2351,43 @@ out center body qt 30;`;
     </div>`
   ).join('');
 
-  // Ajouter marqueurs sur la carte
+  // Marqueurs carte
   items.forEach((p, i) => {
     const el = document.createElement('div');
     el.style.cssText = [
-      'width:30px','height:30px','border-radius:50%',
-      'background:white',
+      'width:30px','height:30px','border-radius:50%','background:white',
       `border:3px solid ${cfg.color}`,
       'display:flex','align-items:center','justify-content:center',
       'font-size:14px','cursor:pointer',
-      'box-shadow:0 2px 8px rgba(0,0,0,.2)',
-      'transition:transform .15s',
+      'box-shadow:0 2px 8px rgba(0,0,0,.2)','transition:transform .15s',
     ].join(';');
     el.textContent = cfg.emoji;
     el.addEventListener('mouseenter', () => el.style.transform = 'scale(1.25)');
     el.addEventListener('mouseleave', () => el.style.transform = 'scale(1)');
     el.addEventListener('click', (e) => { e.stopPropagation(); focusPOIPopup(p, cfg); });
-
     const marker = new maplibregl.Marker({element:el, anchor:'center'})
-      .setLngLat([p.lng, p.lat])
-      .addTo(map);
-    poiMarkers.push({ marker, data: p });
+      .setLngLat([p.lng, p.lat]).addTo(map);
+    poiMarkers.push({marker, data:p});
   });
 
-  // Zoomer sur les résultats si on a des points
   if(items.length > 0){
     const bounds = items.reduce(
-      (b, p) => b.extend([p.lng, p.lat]),
-      new maplibregl.LngLatBounds([items[0].lng, items[0].lat], [items[0].lng, items[0].lat])
+      (b,p) => b.extend([p.lng, p.lat]),
+      new maplibregl.LngLatBounds([items[0].lng, items[0].lat],[items[0].lng, items[0].lat])
     );
-    map.fitBounds(bounds, {padding:{top:80,bottom:80,left:420,right:60}, maxZoom:15, duration:800});
+    map.fitBounds(bounds, {padding:{top:80,bottom:80,left:420,right:60},maxZoom:14,duration:800});
   }
 
-  // Stocker pour focusPOI
   window._poiItems = items;
   window._poiCfg   = cfg;
+}
+
+function showPOILoading(title){
+  const panel = document.getElementById('poi-results');
+  panel.classList.add('show');
+  document.getElementById('poi-results-title').textContent = title;
+  document.getElementById('poi-list').innerHTML =
+    `<div id="poi-loading"><div class="poi-spin"></div>Recherche en cours…</div>`;
 }
 
 function focusPOI(idx){
