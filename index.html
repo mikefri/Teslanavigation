@@ -38,14 +38,32 @@
     .panel.active{display:flex;}
 
     /* ─── MODEL SELECTOR ─── */
-    #model-selector{padding:12px 22px;border-bottom:1px solid var(--border);flex-shrink:0;}
+    #model-selector{border-bottom:1px solid var(--border);flex-shrink:0;overflow:hidden;}
     .section-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+
+    /* Collapsed pill */
+    #model-collapsed{padding:9px 16px;cursor:pointer;transition:background .2s;background:var(--s2);border-bottom:1px solid var(--border);}
+    #model-collapsed:hover{background:var(--s3);}
+    .mc-row{display:flex;align-items:center;gap:10px;}
+    .mc-icon{font-size:16px;flex-shrink:0;}
+    .mc-info{flex:1;min-width:0;}
+    .mc-info #mc-name{display:block;font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .mc-info #mc-desc{display:block;font-size:10px;color:var(--muted);margin-top:1px;}
+    .mc-info #mc-desc{display:block;font-size:10px;color:var(--muted);margin-top:1px;}
+    .mc-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;}
+    .mc-km-val{font-family:'Orbitron',monospace;font-size:13px;color:var(--text);}
+    .mc-edit{font-size:10px;color:var(--red);letter-spacing:1px;}
+
+    /* Expanded panel */
+    #model-expanded{padding:10px 16px 10px;max-height:280px;transition:max-height .35s ease,opacity .25s ease,padding .35s ease;overflow:hidden;}
+    #model-expanded.hidden{max-height:0!important;padding-top:0!important;padding-bottom:0!important;opacity:0;pointer-events:none;}
+    .ms-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
     .model-families{display:flex;gap:4px;margin-bottom:8px;overflow-x:auto;}
     .model-families::-webkit-scrollbar{display:none;}
     .mfam{background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:4px 11px;font-size:10px;font-family:'Orbitron',monospace;letter-spacing:1px;color:var(--muted2);cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0;}
     .mfam:hover{border-color:var(--border2);color:var(--text);}
     .mfam.active{background:var(--red-dim);border-color:var(--red);color:var(--red);}
-    #variant-list{display:flex;flex-direction:column;gap:3px;max-height:160px;overflow-y:auto;}
+    #variant-list{display:flex;flex-direction:column;gap:3px;max-height:155px;overflow-y:auto;}
     #variant-list::-webkit-scrollbar{width:2px;}
     #variant-list::-webkit-scrollbar-thumb{background:var(--s3);}
     .variant{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--s2);border:1px solid var(--border);border-radius:9px;cursor:pointer;transition:all .2s;}
@@ -275,11 +293,30 @@
     <!-- ── NAV PANEL ── -->
     <div class="panel active" id="panel-nav">
 
-      <!-- Model -->
+      <!-- Model selector collapsible -->
       <div id="model-selector">
-        <div class="section-label">Mon modèle Tesla</div>
-        <div class="model-families" id="model-families"></div>
-        <div id="variant-list"></div>
+        <!-- Vue compacte (après sélection) -->
+        <div id="model-collapsed" onclick="toggleModelSelector()" style="display:none">
+          <div class="mc-row">
+            <span class="mc-icon">🚗</span>
+            <div class="mc-info">
+              <span id="mc-name">—</span>
+              <span id="mc-desc">—</span>
+            </div>
+            <div class="mc-right">
+              <span id="mc-km" class="mc-km-val">—</span>
+              <span class="mc-edit">✎ Changer</span>
+            </div>
+          </div>
+        </div>
+        <!-- Vue étendue (sélecteur complet) -->
+        <div id="model-expanded">
+          <div class="ms-header">
+            <span class="section-label" style="margin-bottom:0">Mon modèle Tesla</span>
+          </div>
+          <div class="model-families" id="model-families"></div>
+          <div id="variant-list"></div>
+        </div>
       </div>
 
       <!-- Battery -->
@@ -287,8 +324,7 @@
         <div class="bat-top">
           <span class="bat-pct" id="bat-pct">78%</span>
           <div class="bat-right">
-            <div class="bat-model-lbl" id="bat-model-lbl">Aucun modèle</div>
-            <div class="bat-km-val">Autonomie : <b id="bat-km">—</b></div>
+            <div class="bat-km-val"><b id="bat-km">—</b> disponibles</div>
           </div>
         </div>
         <div class="bat-track"><div class="bat-fill" id="bat-fill" style="width:78%"></div></div>
@@ -569,17 +605,21 @@ function switchTab(t){
 // ════════════════════════════════════════════════════════════════
 //  MODEL SELECTOR
 // ════════════════════════════════════════════════════════════════
+let modelSelectorOpen = true; // starts open
+
 function buildModelSelector(){
   document.getElementById('model-families').innerHTML=MODELS.map(m=>
     `<div class="mfam${m.id===activeFamilyId?' active':''}" onclick="selectFamily('${m.id}')">${m.family}</div>`
   ).join('');
   renderVariants();
 }
+
 function selectFamily(fid){
   activeFamilyId=fid;
   document.querySelectorAll('.mfam').forEach((el,i)=>el.classList.toggle('active',MODELS[i].id===fid));
   renderVariants();
 }
+
 function renderVariants(){
   const fam=MODELS.find(m=>m.id===activeFamilyId);
   document.getElementById('variant-list').innerHTML=fam.variants.map(v=>`
@@ -592,9 +632,36 @@ function renderVariants(){
       <div class="variant-km">${v.range} <span>km</span></div>
     </div>`).join('');
 }
-function selectVariant(vid){
+
+function selectVariant(vid, autoCollapse=true){
   selectedVariant=ALL_VARIANTS.find(v=>v.id===vid);
-  renderVariants(); updateBattery(battery);
+  renderVariants();
+  updateBattery(battery);
+  // Auto-collapse after user selection (not on init)
+  if(autoCollapse && modelSelectorOpen) collapseModelSelector();
+}
+
+function collapseModelSelector(){
+  modelSelectorOpen=false;
+  // Update collapsed pill content
+  if(selectedVariant){
+    document.getElementById('mc-name').textContent=selectedVariant.name;
+    document.getElementById('mc-desc').textContent=selectedVariant.desc;
+    document.getElementById('mc-km').textContent=selectedVariant.range+' km';
+  }
+  document.getElementById('model-collapsed').style.display='block';
+  document.getElementById('model-expanded').classList.add('hidden');
+}
+
+function expandModelSelector(){
+  modelSelectorOpen=true;
+  document.getElementById('model-collapsed').style.display='none';
+  document.getElementById('model-expanded').classList.remove('hidden');
+}
+
+function toggleModelSelector(){
+  if(modelSelectorOpen) collapseModelSelector();
+  else expandModelSelector();
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -606,7 +673,6 @@ function updateBattery(val){
   const km=range?Math.round(range*battery/100):0;
   document.getElementById('bat-pct').textContent=battery+'%';
   document.getElementById('bat-km').textContent=range?(km+' km'):'—';
-  document.getElementById('bat-model-lbl').textContent=selectedVariant?selectedVariant.name.split('(')[0].trim():'Aucun modèle';
   document.getElementById('bat-fill').style.width=battery+'%';
   document.getElementById('pill-batt').textContent=battery+'%';
   const fill=document.getElementById('bat-fill');
@@ -1179,7 +1245,7 @@ function setLoading(on,txt='CALCUL EN COURS…'){
 //  INIT
 // ════════════════════════════════════════════════════════════════
 buildModelSelector();
-selectVariant('m3-prop');
+selectVariant('m3-prop', false); // init: don't collapse
 updateBattery(78);
 </script>
 </body>
