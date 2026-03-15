@@ -3,34 +3,36 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tesla Navigation</title>
+  <title>Tesla Navigation — Light</title>
   <link href="https://unpkg.com/maplibre-gl@5.20.1/dist/maplibre-gl.css" rel="stylesheet"/>
   <script src="https://unpkg.com/maplibre-gl@5.20.1/dist/maplibre-gl.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
     :root {
-      --red:#e82127; --red-dim:rgba(232,33,39,.12); --red-glow:rgba(232,33,39,.4);
-      --dark:#080808; --s1:#101010; --s2:#181818; --s3:#202020;
-      --border:rgba(255,255,255,.07); --border2:rgba(255,255,255,.14);
-      --text:#efefef; --muted:#555; --muted2:#888;
-      --blue:#44aaff; --green:#2ecc71; --orange:#f39c12; --purple:#bf7fff;
+      --red:#cc1a1f; --red-dim:rgba(204,26,31,.10); --red-glow:rgba(204,26,31,.35);
+      --bg:#f4f2ee; --s1:#faf9f7; --s2:#ffffff; --s3:#f0ede8;
+      --border:rgba(0,0,0,.08); --border2:rgba(0,0,0,.14);
+      --text:#1a1a1a; --muted:#aaa; --muted2:#888;
+      --blue:#1a7fd4; --green:#1b9e57; --orange:#c97c10; --purple:#7c4bc2;
+      --shadow-soft: 0 2px 12px rgba(0,0,0,.07);
+      --shadow-card: 0 4px 20px rgba(0,0,0,.09);
     }
     *{margin:0;padding:0;box-sizing:border-box;}
-    html,body{height:100%;background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;overflow:hidden;}
+    html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow:hidden;}
     #app{display:flex;height:100vh;}
 
     /* ─── SIDEBAR ─── */
-    #sidebar{width:380px;min-width:380px;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:10;overflow:hidden;}
+    #sidebar{width:380px;min-width:380px;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:10;overflow:hidden;box-shadow:2px 0 16px rgba(0,0,0,.06);}
 
-    #header{padding:16px 22px 12px;border-bottom:1px solid var(--border);flex-shrink:0;}
+    #header{padding:16px 22px 12px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--s2);}
     .logo-row{display:flex;align-items:center;gap:11px;}
-    .logo-t{font-family:'Orbitron',monospace;font-size:26px;font-weight:800;color:var(--red);filter:drop-shadow(0 0 10px var(--red-glow));line-height:1;}
-    .logo-text{font-family:'Orbitron',monospace;font-size:15px;font-weight:800;letter-spacing:5px;}
-    .logo-tag{font-size:9px;color:var(--muted2);letter-spacing:3px;text-transform:uppercase;margin-top:3px;margin-left:40px;}
+    .logo-t{font-family:'Orbitron',monospace;font-size:26px;font-weight:800;color:var(--red);filter:drop-shadow(0 0 8px var(--red-glow));line-height:1;}
+    .logo-text{font-family:'Orbitron',monospace;font-size:15px;font-weight:800;letter-spacing:5px;color:var(--text);}
+    .logo-tag{font-size:9px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-top:3px;margin-left:40px;}
 
     /* Tabs */
-    #tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
-    .tab{flex:1;padding:9px 0;text-align:center;font-size:10px;font-family:'Orbitron',monospace;letter-spacing:1px;color:var(--muted2);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;}
+    #tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--s2);}
+    .tab{flex:1;padding:9px 0;text-align:center;font-size:10px;font-family:'Orbitron',monospace;letter-spacing:1px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;}
     .tab:hover{color:var(--text);}
     .tab.active{color:var(--red);border-bottom-color:var(--red);}
 
@@ -41,106 +43,102 @@
     #model-selector{border-bottom:1px solid var(--border);flex-shrink:0;overflow:hidden;}
     .section-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
 
-    /* Collapsed pill */
     #model-collapsed{padding:9px 16px;cursor:pointer;transition:background .2s;background:var(--s2);border-bottom:1px solid var(--border);}
     #model-collapsed:hover{background:var(--s3);}
     .mc-row{display:flex;align-items:center;gap:10px;}
     .mc-icon{font-size:16px;flex-shrink:0;}
     .mc-info{flex:1;min-width:0;}
     .mc-info #mc-name{display:block;font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .mc-info #mc-desc{display:block;font-size:10px;color:var(--muted);margin-top:1px;}
-    .mc-info #mc-desc{display:block;font-size:10px;color:var(--muted);margin-top:1px;}
+    .mc-info #mc-desc{display:block;font-size:10px;color:var(--muted2);margin-top:1px;}
     .mc-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;}
     .mc-km-val{font-family:'Orbitron',monospace;font-size:13px;color:var(--text);}
     .mc-edit{font-size:10px;color:var(--red);letter-spacing:1px;}
 
-    /* Expanded panel */
-    #model-expanded{padding:10px 16px 10px;max-height:280px;transition:max-height .35s ease,opacity .25s ease,padding .35s ease;overflow:hidden;}
+    #model-expanded{padding:10px 16px 10px;max-height:280px;transition:max-height .35s ease,opacity .25s ease,padding .35s ease;overflow:hidden;background:var(--s1);}
     #model-expanded.hidden{max-height:0!important;padding-top:0!important;padding-bottom:0!important;opacity:0;pointer-events:none;}
     .ms-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
     .model-families{display:flex;gap:4px;margin-bottom:8px;overflow-x:auto;}
     .model-families::-webkit-scrollbar{display:none;}
-    .mfam{background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:4px 11px;font-size:10px;font-family:'Orbitron',monospace;letter-spacing:1px;color:var(--muted2);cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0;}
-    .mfam:hover{border-color:var(--border2);color:var(--text);}
+    .mfam{background:var(--s2);border:1px solid var(--border2);border-radius:7px;padding:4px 11px;font-size:10px;font-family:'Orbitron',monospace;letter-spacing:1px;color:var(--muted2);cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0;box-shadow:var(--shadow-soft);}
+    .mfam:hover{border-color:var(--red);color:var(--text);}
     .mfam.active{background:var(--red-dim);border-color:var(--red);color:var(--red);}
     #variant-list{display:flex;flex-direction:column;gap:3px;max-height:155px;overflow-y:auto;}
     #variant-list::-webkit-scrollbar{width:2px;}
-    #variant-list::-webkit-scrollbar-thumb{background:var(--s3);}
-    .variant{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--s2);border:1px solid var(--border);border-radius:9px;cursor:pointer;transition:all .2s;}
-    .variant:hover{border-color:var(--border2);}
+    #variant-list::-webkit-scrollbar-thumb{background:var(--border2);}
+    .variant{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--s2);border:1px solid var(--border);border-radius:9px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow-soft);}
+    .variant:hover{border-color:var(--border2);box-shadow:var(--shadow-card);}
     .variant.active{background:var(--red-dim);border-color:var(--red);}
     .variant-info{flex:1;min-width:0;}
-    .variant-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .variant-desc{font-size:10px;color:var(--muted);margin-top:1px;}
+    .variant-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
+    .variant-desc{font-size:10px;color:var(--muted2);margin-top:1px;}
     .vtag{font-size:9px;padding:2px 6px;border-radius:4px;font-family:'Orbitron',monospace;letter-spacing:1px;white-space:nowrap;flex-shrink:0;}
-    .vtag-prop{background:rgba(68,170,255,.12);color:var(--blue);border:1px solid rgba(68,170,255,.25);}
-    .vtag-ga{background:rgba(46,204,113,.1);color:var(--green);border:1px solid rgba(46,204,113,.25);}
-    .vtag-perf{background:rgba(232,33,39,.1);color:var(--red);border:1px solid rgba(232,33,39,.25);}
-    .vtag-plaid{background:rgba(191,127,255,.12);color:var(--purple);border:1px solid rgba(191,127,255,.3);}
+    .vtag-prop{background:rgba(26,127,212,.10);color:var(--blue);border:1px solid rgba(26,127,212,.22);}
+    .vtag-ga{background:rgba(27,158,87,.10);color:var(--green);border:1px solid rgba(27,158,87,.22);}
+    .vtag-perf{background:rgba(204,26,31,.10);color:var(--red);border:1px solid rgba(204,26,31,.22);}
+    .vtag-plaid{background:rgba(124,75,194,.10);color:var(--purple);border:1px solid rgba(124,75,194,.22);}
     .variant-km{font-family:'Orbitron',monospace;font-size:12px;color:var(--text);white-space:nowrap;flex-shrink:0;}
     .variant-km span{font-size:9px;color:var(--muted2);font-family:'DM Sans',sans-serif;}
 
     /* ─── BATTERY ─── */
-    #battery-block{padding:11px 22px;border-bottom:1px solid var(--border);flex-shrink:0;}
+    #battery-block{padding:11px 22px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--s2);}
     .bat-top{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:6px;}
     .bat-pct{font-family:'Orbitron',monospace;font-size:22px;font-weight:600;color:var(--green);}
     .bat-right{text-align:right;}
     .bat-model-lbl{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;}
     .bat-km-val{font-size:12px;color:var(--muted2);}
     .bat-km-val b{color:var(--text);}
-    .bat-track{height:5px;background:var(--s3);border-radius:4px;overflow:hidden;margin-bottom:8px;}
+    .bat-track{height:5px;background:var(--s3);border-radius:4px;overflow:hidden;margin-bottom:8px;border:1px solid var(--border);}
     .bat-fill{height:100%;border-radius:4px;transition:width .5s,background .3s;}
     .bat-row{display:flex;align-items:center;gap:8px;}
     .bat-row label{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;white-space:nowrap;}
-    .bat-row input[type=range]{flex:1;-webkit-appearance:none;height:4px;background:var(--s3);border-radius:2px;outline:none;cursor:pointer;}
-    .bat-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;background:var(--green);border-radius:50%;box-shadow:0 0 7px rgba(46,204,113,.5);}
+    .bat-row input[type=range]{flex:1;-webkit-appearance:none;height:4px;background:var(--s3);border-radius:2px;outline:none;cursor:pointer;border:1px solid var(--border);}
+    .bat-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:var(--green);border-radius:50%;box-shadow:0 1px 6px rgba(27,158,87,.4);border:2px solid #fff;}
 
     /* ─── OPTIONS ─── */
-    #options-row{display:flex;align-items:center;gap:0;padding:9px 22px;border-bottom:1px solid var(--border);flex-shrink:0;}
+    #options-row{display:flex;align-items:center;gap:0;padding:9px 22px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--s2);}
     .opt-block{display:flex;align-items:center;gap:7px;}
-    .opt-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;}
+    .opt-lbl{font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;}
     .toggle{position:relative;width:32px;height:17px;cursor:pointer;flex-shrink:0;}
     .toggle input{opacity:0;width:0;height:0;}
-    .tslider{position:absolute;inset:0;background:var(--s3);border-radius:20px;transition:background .2s;}
-    .tslider:before{content:'';position:absolute;width:11px;height:11px;left:3px;top:3px;background:var(--muted2);border-radius:50%;transition:transform .2s,background .2s;}
-    .toggle input:checked+.tslider{background:var(--red-dim);}
+    .tslider{position:absolute;inset:0;background:#e0ddd8;border-radius:20px;transition:background .2s;border:1px solid var(--border2);}
+    .tslider:before{content:'';position:absolute;width:11px;height:11px;left:2px;top:2px;background:#fff;border-radius:50%;transition:transform .2s,background .2s;box-shadow:0 1px 4px rgba(0,0,0,.18);}
+    .toggle input:checked+.tslider{background:var(--red-dim);border-color:var(--red);}
     .toggle input:checked+.tslider:before{transform:translateX(15px);background:var(--red);}
-    .opt-sep{width:1px;height:18px;background:var(--border);margin:0 10px;}
+    .opt-sep{width:1px;height:18px;background:var(--border2);margin:0 10px;}
     #charge-grp{display:flex;align-items:center;gap:7px;flex:1;}
-    #charge-grp input[type=range]{flex:1;-webkit-appearance:none;height:4px;background:var(--s3);border-radius:2px;outline:none;cursor:pointer;}
-    #charge-grp input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;background:var(--orange);border-radius:50%;box-shadow:0 0 7px rgba(243,156,18,.5);}
+    #charge-grp input[type=range]{flex:1;-webkit-appearance:none;height:4px;background:var(--s3);border-radius:2px;outline:none;cursor:pointer;border:1px solid var(--border);}
+    #charge-grp input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:var(--orange);border-radius:50%;box-shadow:0 1px 6px rgba(201,124,16,.4);border:2px solid #fff;}
     #charge-target-val{font-family:'Orbitron',monospace;font-size:11px;color:var(--orange);min-width:28px;text-align:right;}
 
     /* ─── ROUTE FORM ─── */
-    #route-form{padding:11px 22px;border-bottom:1px solid var(--border);flex-shrink:0;}
+    #route-form{padding:11px 22px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--s1);}
     .input-wrap{position:relative;margin-bottom:7px;}
     .dot{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:7px;height:7px;border-radius:50%;z-index:2;pointer-events:none;}
-    .dot.start{background:var(--blue);box-shadow:0 0 7px var(--blue);}
-    .dot.end{background:var(--red);box-shadow:0 0 7px var(--red-glow);}
+    .dot.start{background:var(--blue);box-shadow:0 0 6px rgba(26,127,212,.5);}
+    .dot.end{background:var(--red);box-shadow:0 0 5px var(--red-glow);}
     .v-line{width:1px;height:7px;background:var(--border2);margin:0 0 7px 15px;}
-    .input-wrap input{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:9px 11px 9px 28px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .15s,background .15s;}
-    .input-wrap input:focus{border-color:var(--border2);background:var(--s3);}
+    .input-wrap input{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:9px;padding:9px 11px 9px 28px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .15s,box-shadow .15s;box-shadow:var(--shadow-soft);}
+    .input-wrap input:focus{border-color:var(--red);box-shadow:0 0 0 3px var(--red-dim);}
     .input-wrap input::placeholder{color:var(--muted);}
-    .suggestions{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--s3);border:1px solid var(--border2);border-radius:9px;z-index:9999;max-height:180px;overflow-y:auto;display:none;box-shadow:0 12px 40px rgba(0,0,0,.7);}
+    .suggestions{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--s2);border:1px solid var(--border2);border-radius:9px;z-index:9999;max-height:180px;overflow-y:auto;display:none;box-shadow:0 12px 40px rgba(0,0,0,.15);}
     .suggestions.open{display:block;}
     .sug-item{padding:8px 13px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s;}
     .sug-item:last-child{border-bottom:none;}
-    .sug-item:hover{background:rgba(255,255,255,.04);}
+    .sug-item:hover{background:var(--s3);}
     .sug-name{color:var(--text);}
     .sug-sub{color:var(--muted2);font-size:11px;margin-top:1px;}
-    #go-btn{width:100%;padding:10px;background:var(--red);border:none;border-radius:9px;color:#fff;font-family:'Orbitron',monospace;font-size:10px;font-weight:600;letter-spacing:3px;cursor:pointer;transition:all .2s;box-shadow:0 0 18px rgba(232,33,39,.22);}
-    #go-btn:hover{background:#ff2d34;box-shadow:0 0 30px rgba(232,33,39,.5);transform:translateY(-1px);}
+    #go-btn{width:100%;padding:10px;background:var(--red);border:none;border-radius:9px;color:#fff;font-family:'Orbitron',monospace;font-size:10px;font-weight:600;letter-spacing:3px;cursor:pointer;transition:all .2s;box-shadow:0 3px 14px rgba(204,26,31,.28);}
+    #go-btn:hover{background:#e01c21;box-shadow:0 5px 22px rgba(204,26,31,.42);transform:translateY(-1px);}
     #go-btn:active{transform:translateY(0);}
     #reset-btn{display:none;width:100%;margin-top:6px;padding:7px;background:transparent;border:1px solid var(--border2);border-radius:9px;color:var(--muted2);font-size:12px;cursor:pointer;transition:all .2s;}
-    #reset-btn:hover{color:var(--text);}
+    #reset-btn:hover{color:var(--text);border-color:var(--red);}
     #reset-btn.show{display:block;}
 
-    /* ─── ROUTE SUMMARY CARD ─── */
-    #route-summary{padding:10px 22px;border-bottom:1px solid var(--border);display:none;flex-shrink:0;}
+    /* ─── ROUTE SUMMARY ─── */
+    #route-summary{padding:10px 22px;border-bottom:1px solid var(--border);display:none;flex-shrink:0;background:var(--s1);}
     #route-summary.show{display:block;}
-    /* Top row: 4 mini stats */
     .sum-top{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:7px;}
-    .scard{background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:8px 5px;text-align:center;}
+    .scard{background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:8px 5px;text-align:center;box-shadow:var(--shadow-soft);}
     .scard-val{font-family:'Orbitron',monospace;font-size:12px;font-weight:600;}
     .scard-val.ok{color:var(--green);}
     .scard-val.warn{color:var(--orange);}
@@ -148,41 +146,39 @@
     .scard-val.plain{color:var(--text);}
     .scard-val.blue{color:var(--blue);}
     .scard-lbl{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
-    /* Detailed summary row */
-    .sum-detail{background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:9px 12px;font-size:12px;color:var(--muted2);line-height:1.9;}
+    .sum-detail{background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:9px 12px;font-size:12px;color:var(--muted2);line-height:1.9;box-shadow:var(--shadow-soft);}
     .sum-detail b{color:var(--text);}
     .sum-detail .sum-row{display:flex;justify-content:space-between;align-items:center;}
     .sum-detail .sum-row + .sum-row{border-top:1px solid var(--border);padding-top:5px;margin-top:5px;}
-    .badge-ok{background:rgba(46,204,113,.15);color:var(--green);border:1px solid rgba(46,204,113,.3);border-radius:5px;padding:1px 7px;font-size:10px;font-family:'Orbitron',monospace;}
-    .badge-warn{background:rgba(243,156,18,.15);color:var(--orange);border:1px solid rgba(243,156,18,.3);border-radius:5px;padding:1px 7px;font-size:10px;font-family:'Orbitron',monospace;}
-    .badge-bad{background:rgba(232,33,39,.15);color:var(--red);border:1px solid rgba(232,33,39,.3);border-radius:5px;padding:1px 7px;font-size:10px;font-family:'Orbitron',monospace;}
+    .badge-ok{background:rgba(27,158,87,.12);color:var(--green);border:1px solid rgba(27,158,87,.25);border-radius:5px;padding:1px 7px;font-size:10px;font-family:'Orbitron',monospace;}
+    .badge-warn{background:rgba(201,124,16,.12);color:var(--orange);border:1px solid rgba(201,124,16,.25);border-radius:5px;padding:1px 7px;font-size:10px;font-family:'Orbitron',monospace;}
+    .badge-bad{background:rgba(204,26,31,.12);color:var(--red);border:1px solid rgba(204,26,31,.25);border-radius:5px;padding:1px 7px;font-size:10px;font-family:'Orbitron',monospace;}
 
     /* ─── TIMELINE ─── */
-    #timeline{flex:1;overflow-y:auto;padding:12px 22px;min-height:0;}
+    #timeline{flex:1;overflow-y:auto;padding:12px 22px;min-height:0;background:var(--s1);}
     #timeline::-webkit-scrollbar{width:3px;}
-    #timeline::-webkit-scrollbar-thumb{background:var(--s3);}
+    #timeline::-webkit-scrollbar-thumb{background:var(--border2);}
     .tl-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:11px;}
     .seg-row{display:flex;gap:10px;align-items:flex-start;padding:5px 0;}
     .seg-dot{width:10px;height:10px;min-width:10px;border-radius:50%;margin-top:4px;flex-shrink:0;}
-    .seg-dot.origin{background:var(--blue);box-shadow:0 0 8px var(--blue);}
-    .seg-dot.dest{background:var(--red);box-shadow:0 0 6px var(--red-glow);}
+    .seg-dot.origin{background:var(--blue);box-shadow:0 0 7px rgba(26,127,212,.5);}
+    .seg-dot.dest{background:var(--red);box-shadow:0 0 5px var(--red-glow);}
     .seg-place{font-size:13px;font-weight:500;color:var(--text);}
     .seg-meta{font-size:11px;color:var(--muted2);margin-top:2px;line-height:1.6;}
     .drive-block{display:flex;gap:10px;align-items:center;padding:1px 0;}
     .vbar-col{display:flex;flex-direction:column;align-items:center;width:10px;}
     .vbar{width:1px;background:var(--border2);flex:1;min-height:20px;}
     .drive-pills{flex:1;display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
-    .dpill{background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:3px 8px;font-size:11px;color:var(--muted2);}
+    .dpill{background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:3px 8px;font-size:11px;color:var(--muted2);box-shadow:var(--shadow-soft);}
     .dpill b{color:var(--text);}
-    /* Charger stop card */
-    .sc-stop{background:rgba(243,156,18,.07);border:1px solid rgba(243,156,18,.22);border-radius:11px;padding:10px 12px;margin:3px 0;}
+    .sc-stop{background:rgba(201,124,16,.06);border:1px solid rgba(201,124,16,.20);border-radius:11px;padding:10px 12px;margin:3px 0;}
     .sc-stop-hdr{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px;}
     .sc-stop-name{flex:1;}
     .sc-stop-name .name{font-size:12px;font-weight:500;color:var(--text);}
     .sc-stop-name .meta{font-size:10px;color:var(--muted2);margin-top:2px;}
-    .sc-stop-badge{background:rgba(243,156,18,.2);border:1px solid rgba(243,156,18,.4);border-radius:5px;padding:2px 7px;font-size:9px;font-family:'Orbitron',monospace;color:var(--orange);flex-shrink:0;}
+    .sc-stop-badge{background:rgba(201,124,16,.14);border:1px solid rgba(201,124,16,.30);border-radius:5px;padding:2px 7px;font-size:9px;font-family:'Orbitron',monospace;color:var(--orange);flex-shrink:0;}
     .sc-stop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
-    .sc-stat{text-align:center;background:rgba(0,0,0,.2);border-radius:7px;padding:6px 4px;}
+    .sc-stat{text-align:center;background:rgba(0,0,0,.04);border-radius:7px;padding:6px 4px;border:1px solid var(--border);}
     .sc-stat-val{font-family:'Orbitron',monospace;font-size:12px;}
     .sc-stat-lbl{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
 
@@ -191,46 +187,40 @@
 
     /* ─── SUPERCHARGER TAB ─── */
     #charger-panel{overflow:hidden;}
-
-    /* Search + filter bar condensed */
-    #sc-search-bar{padding:10px 22px;border-bottom:1px solid var(--border);flex-shrink:0;}
-    #sc-search{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:9px 13px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;}
-    #sc-search:focus{border-color:var(--border2);background:var(--s3);}
+    #sc-search-bar{padding:10px 22px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--s2);}
+    #sc-search{width:100%;background:var(--s3);border:1px solid var(--border2);border-radius:9px;padding:9px 13px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .15s,box-shadow .15s;}
+    #sc-search:focus{border-color:var(--red);background:var(--s2);box-shadow:0 0 0 3px var(--red-dim);}
     #sc-search::placeholder{color:var(--muted);}
-    #sc-filter-row{display:flex;gap:5px;padding:8px 22px;border-bottom:1px solid var(--border);flex-shrink:0;}
-    .fchip{background:var(--s2);border:1px solid var(--border);border-radius:16px;padding:4px 11px;font-size:11px;color:var(--muted2);cursor:pointer;transition:all .2s;white-space:nowrap;flex:1;text-align:center;}
-    .fchip:hover{border-color:var(--border2);color:var(--text);}
+    #sc-filter-row{display:flex;gap:5px;padding:8px 22px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--s2);}
+    .fchip{background:var(--s3);border:1px solid var(--border2);border-radius:16px;padding:4px 11px;font-size:11px;color:var(--muted2);cursor:pointer;transition:all .2s;white-space:nowrap;flex:1;text-align:center;}
+    .fchip:hover{border-color:var(--red);color:var(--text);}
     .fchip.on{background:var(--red-dim);border-color:var(--red);color:var(--red);}
 
-    /* Stats row with 3 cards */
-    #sc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px 22px;border-bottom:1px solid var(--border);flex-shrink:0;}
-    .sc-kpi{background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:9px 6px;text-align:center;}
+    #sc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px 22px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--s1);}
+    .sc-kpi{background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:9px 6px;text-align:center;box-shadow:var(--shadow-soft);}
     .sc-kpi-val{font-family:'Orbitron',monospace;font-size:14px;font-weight:600;}
     .sc-kpi-lbl{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:3px;}
 
-    /* Country quick filter */
-    #sc-country-row{display:flex;gap:5px;padding:7px 22px;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;}
+    #sc-country-row{display:flex;gap:5px;padding:7px 22px;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;background:var(--s1);}
     #sc-country-row::-webkit-scrollbar{display:none;}
-    .cc-chip{background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:3px 10px;font-size:11px;color:var(--muted2);cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;}
-    .cc-chip:hover{border-color:var(--border2);color:var(--text);}
-    .cc-chip.on{background:rgba(68,170,255,.12);border-color:var(--blue);color:var(--blue);}
+    .cc-chip{background:var(--s2);border:1px solid var(--border2);border-radius:14px;padding:3px 10px;font-size:11px;color:var(--muted2);cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;box-shadow:var(--shadow-soft);}
+    .cc-chip:hover{border-color:var(--blue);color:var(--text);}
+    .cc-chip.on{background:rgba(26,127,212,.10);border-color:var(--blue);color:var(--blue);}
 
-    /* Sort bar */
-    #sc-sort-row{display:flex;align-items:center;gap:8px;padding:6px 22px;border-bottom:1px solid var(--border);flex-shrink:0;}
+    #sc-sort-row{display:flex;align-items:center;gap:8px;padding:6px 22px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--s1);}
     .sort-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
     .sort-btn{background:transparent;border:none;font-size:11px;color:var(--muted2);cursor:pointer;padding:2px 6px;border-radius:5px;transition:all .15s;}
     .sort-btn:hover{color:var(--text);}
-    .sort-btn.active{background:var(--s3);color:var(--text);}
+    .sort-btn.active{background:var(--s3);color:var(--text);border:1px solid var(--border2);}
     #sc-count-label{margin-left:auto;font-size:10px;color:var(--muted);}
 
-    /* Charger list */
-    #sc-list-wrap{flex:1;overflow-y:auto;}
+    #sc-list-wrap{flex:1;overflow-y:auto;background:var(--s1);}
     #sc-list-wrap::-webkit-scrollbar{width:3px;}
-    #sc-list-wrap::-webkit-scrollbar-thumb{background:var(--s3);}
+    #sc-list-wrap::-webkit-scrollbar-thumb{background:var(--border2);}
     .sc-item{padding:9px 22px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;display:flex;gap:10px;align-items:flex-start;}
-    .sc-item:hover{background:rgba(255,255,255,.03);}
+    .sc-item:hover{background:var(--s2);}
     .sc-status-dot{width:8px;height:8px;min-width:8px;border-radius:50%;margin-top:5px;}
-    .sc-status-dot.open{background:var(--green);box-shadow:0 0 5px rgba(46,204,113,.6);}
+    .sc-status-dot.open{background:var(--green);box-shadow:0 0 5px rgba(27,158,87,.5);}
     .sc-status-dot.constr{background:var(--orange);}
     .sc-status-dot.closed{background:var(--red);}
     .sc-item-name{font-size:13px;color:var(--text);font-weight:500;}
@@ -238,38 +228,41 @@
     .sc-item-right{margin-left:auto;text-align:right;flex-shrink:0;}
     .sc-item-stalls{font-family:'Orbitron',monospace;font-size:12px;color:var(--text);}
     .sc-item-kw{font-size:10px;color:var(--blue);margin-top:2px;}
-    #sc-loading{padding:24px;text-align:center;}
+    #sc-loading{padding:24px;text-align:center;background:var(--s1);}
     .sc-loader-ring{width:30px;height:30px;border:2px solid var(--border2);border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px;}
     .sc-loader-txt{font-size:11px;color:var(--muted2);letter-spacing:2px;}
 
     /* ─── MAP ─── */
     #map-area{flex:1;position:relative;overflow:hidden;}
     #map{width:100%;height:100%;}
-    #top-pill{position:absolute;top:14px;left:50%;transform:translateX(-50%);background:rgba(8,8,8,.88);backdrop-filter:blur(16px);border:1px solid var(--border2);border-radius:40px;padding:7px 18px;z-index:200;display:flex;align-items:center;gap:14px;font-size:11px;white-space:nowrap;box-shadow:0 4px 30px rgba(0,0,0,.5);}
+    #top-pill{position:absolute;top:14px;left:50%;transform:translateX(-50%);background:rgba(250,249,247,.92);backdrop-filter:blur(16px);border:1px solid var(--border2);border-radius:40px;padding:7px 18px;z-index:200;display:flex;align-items:center;gap:14px;font-size:11px;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,.12);}
     .pill-item{display:flex;align-items:center;gap:6px;color:var(--muted2);}
     .pill-val{font-family:'Orbitron',monospace;font-size:10px;color:var(--text);}
-    .pill-sep{color:var(--border);}
-    #locate-btn{position:absolute;bottom:22px;left:14px;z-index:200;width:40px;height:40px;background:rgba(8,8,8,.88);backdrop-filter:blur(12px);border:1px solid var(--border2);border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;transition:all .2s;color:var(--blue);}
-    #locate-btn:hover{border-color:var(--blue);box-shadow:0 0 12px rgba(68,170,255,.4);}
+    .pill-sep{color:var(--border2);}
+    #locate-btn{position:absolute;bottom:22px;left:14px;z-index:200;width:40px;height:40px;background:rgba(250,249,247,.92);backdrop-filter:blur(12px);border:1px solid var(--border2);border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;transition:all .2s;color:var(--blue);box-shadow:var(--shadow-card);}
+    #locate-btn:hover{border-color:var(--blue);box-shadow:0 0 12px rgba(26,127,212,.3);}
     #style-toggle{position:absolute;bottom:22px;right:14px;z-index:200;display:flex;flex-direction:column;gap:7px;}
-    .map-btn{width:40px;height:40px;background:rgba(8,8,8,.88);backdrop-filter:blur(12px);border:1px solid var(--border2);border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s;color:var(--muted2);}
+    .map-btn{width:40px;height:40px;background:rgba(250,249,247,.92);backdrop-filter:blur(12px);border:1px solid var(--border2);border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s;color:var(--muted2);box-shadow:var(--shadow-card);}
     .map-btn:hover{border-color:var(--red);color:var(--red);}
     .map-btn.active{border-color:var(--red);color:var(--red);background:var(--red-dim);}
-    #sc-toggle-btn{position:absolute;top:14px;right:14px;z-index:200;background:rgba(8,8,8,.88);backdrop-filter:blur(12px);border:1px solid var(--border2);border-radius:9px;padding:7px 12px;cursor:pointer;font-size:10px;font-family:'Orbitron',monospace;letter-spacing:1px;color:var(--muted2);transition:all .2s;display:flex;align-items:center;gap:7px;}
+    #sc-toggle-btn{position:absolute;top:14px;right:14px;z-index:200;background:rgba(250,249,247,.92);backdrop-filter:blur(12px);border:1px solid var(--border2);border-radius:9px;padding:7px 12px;cursor:pointer;font-size:10px;font-family:'Orbitron',monospace;letter-spacing:1px;color:var(--muted2);transition:all .2s;display:flex;align-items:center;gap:7px;box-shadow:var(--shadow-card);}
     #sc-toggle-btn:hover{border-color:var(--red);color:var(--red);}
     #sc-toggle-btn.active{border-color:var(--red);color:var(--red);background:var(--red-dim);}
     #sc-toggle-btn .dot-ind{width:7px;height:7px;border-radius:50%;background:var(--muted);transition:background .2s;}
-    #sc-toggle-btn.active .dot-ind{background:var(--green);box-shadow:0 0 5px rgba(46,204,113,.8);}
-    #loading{display:none;position:fixed;inset:0;background:rgba(8,8,8,.75);backdrop-filter:blur(4px);z-index:9000;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
+    #sc-toggle-btn.active .dot-ind{background:var(--green);box-shadow:0 0 5px rgba(27,158,87,.8);}
+    #loading{display:none;position:fixed;inset:0;background:rgba(244,242,238,.80);backdrop-filter:blur(4px);z-index:9000;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
     #loading.show{display:flex;}
     .spinner{width:38px;height:38px;border:2px solid var(--border2);border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg);}}
     .loading-text{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:3px;color:var(--muted2);}
-    .maplibregl-ctrl-attrib{background:rgba(8,8,8,.7)!important;color:#444!important;}
-    .maplibregl-ctrl-attrib a{color:#666!important;}
-    .maplibregl-popup-content{background:var(--s2)!important;color:var(--text)!important;border:1px solid var(--border2)!important;border-radius:12px!important;font-family:'DM Sans',sans-serif!important;font-size:13px!important;padding:13px 15px!important;box-shadow:0 8px 30px rgba(0,0,0,.6)!important;min-width:185px;}
+
+    /* MapLibre overrides for light theme */
+    .maplibregl-ctrl-attrib{background:rgba(250,249,247,.8)!important;color:#999!important;}
+    .maplibregl-ctrl-attrib a{color:#bbb!important;}
+    .maplibregl-popup-content{background:var(--s2)!important;color:var(--text)!important;border:1px solid var(--border2)!important;border-radius:12px!important;font-family:'DM Sans',sans-serif!important;font-size:13px!important;padding:13px 15px!important;box-shadow:0 8px 30px rgba(0,0,0,.15)!important;min-width:185px;}
     .maplibregl-popup-tip{border-top-color:var(--s2)!important;}
     .maplibregl-popup-close-button{color:var(--muted2)!important;font-size:17px!important;top:5px!important;right:7px!important;}
+    .maplibregl-ctrl button{background:rgba(250,249,247,.92)!important;border-color:var(--border2)!important;}
   </style>
 </head>
 <body>
@@ -293,9 +286,7 @@
     <!-- ── NAV PANEL ── -->
     <div class="panel active" id="panel-nav">
 
-      <!-- Model selector collapsible -->
       <div id="model-selector">
-        <!-- Vue compacte (après sélection) -->
         <div id="model-collapsed" onclick="toggleModelSelector()" style="display:none">
           <div class="mc-row">
             <span class="mc-icon">🚗</span>
@@ -309,7 +300,6 @@
             </div>
           </div>
         </div>
-        <!-- Vue étendue (sélecteur complet) -->
         <div id="model-expanded">
           <div class="ms-header">
             <span class="section-label" style="margin-bottom:0">Mon modèle Tesla</span>
@@ -319,7 +309,6 @@
         </div>
       </div>
 
-      <!-- Battery -->
       <div id="battery-block">
         <div class="bat-top">
           <span class="bat-pct" id="bat-pct">78%</span>
@@ -334,7 +323,6 @@
         </div>
       </div>
 
-      <!-- Options -->
       <div id="options-row">
         <div class="opt-block">
           <span class="opt-lbl">SC Auto</span>
@@ -348,7 +336,6 @@
         </div>
       </div>
 
-      <!-- Route form -->
       <div id="route-form">
         <div class="input-wrap">
           <div class="dot start"></div>
@@ -367,20 +354,16 @@
         <button id="reset-btn" onclick="resetRoute()">✕ Effacer l'itinéraire</button>
       </div>
 
-      <!-- ── ROUTE SUMMARY (riche) ── -->
       <div id="route-summary">
-        <!-- 4 mini KPIs -->
         <div class="sum-top">
           <div class="scard"><div class="scard-val plain" id="s-dist">—</div><div class="scard-lbl">Distance</div></div>
           <div class="scard"><div class="scard-val plain" id="s-time">—</div><div class="scard-lbl">Route</div></div>
           <div class="scard"><div class="scard-val blue"  id="s-stops">—</div><div class="scard-lbl">Arrêts SC</div></div>
           <div class="scard"><div class="scard-val ok"    id="s-batt">—</div><div class="scard-lbl">Batt. arr.</div></div>
         </div>
-        <!-- Détail -->
         <div class="sum-detail" id="sum-detail"></div>
       </div>
 
-      <!-- Timeline -->
       <div id="timeline">
         <div id="hint">
           <div class="hint-icon">🚗</div>
@@ -402,21 +385,18 @@
         <input id="sc-search" type="text" placeholder="🔍  Rechercher une ville, un nom…" oninput="scFilter()"/>
       </div>
 
-      <!-- Status filters -->
       <div id="sc-filter-row">
         <div class="fchip on" data-st="OPEN"         onclick="scToggleSt(this)">✅ Ouvert</div>
         <div class="fchip"    data-st="CONSTRUCTION" onclick="scToggleSt(this)">🚧 Construction</div>
         <div class="fchip"    data-st="CLOSED_TEMP"  onclick="scToggleSt(this)">⏸ Fermé</div>
       </div>
 
-      <!-- KPIs -->
       <div id="sc-stats">
         <div class="sc-kpi"><div class="sc-kpi-val" id="kpi-total">—</div><div class="sc-kpi-lbl">Total</div></div>
         <div class="sc-kpi"><div class="sc-kpi-val" id="kpi-open" style="color:var(--green)">—</div><div class="sc-kpi-lbl">Ouverts</div></div>
         <div class="sc-kpi"><div class="sc-kpi-val" id="kpi-stalls" style="color:var(--blue)">—</div><div class="sc-kpi-lbl">Bornes</div></div>
       </div>
 
-      <!-- Country quick-filter -->
       <div id="sc-country-row" style="padding-top:8px;">
         <div class="cc-chip on" data-cc="ALL" onclick="scCountry(this)">🌍 Tous</div>
         <div class="cc-chip" data-cc="FR"  onclick="scCountry(this)">🇫🇷 France</div>
@@ -430,7 +410,6 @@
         <div class="cc-chip" data-cc="US"  onclick="scCountry(this)">🇺🇸 USA</div>
       </div>
 
-      <!-- Sort bar -->
       <div id="sc-sort-row">
         <span class="sort-lbl">Trier</span>
         <button class="sort-btn active" id="sort-name" onclick="scSort('name',this)">A-Z</button>
@@ -465,8 +444,8 @@
     <button id="locate-btn" onclick="locateMe()">◎</button>
 
     <div id="style-toggle">
-      <button class="map-btn active" id="btn-dark"   onclick="setStyle('dark')">🌙</button>
-      <button class="map-btn"        id="btn-bright" onclick="setStyle('bright')">☀️</button>
+      <button class="map-btn active" id="btn-bright" onclick="setStyle('bright')">☀️</button>
+      <button class="map-btn"        id="btn-dark"   onclick="setStyle('dark')">🌙</button>
       <button class="map-btn"        id="btn-topo"   onclick="setStyle('topo')">🗺</button>
     </div>
   </div>
@@ -475,9 +454,6 @@
 <div id="loading"><div class="spinner"></div><div class="loading-text" id="loading-text">CALCUL EN COURS…</div></div>
 
 <script>
-// ════════════════════════════════════════════════════════════════
-//  MODELS DB
-// ════════════════════════════════════════════════════════════════
 const MODELS = [
   { family:'Model 3', id:'m3', variants:[
     { id:'m3-prop',   name:'Propulsion (Highland)',          tag:'PROP',  tc:'vtag-prop',  range:513, kwh:57,  desc:'LFP · 513 km WLTP' },
@@ -510,9 +486,6 @@ const MODELS = [
 ];
 const ALL_VARIANTS = MODELS.flatMap(m=>m.variants);
 
-// ════════════════════════════════════════════════════════════════
-//  STATE
-// ════════════════════════════════════════════════════════════════
 const MAP_STYLES = {
   dark:  'https://tiles.openfreemap.org/styles/dark',
   bright:'https://tiles.openfreemap.org/styles/bright',
@@ -528,10 +501,7 @@ let scVisible=false, scLoaded=false;
 let originMarker=null, destMarker=null, stopMarkers=[];
 let userMarker=null, scPopup=null;
 
-// ════════════════════════════════════════════════════════════════
-//  MAP INIT
-// ════════════════════════════════════════════════════════════════
-map = new maplibregl.Map({container:'map',style:MAP_STYLES.dark,center:[2.35,46.8],zoom:5,pitch:30});
+map = new maplibregl.Map({container:'map',style:MAP_STYLES.bright,center:[2.35,46.8],zoom:5,pitch:30});
 map.addControl(new maplibregl.NavigationControl({visualizePitch:true}),'top-right');
 map.addControl(new maplibregl.ScaleControl({unit:'metric'}),'bottom-right');
 map.on('load', initMapLayers);
@@ -539,35 +509,28 @@ map.on('load', initMapLayers);
 function emptyGeo(){return{type:'FeatureCollection',features:[]};}
 
 function initMapLayers(){
-  // Route
   if(!map.getSource('route')){
     map.addSource('route',{type:'geojson',data:emptyGeo()});
-    map.addLayer({id:'route-glow',type:'line',source:'route',paint:{'line-color':'#e82127','line-width':16,'line-opacity':0.12,'line-blur':10}});
-    map.addLayer({id:'route-line',type:'line',source:'route',paint:{'line-color':'#e82127','line-width':4,'line-opacity':0.9},layout:{'line-cap':'round','line-join':'round'}});
+    map.addLayer({id:'route-glow',type:'line',source:'route',paint:{'line-color':'#cc1a1f','line-width':16,'line-opacity':0.10,'line-blur':10}});
+    map.addLayer({id:'route-line',type:'line',source:'route',paint:{'line-color':'#cc1a1f','line-width':4,'line-opacity':0.88},layout:{'line-cap':'round','line-join':'round'}});
   }
-  // Superchargers (toujours créés, visibilité contrôlée)
   if(!map.getSource('sc')){
     map.addSource('sc',{type:'geojson',data:emptyGeo(),cluster:true,clusterMaxZoom:11,clusterRadius:50});
-    // Clusters
     map.addLayer({id:'sc-clusters',type:'circle',source:'sc',filter:['has','point_count'],
-      paint:{'circle-color':['step',['get','point_count'],'#c0392b',10,'#922b21',50,'#641e16'],
+      paint:{'circle-color':['step',['get','point_count'],'#cc1a1f',10,'#a31519',50,'#7a0f11'],
              'circle-radius':['step',['get','point_count'],18,10,24,50,30],
-             'circle-opacity':0.88,'circle-stroke-width':2,'circle-stroke-color':'rgba(255,255,255,0.18)'}});
+             'circle-opacity':0.85,'circle-stroke-width':2,'circle-stroke-color':'rgba(255,255,255,0.5)'}});
     map.addLayer({id:'sc-cluster-count',type:'symbol',source:'sc',filter:['has','point_count'],
       layout:{'text-field':['get','point_count_abbreviated'],'text-font':['Open Sans Bold','Arial Unicode MS Bold'],'text-size':13},
       paint:{'text-color':'#fff'}});
-    // Single points
     map.addLayer({id:'sc-pts',type:'circle',source:'sc',filter:['!',['has','point_count']],
-      paint:{'circle-color':['match',['get','status'],'OPEN','#2ecc71','CONSTRUCTION','#f39c12','#e74c3c'],
-             'circle-radius':8,'circle-stroke-width':2,'circle-stroke-color':'rgba(0,0,0,0.55)','circle-opacity':0.92}});
-    // Labels at high zoom
+      paint:{'circle-color':['match',['get','status'],'OPEN','#1b9e57','CONSTRUCTION','#c97c10','#cc1a1f'],
+             'circle-radius':8,'circle-stroke-width':2,'circle-stroke-color':'rgba(255,255,255,0.7)','circle-opacity':0.92}});
     map.addLayer({id:'sc-labels',type:'symbol',source:'sc',filter:['!',['has','point_count']],
       minzoom:12,
       layout:{'text-field':['get','name'],'text-font':['Open Sans Regular','Arial Unicode MS Regular'],'text-size':11,'text-offset':[0,1.2],'text-anchor':'top'},
-      paint:{'text-color':'#fff','text-halo-color':'rgba(0,0,0,0.8)','text-halo-width':1}});
-    // All layers hidden by default
+      paint:{'text-color':'#333','text-halo-color':'rgba(255,255,255,0.9)','text-halo-width':1.5}});
     ['sc-clusters','sc-cluster-count','sc-pts','sc-labels'].forEach(l=>map.setLayoutProperty(l,'visibility','none'));
-    // Events
     map.on('click','sc-clusters',e=>{
       const f=map.queryRenderedFeatures(e.point,{layers:['sc-clusters']})[0];
       map.getSource('sc').getClusterExpansionZoom(f.properties.cluster_id,(err,zoom)=>{
@@ -586,15 +549,9 @@ function initMapLayers(){
   }
 }
 
-// ════════════════════════════════════════════════════════════════
-//  CLOCK
-// ════════════════════════════════════════════════════════════════
 function tick(){document.getElementById('pill-time').textContent=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}
 tick(); setInterval(tick,30000);
 
-// ════════════════════════════════════════════════════════════════
-//  TABS
-// ════════════════════════════════════════════════════════════════
 function switchTab(t){
   document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',(i===0&&t==='nav')||(i===1&&t==='chargers')));
   document.getElementById('panel-nav').classList.toggle('active',t==='nav');
@@ -602,10 +559,7 @@ function switchTab(t){
   if(t==='chargers'&&!scLoaded) loadSuperchargers();
 }
 
-// ════════════════════════════════════════════════════════════════
-//  MODEL SELECTOR
-// ════════════════════════════════════════════════════════════════
-let modelSelectorOpen = true; // starts open
+let modelSelectorOpen = true;
 
 function buildModelSelector(){
   document.getElementById('model-families').innerHTML=MODELS.map(m=>
@@ -637,13 +591,11 @@ function selectVariant(vid, autoCollapse=true){
   selectedVariant=ALL_VARIANTS.find(v=>v.id===vid);
   renderVariants();
   updateBattery(battery);
-  // Auto-collapse after user selection (not on init)
   if(autoCollapse && modelSelectorOpen) collapseModelSelector();
 }
 
 function collapseModelSelector(){
   modelSelectorOpen=false;
-  // Update collapsed pill content
   if(selectedVariant){
     document.getElementById('mc-name').textContent=selectedVariant.name;
     document.getElementById('mc-desc').textContent=selectedVariant.desc;
@@ -664,9 +616,6 @@ function toggleModelSelector(){
   else expandModelSelector();
 }
 
-// ════════════════════════════════════════════════════════════════
-//  BATTERY
-// ════════════════════════════════════════════════════════════════
 function updateBattery(val){
   battery=parseInt(val);
   const range=selectedVariant?selectedVariant.range:0;
@@ -676,14 +625,11 @@ function updateBattery(val){
   document.getElementById('bat-fill').style.width=battery+'%';
   document.getElementById('pill-batt').textContent=battery+'%';
   const fill=document.getElementById('bat-fill');
-  fill.style.background=battery>50?'linear-gradient(90deg,#27ae60,#2ecc71)':battery>20?'linear-gradient(90deg,#d35400,#f39c12)':'linear-gradient(90deg,#c0392b,#e82127)';
+  fill.style.background=battery>50?'linear-gradient(90deg,#1b9e57,#27ae60)':battery>20?'linear-gradient(90deg,#c97c10,#e8a020)':'linear-gradient(90deg,#a31519,#cc1a1f)';
   document.getElementById('bat-pct').style.color=battery>50?'var(--green)':battery>20?'var(--orange)':'var(--red)';
 }
 function updateChargeTarget(v){chargeTargetPct=parseInt(v);document.getElementById('charge-target-val').textContent=v+'%';}
 
-// ════════════════════════════════════════════════════════════════
-//  GEOCODING
-// ════════════════════════════════════════════════════════════════
 let deb={};
 async function onInput(el,f){
   clearTimeout(deb[f]);const q=el.value.trim();
@@ -705,21 +651,18 @@ function pickSug(f,lon,lat,el){
   document.getElementById('input-'+f).value=name;closeSug(f);
   if(f==='origin'){
     if(originMarker)originMarker.remove();
-    originMarker=new maplibregl.Marker({color:'#44aaff'}).setLngLat(coords[f]).setPopup(new maplibregl.Popup({offset:25}).setHTML(`<b>Départ</b><br>${name}`)).addTo(map);
+    originMarker=new maplibregl.Marker({color:'#1a7fd4'}).setLngLat(coords[f]).setPopup(new maplibregl.Popup({offset:25}).setHTML(`<b>Départ</b><br>${name}`)).addTo(map);
     document.getElementById('pill-loc').textContent=name;
     map.flyTo({center:coords[f],zoom:11,duration:800});
   }else{
     if(destMarker)destMarker.remove();
-    destMarker=new maplibregl.Marker({color:'#e82127'}).setLngLat(coords[f]).setPopup(new maplibregl.Popup({offset:25}).setHTML(`<b>Destination</b><br>${name}`)).addTo(map);
+    destMarker=new maplibregl.Marker({color:'#cc1a1f'}).setLngLat(coords[f]).setPopup(new maplibregl.Popup({offset:25}).setHTML(`<b>Destination</b><br>${name}`)).addTo(map);
   }
 }
 function showSug(f){const b=document.getElementById('sug-'+f);if(b.innerHTML)b.classList.add('open');}
 function closeSug(f){document.getElementById('sug-'+f).classList.remove('open');}
 document.addEventListener('click',e=>{if(!e.target.closest('.input-wrap')){closeSug('origin');closeSug('dest');}});
 
-// ════════════════════════════════════════════════════════════════
-//  ROUTING (OSRM)
-// ════════════════════════════════════════════════════════════════
 async function fetchRoute(wps){
   const c=wps.map(w=>w.join(',')).join(';');
   const r=await fetch(`https://router.project-osrm.org/route/v1/driving/${c}?overview=full&geometries=geojson&steps=false`);
@@ -727,9 +670,6 @@ async function fetchRoute(wps){
   return d.routes[0];
 }
 
-// ════════════════════════════════════════════════════════════════
-//  SPATIAL HELPERS
-// ════════════════════════════════════════════════════════════════
 function hav([lon1,lat1],[lon2,lat2]){
   const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;
   const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
@@ -744,7 +684,6 @@ function coordAtKm(rc,targetKm){
   }
   return rc[rc.length-1];
 }
-// Returns cumulative route-distance (km) to the closest route point near cp
 function routeKmTo(rc,cp){
   let acc=0,bestKm=0,bestD=Infinity;
   for(let i=1;i<rc.length;i++){
@@ -770,9 +709,6 @@ function findBestCharger(idealPt,rc,usedIds){
   return best;
 }
 
-// ════════════════════════════════════════════════════════════════
-//  PLAN STOPS (route-distance based)
-// ════════════════════════════════════════════════════════════════
 async function planStops(rc,totalDistKm){
   if(!document.getElementById('sc-auto').checked||!allChargers.length)return[];
   const maxRange=selectedVariant.range;
@@ -810,9 +746,6 @@ async function planStops(rc,totalDistKm){
   return stops;
 }
 
-// ════════════════════════════════════════════════════════════════
-//  CALC ROUTE (main)
-// ════════════════════════════════════════════════════════════════
 async function calcRoute(){
   if(!selectedVariant){alert('Veuillez sélectionner votre modèle Tesla.');return;}
   if(!coords.origin||!coords.dest){alert('Sélectionnez départ et destination.');return;}
@@ -826,7 +759,6 @@ async function calcRoute(){
     setLoading(true,'OPTIMISATION DES ARRÊTS…');
     const stops=await planStops(rc,totalDistKm);
 
-    // Multi-waypoint route if stops
     let finalRoute=direct;
     if(stops.length>0){
       try{
@@ -835,23 +767,20 @@ async function calcRoute(){
       }catch(e){}
     }
 
-    // Draw route
     map.getSource('route').setData(finalRoute.geometry);
     const cs=finalRoute.geometry.coordinates;
     const bounds=cs.reduce((b,c)=>b.extend(c),new maplibregl.LngLatBounds(cs[0],cs[0]));
     map.fitBounds(bounds,{padding:{top:60,bottom:80,left:60,right:60},duration:1000});
 
-    // Stop markers
     stopMarkers.forEach(m=>m.remove());stopMarkers=[];
     stops.forEach((stop,i)=>{
       const el=document.createElement('div');
-      el.style.cssText='width:30px;height:30px;background:#f39c12;border:2.5px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 0 14px rgba(243,156,18,.8);cursor:pointer;';
+      el.style.cssText='width:30px;height:30px;background:#c97c10;border:2.5px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 12px rgba(201,124,16,.6);cursor:pointer;';
       el.textContent='⚡';
       const popup=new maplibregl.Popup({offset:22}).setHTML(scStopPopupHTML(stop,i));
       stopMarkers.push(new maplibregl.Marker({element:el}).setLngLat([stop.charger.gps.longitude,stop.charger.gps.latitude]).setPopup(popup).addTo(map));
     });
 
-    // Final battery
     const maxRange=selectedVariant.range;
     let finalBattPct;
     if(stops.length===0){
@@ -868,20 +797,15 @@ async function calcRoute(){
     const h=Math.floor(totalDur/3600),m_=Math.floor((totalDur%3600)/60);
     const totalTimeStr=h>0?`${h}h${String(m_).padStart(2,'0')}`:`${m_} min`;
 
-    // Summary KPIs
     document.getElementById('s-dist').textContent=totalDist.toFixed(0)+' km';
     document.getElementById('s-time').textContent=totalTimeStr;
     document.getElementById('s-stops').textContent=stops.length;
     document.getElementById('s-batt').textContent=finalBattPct+'%';
     document.getElementById('s-batt').className='scard-val '+(finalBattPct<0?'bad':finalBattPct<20?'warn':'ok');
 
-    // Detailed summary
     renderSummaryDetail(stops,totalDist,totalDur,totalChargeMins,finalBattPct);
-
     document.getElementById('route-summary').classList.add('show');
     document.getElementById('reset-btn').classList.add('show');
-
-    // Timeline
     renderTimeline(stops,totalDistKm,totalDur,finalBattPct,totalChargeMins);
 
   }catch(e){console.error(e);alert('Impossible de calculer l\'itinéraire. Vérifiez votre connexion.');}
@@ -904,9 +828,6 @@ function scStopPopupHTML(stop,i){
   </div>`;
 }
 
-// ════════════════════════════════════════════════════════════════
-//  DETAILED SUMMARY CARD
-// ════════════════════════════════════════════════════════════════
 function renderSummaryDetail(stops,totalDistKm,totalDurSec,totalChargeMins,finalBattPct){
   const maxRange=selectedVariant.range;
   const h=Math.floor(totalDurSec/3600),m_=Math.floor((totalDurSec%3600)/60);
@@ -914,49 +835,23 @@ function renderSummaryDetail(stops,totalDistKm,totalDurSec,totalChargeMins,final
   const totalTimeMin=Math.round(totalDurSec/60)+totalChargeMins;
   const totalH=Math.floor(totalTimeMin/60),totalM=totalTimeMin%60;
   const totalStr=`${totalH}h${String(totalM).padStart(2,'0')}`;
-
-  // Energy consumed
   const energyKwh=Math.round((totalDistKm/maxRange)*selectedVariant.kwh);
-  // Charge cost estimate (€0.38/kWh Tesla SC France avg)
   const chargeCost=stops.reduce((sum,s)=>{
     const kwAdded=(s.battAfter-s.battOnArr)/100*(selectedVariant.kwh);
     return sum+kwAdded*0.38;
   },0).toFixed(1);
-
   let battBadge=finalBattPct>=30?`<span class="badge-ok">✓ ${finalBattPct}%</span>`:
                 finalBattPct>=15?`<span class="badge-warn">⚠ ${finalBattPct}%</span>`:
                 `<span class="badge-bad">⚠ ${finalBattPct}%</span>`;
-
   document.getElementById('sum-detail').innerHTML=`
-    <div class="sum-row">
-      <span>🚗 Durée totale (route + recharge)</span>
-      <b>${totalStr}</b>
-    </div>
-    <div class="sum-row">
-      <span>⚡ Arrêts Superchargeur</span>
-      <b>${stops.length > 0 ? stops.length+' arrêt'+(stops.length>1?'s':'')+' (~'+totalChargeMins+' min)' : 'Aucun nécessaire'}</b>
-    </div>
-    <div class="sum-row">
-      <span>🔋 Batterie à l'arrivée</span>
-      ${battBadge}
-    </div>
-    <div class="sum-row">
-      <span>⚙️ Énergie consommée</span>
-      <b>~${energyKwh} kWh</b>
-    </div>
-    ${stops.length>0?`<div class="sum-row">
-      <span>💶 Coût recharge estimé</span>
-      <b>~${chargeCost} €</b>
-    </div>`:''}
-    <div class="sum-row">
-      <span>🏎 Modèle</span>
-      <b>${selectedVariant.name}</b>
-    </div>`;
+    <div class="sum-row"><span>🚗 Durée totale (route + recharge)</span><b>${totalStr}</b></div>
+    <div class="sum-row"><span>⚡ Arrêts Superchargeur</span><b>${stops.length > 0 ? stops.length+' arrêt'+(stops.length>1?'s':'')+' (~'+totalChargeMins+' min)' : 'Aucun nécessaire'}</b></div>
+    <div class="sum-row"><span>🔋 Batterie à l'arrivée</span>${battBadge}</div>
+    <div class="sum-row"><span>⚙️ Énergie consommée</span><b>~${energyKwh} kWh</b></div>
+    ${stops.length>0?`<div class="sum-row"><span>💶 Coût recharge estimé</span><b>~${chargeCost} €</b></div>`:''}
+    <div class="sum-row"><span>🏎 Modèle</span><b>${selectedVariant.name}</b></div>`;
 }
 
-// ════════════════════════════════════════════════════════════════
-//  TIMELINE
-// ════════════════════════════════════════════════════════════════
 function renderTimeline(stops,totalDistKm,totalDurSec,finalBattPct,totalChargeMins){
   document.getElementById('hint').style.display='none';
   document.getElementById('tl-content').style.display='block';
@@ -970,7 +865,6 @@ function renderTimeline(stops,totalDistKm,totalDurSec,finalBattPct,totalChargeMi
     (totalChargeMins>0?` · ~${totalChargeMins} min recharge`:'');
 
   let html='';
-  // DEPART
   html+=`<div class="seg-row">
     <div class="seg-dot origin"></div>
     <div><div class="seg-place">📍 ${origin}</div>
@@ -1024,9 +918,6 @@ function renderTimeline(stops,totalDistKm,totalDurSec,finalBattPct,totalChargeMi
   document.getElementById('tl-list').innerHTML=html;
 }
 
-// ════════════════════════════════════════════════════════════════
-//  RESET
-// ════════════════════════════════════════════════════════════════
 function resetRoute(){
   coords={origin:null,dest:null};
   ['input-origin','input-dest'].forEach(id=>document.getElementById(id).value='');
@@ -1040,9 +931,6 @@ function resetRoute(){
   stopMarkers.forEach(m=>m.remove());stopMarkers=[];
 }
 
-// ════════════════════════════════════════════════════════════════
-//  SUPERCHARGERS DATA + LIST
-// ════════════════════════════════════════════════════════════════
 async function loadSuperchargers(){
   scLoaded=true;
   try{
@@ -1050,10 +938,7 @@ async function loadSuperchargers(){
     allChargers=await r.json();
     updateScKPIs();
     renderScList();
-    // Feed map source with all open chargers
-    if(map.getSource('sc')){
-      map.getSource('sc').setData(buildScGeoJSON(allChargers));
-    }
+    if(map.getSource('sc'))map.getSource('sc').setData(buildScGeoJSON(allChargers));
     document.getElementById('sc-loading').style.display='none';
     document.getElementById('sc-list-wrap').style.display='block';
   }catch(e){
@@ -1097,11 +982,9 @@ function getScFiltered(){
   let items=allChargers.filter(c=>{
     if(!scStatusFilter.has(c.status))return false;
     if(scActiveCountry!=='ALL'){
-      // Match country code in address
       const country=(c.address?.country||'').toUpperCase();
       const cc=(c.address?.countryId||c.address?.state||'').toUpperCase();
       if(!country.includes(scActiveCountry)&&!cc.includes(scActiveCountry)){
-        // Try matching common names
         const names={FR:'FRANCE',DE:'GERMANY|ALLEMAGNE',ES:'SPAIN|ESPAGNE',IT:'ITALY|ITALIE',BE:'BELGIUM|BELGIQUE',NL:'NETHERLANDS|PAYS-BAS',CH:'SWITZERLAND|SUISSE',GB:'UNITED KINGDOM|UK',US:'UNITED STATES|USA'};
         const pattern=names[scActiveCountry]||scActiveCountry;
         if(!pattern.split('|').some(p=>country.includes(p)))return false;
@@ -1110,7 +993,6 @@ function getScFiltered(){
     if(q&&!c.name.toLowerCase().includes(q)&&!(c.address?.city||'').toLowerCase().includes(q)&&!(c.address?.country||'').toLowerCase().includes(q))return false;
     return true;
   });
-  // Sort
   if(scSortKey==='stalls') items=items.sort((a,b)=>(b.stallCount||0)-(a.stallCount||0));
   else if(scSortKey==='kw') items=items.sort((a,b)=>(b.powerKilowatt||0)-(a.powerKilowatt||0));
   else items=items.sort((a,b)=>a.name.localeCompare(b.name));
@@ -1144,7 +1026,6 @@ function flyToSc(lat,lng,name,status,stalls,kw,city){
   switchTab('nav');
   map.flyTo({center:[lng,lat],zoom:14,duration:1000});
   showScPopup(lng,lat,name,status,stalls,kw,city);
-  // Also make SC layer visible if not already
   if(!scVisible)toggleScLayer();
 }
 
@@ -1174,26 +1055,14 @@ function refreshScMapData(){
   map.getSource('sc').setData(buildScGeoJSON(getScFiltered()));
 }
 
-// ════════════════════════════════════════════════════════════════
-//  SC MAP TOGGLE  — clé : on recharge les données et rend visible
-// ════════════════════════════════════════════════════════════════
 async function toggleScLayer(){
   const btn=document.getElementById('sc-toggle-btn');
   scVisible=!scVisible;
   btn.classList.toggle('active',scVisible);
-
   if(scVisible){
-    // Charger les données si pas encore fait
-    if(!scLoaded){
-      setLoading(true,'CHARGEMENT SUPERCHARGEURS…');
-      await loadSuperchargers();
-      setLoading(false);
-    }
-    // S'assurer que les layers existent (après changement de style)
+    if(!scLoaded){setLoading(true,'CHARGEMENT SUPERCHARGEURS…');await loadSuperchargers();setLoading(false);}
     if(!map.getLayer('sc-pts'))initMapLayers();
-    // Mettre les données à jour
     if(map.getSource('sc'))map.getSource('sc').setData(buildScGeoJSON(allChargers));
-    // Rendre visible
     ['sc-clusters','sc-cluster-count','sc-pts','sc-labels'].forEach(l=>{
       if(map.getLayer(l))map.setLayoutProperty(l,'visibility','visible');
     });
@@ -1204,9 +1073,6 @@ async function toggleScLayer(){
   }
 }
 
-// ════════════════════════════════════════════════════════════════
-//  LOCATE / STYLE
-// ════════════════════════════════════════════════════════════════
 function locateMe(){
   if(!navigator.geolocation)return;
   navigator.geolocation.getCurrentPosition(pos=>{
@@ -1214,7 +1080,7 @@ function locateMe(){
     map.flyTo({center:[lng,lat],zoom:13,duration:1000});
     if(userMarker)userMarker.remove();
     const el=document.createElement('div');
-    el.style.cssText='width:13px;height:13px;background:#44aaff;border:2px solid #fff;border-radius:50%;box-shadow:0 0 13px rgba(68,170,255,.8)';
+    el.style.cssText='width:13px;height:13px;background:#1a7fd4;border:2px solid #fff;border-radius:50%;box-shadow:0 0 10px rgba(26,127,212,.6)';
     userMarker=new maplibregl.Marker({element:el}).setLngLat([lng,lat]).setPopup(new maplibregl.Popup({offset:18}).setHTML('<b>Ma position</b>')).addTo(map);
     if(!coords.origin){coords.origin=[lng,lat];document.getElementById('input-origin').value='Ma position';document.getElementById('pill-loc').textContent='Ma position';}
   },()=>alert('Géolocalisation non disponible.'));
@@ -1226,7 +1092,6 @@ function setStyle(s){
   map.setStyle(MAP_STYLES[s]);
   map.once('styledata',()=>{
     initMapLayers();
-    // Restore SC visibility if was on
     if(scVisible&&scLoaded){
       if(map.getSource('sc'))map.getSource('sc').setData(buildScGeoJSON(allChargers));
       ['sc-clusters','sc-cluster-count','sc-pts','sc-labels'].forEach(l=>{
@@ -1241,11 +1106,8 @@ function setLoading(on,txt='CALCUL EN COURS…'){
   document.getElementById('loading-text').textContent=txt;
 }
 
-// ════════════════════════════════════════════════════════════════
-//  INIT
-// ════════════════════════════════════════════════════════════════
 buildModelSelector();
-selectVariant('m3-prop', false); // init: don't collapse
+selectVariant('m3-prop', false);
 updateBattery(78);
 </script>
 </body>
