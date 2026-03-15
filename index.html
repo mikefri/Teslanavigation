@@ -388,36 +388,6 @@
     /* Marqueurs radar sur la carte — rendu via canvas MapLibre */
     /* (styles appliqués via JS aux éléments DOM des markers) */
 
-    /* ─── POI ─── */
-    #poi-bar{display:flex;gap:5px;padding:7px 22px 0;flex-wrap:wrap;flex-shrink:0;}
-    .poi-chip{display:flex;align-items:center;gap:4px;background:var(--s2);border:1px solid var(--border2);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--muted2);cursor:pointer;transition:all .18s;white-space:nowrap;box-shadow:var(--shadow-soft);}
-    .poi-chip:hover{border-color:var(--blue);color:var(--text);transform:translateY(-1px);}
-    .poi-chip.active{background:rgba(26,127,212,.12);border-color:var(--blue);color:var(--blue);}
-    .poi-chip .poi-emoji{font-size:13px;}
-
-    /* Panneau résultats POI */
-    #poi-results{display:none;flex-direction:column;flex-shrink:0;border-top:1px solid var(--border);background:var(--s1);max-height:220px;overflow:hidden;}
-    #poi-results.show{display:flex;}
-    #poi-results-header{display:flex;align-items:center;justify-content:space-between;padding:7px 22px 5px;flex-shrink:0;}
-    #poi-results-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-family:'Orbitron',monospace;}
-    #poi-results-close{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:14px;padding:0 2px;transition:color .15s;}
-    #poi-results-close:hover{color:var(--red);}
-    #poi-list{overflow-y:auto;flex:1;}
-    #poi-list::-webkit-scrollbar{width:3px;}
-    #poi-list::-webkit-scrollbar-thumb{background:var(--border2);}
-    .poi-item{display:flex;align-items:center;gap:10px;padding:8px 22px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;}
-    .poi-item:hover{background:var(--s2);}
-    .poi-item:last-child{border-bottom:none;}
-    .poi-item-icon{font-size:20px;flex-shrink:0;width:28px;text-align:center;}
-    .poi-item-info{flex:1;min-width:0;}
-    .poi-item-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .poi-item-addr{font-size:11px;color:var(--muted2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .poi-item-dist{font-family:'Orbitron',monospace;font-size:11px;color:var(--blue);flex-shrink:0;text-align:right;}
-    .poi-item-set-dest{flex-shrink:0;background:var(--blue);border:none;border-radius:7px;color:#fff;font-size:10px;padding:4px 8px;cursor:pointer;font-family:'Orbitron',monospace;letter-spacing:1px;transition:all .15s;}
-    .poi-item-set-dest:hover{background:#1568b8;transform:scale(1.05);}
-    #poi-loading{padding:12px 22px;font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:8px;}
-    .poi-spin{width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
-
     /* MapLibre overrides for light theme */
     .maplibregl-ctrl-attrib{background:rgba(250,249,247,.8)!important;color:#999!important;}
     .maplibregl-ctrl-attrib a{color:#bbb!important;}
@@ -512,51 +482,9 @@
                  oninput="onInput(this,'dest')" onfocus="showSug('dest')"/>
           <div class="suggestions" id="sug-dest"></div>
         </div>
-
-        <!-- Chips POI -->
-        <div id="poi-bar">
-          <div class="poi-chip" data-poi="fast_food" onclick="searchPOI(this)"><span class="poi-emoji">🍔</span> Fast-food</div>
-          <div class="poi-chip" data-poi="fuel"      onclick="searchPOI(this)"><span class="poi-emoji">⛽</span> Carburant</div>
-          <div class="poi-chip" data-poi="cafe"      onclick="searchPOI(this)"><span class="poi-emoji">☕</span> Café</div>
-          <div class="poi-chip" data-poi="supermarket" onclick="searchPOI(this)"><span class="poi-emoji">🛒</span> Supermarché</div>
-          <div class="poi-chip" data-poi="hotel"     onclick="searchPOI(this)"><span class="poi-emoji">🏨</span> Hôtel</div>
-          <div class="poi-chip" data-poi="hospital"  onclick="searchPOI(this)"><span class="poi-emoji">🏥</span> Hôpital</div>
-          <div class="poi-chip" data-poi="parking"   onclick="searchPOI(this)"><span class="poi-emoji">🅿️</span> Parking</div>
-          <div class="poi-chip" data-poi="restaurant" onclick="searchPOI(this)"><span class="poi-emoji">🍽️</span> Restaurant</div>
-        </div>
-        <!-- Recherche POI libre + rayon -->
-        <div style="display:flex;gap:6px;padding:6px 0 0;align-items:center">
-          <div style="position:relative;flex:1">
-            <input id="poi-search-input" type="text" placeholder="🔍 Rechercher un lieu…"
-              autocomplete="off"
-              style="width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:9px;padding:8px 11px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;transition:border-color .15s,box-shadow .15s;box-shadow:var(--shadow-soft);"
-              onfocus="this.style.borderColor='var(--blue)';this.style.boxShadow='0 0 0 3px rgba(26,127,212,.12)'"
-              onblur="this.style.borderColor='';this.style.boxShadow=''"
-              onkeydown="if(event.key==='Enter')searchPOIFree()"
-            />
-          </div>
-          <select id="poi-radius" style="background:var(--s2);border:1px solid var(--border2);border-radius:9px;padding:8px 8px;color:var(--text);font-size:12px;outline:none;cursor:pointer;flex-shrink:0;box-shadow:var(--shadow-soft)">
-            <option value="2000">2 km</option>
-            <option value="5000">5 km</option>
-            <option value="10000">10 km</option>
-            <option value="20000" selected>20 km</option>
-            <option value="50000">50 km</option>
-          </select>
-          <button onclick="searchPOIFree()" style="background:var(--blue);border:none;border-radius:9px;color:#fff;padding:8px 12px;cursor:pointer;font-size:14px;flex-shrink:0;box-shadow:0 2px 8px rgba(26,127,212,.3);transition:all .15s" title="Rechercher">🔍</button>
-        </div>
-
-        <button id="go-btn" onclick="calcRoute()" style="margin-top:7px">⚡ CALCULER L'ITINÉRAIRE</button>
+        <button id="go-btn" onclick="calcRoute()">⚡ CALCULER L'ITINÉRAIRE</button>
         <button id="reset-btn" onclick="resetRoute()">✕ Effacer l'itinéraire</button>
         <button id="guidance-btn" onclick="startGuidance()" style="display:none;width:100%;margin-top:6px;padding:10px;background:var(--blue);border:none;border-radius:9px;color:#fff;font-family:'Orbitron',monospace;font-size:10px;font-weight:600;letter-spacing:3px;cursor:pointer;transition:all .2s;box-shadow:0 3px 14px rgba(26,127,212,.28);">▶ DÉMARRER LE GUIDAGE</button>
-      </div>
-
-      <!-- Résultats POI (sous le form, au-dessus du summary) -->
-      <div id="poi-results">
-        <div id="poi-results-header">
-          <span id="poi-results-title">POI à proximité</span>
-          <button id="poi-results-close" onclick="closePOI()">✕</button>
-        </div>
-        <div id="poi-list"></div>
       </div>
 
       <div id="route-summary">
@@ -1208,7 +1136,6 @@ function resetRoute(){
   stopMarkers.forEach(m=>m.remove());stopMarkers=[];
   activeRouteCoords=null; activeRouteTotalDist=0; activeRouteTotalDur=0;
   hideRadarAlert();
-  closePOI();
 }
 
 async function loadSuperchargers(){
@@ -1868,235 +1795,130 @@ function setLoading(on,txt='CALCUL EN COURS…'){
   document.getElementById('loading-text').textContent=txt;
 }
 
-function showToastError(msg){
-  // Toast discret en bas — ne bloque pas l'UI
-  let t = document.getElementById('_err-toast');
-  if(!t){
-    t = document.createElement('div');
-    t.id = '_err-toast';
-    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(30,30,30,.92);color:#fff;font-size:12px;padding:9px 18px;border-radius:20px;z-index:9999;pointer-events:none;transition:opacity .4s;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.3)';
-    document.body.appendChild(t);
-  }
-  t.textContent = msg;
-  t.style.opacity = '1';
-  clearTimeout(t._tid);
-  t._tid = setTimeout(() => t.style.opacity = '0', 3500);
-}
-
 // ════════════════════════════════════════════════════════════════
 //  SYSTÈME RADARS — OpenStreetMap Overpass API
 // ════════════════════════════════════════════════════════════════
 let radarVisible  = false;
 let radarLoaded   = false;
-let allRadars     = [];
-let radarMarkers  = [];
+let allRadars     = [];          // [{id,type,lat,lng,maxspeed,name}]
+let radarMarkers  = [];          // maplibregl.Marker[]
+let radarAlertActive = false;
 let lastAlertedRadarId = null;
 let radarAlertTimer = null;
 let lastRadarBeepTime = 0;
-const RADAR_ALERT_DIST_M   = 400;
-const RADAR_DISMISS_DIST_M = 150;
+const RADAR_ALERT_DIST_M  = 400;   // alerte à X m
+const RADAR_DISMISS_DIST_M = 100;  // efface alerte une fois passé
 
+// Types de radars OSM → config affichage
 const RADAR_TYPES = {
-  'speed'        : { label:'Radar fixe',         icon:'🚨', color:'#cc1a1f' },
-  'red_light'    : { label:'Radar feu rouge',    icon:'🚦', color:'#c97c10' },
-  'average_speed': { label:'Radar de tronçon',   icon:'📏', color:'#7c4bc2' },
-  'mobile'       : { label:'Radar mobile',       icon:'🚐', color:'#1a7fd4' },
-  'unknown'      : { label:'Contrôle vitesse',   icon:'📷', color:'#888'    },
+  'speed'        : { label:'Radar fixe',          icon:'🚨', color:'#cc1a1f', stripe:'#cc1a1f' },
+  'red_light'    : { label:'Radar feu rouge',     icon:'🚦', color:'#c97c10', stripe:'#c97c10' },
+  'average_speed': { label:'Radar de tronçon',    icon:'📏', color:'#7c4bc2', stripe:'#7c4bc2' },
+  'mobile'       : { label:'Radar mobile',        icon:'🚐', color:'#1a7fd4', stripe:'#1a7fd4' },
+  'unknown'      : { label:'Contrôle vitesse',    icon:'📷', color:'#888',    stripe:'#888'    },
 };
 
 function getRadarType(tags){
-  const t = (tags['enforcement'] || tags['camera:type'] || tags['highway:enforcement'] || '').toLowerCase();
-  if(t.includes('average') || t.includes('section')) return 'average_speed';
-  if(t.includes('red_light')) return 'red_light';
-  if(t.includes('mobile'))    return 'mobile';
-  if(t.includes('speed') || tags['maxspeed'] || tags['highway']==='speed_camera') return 'speed';
+  const t = tags['enforcement'] || tags['highway:enforcement'] || '';
+  if(t.includes('average_speed') || t.includes('section')) return 'average_speed';
+  if(t.includes('red_light'))   return 'red_light';
+  if(t.includes('mobile'))      return 'mobile';
+  if(t.includes('speed') || tags['maxspeed']) return 'speed';
   return 'unknown';
 }
 
-// Charge les radars dans la bbox visible de la carte
+// Charge les radars via Overpass dans la bbox courante (France étendue par défaut)
 async function loadRadars(){
   radarLoaded = true;
-
-  // Indicateur léger NON-bloquant (pas le spinner global)
-  const btn = document.getElementById('radar-toggle-btn');
-  const origHTML = btn.innerHTML;
-  btn.innerHTML = '<span style="font-size:11px;letter-spacing:1px;font-family:Orbitron,monospace">⏳ …</span>';
-  btn.style.pointerEvents = 'none';
-
-  const restore = () => {
-    btn.innerHTML = origHTML;
-    btn.style.pointerEvents = '';
-    // Ré-appliquer l'état actif si besoin
-    btn.classList.toggle('active', radarVisible);
-    // Restaurer le dot
-    const dot = btn.querySelector('.dot-ind-r');
-    if(dot) dot.style.background = radarVisible ? 'var(--orange)' : 'var(--muted)';
-  };
-
-  // Helper : fetch avec timeout strict de 8 s
-  const fetchWithTimeout = (url, options, ms=8000) => {
-    const ctrl = new AbortController();
-    const tid = setTimeout(() => ctrl.abort(), ms);
-    return fetch(url, { ...options, signal: ctrl.signal })
-      .finally(() => clearTimeout(tid));
-  };
-
-  // Bbox visible + marge raisonnable (0.3°)
-  const bounds = map.getBounds();
-  const s = Math.max(-90,  bounds.getSouth() - 0.3).toFixed(4);
-  const w = Math.max(-180, bounds.getWest()  - 0.3).toFixed(4);
-  const n = Math.min( 90,  bounds.getNorth() + 0.3).toFixed(4);
-  const e = Math.min( 180, bounds.getEast()  + 0.3).toFixed(4);
-
-  // Requête Overpass — uniquement highway=speed_camera (tag universel, léger)
-  const query = `[out:json][timeout:10];node["highway"="speed_camera"](${s},${w},${n},${e});out body qt;`;
-
-  const mirrors = [
-    'https://overpass-api.de/api/interpreter',
-    'https://overpass.kumi.systems/api/interpreter',
-    'https://overpass.openstreetmap.ru/api/interpreter',
-  ];
-
-  let data = null;
-  for(const url of mirrors){
-    try {
-      const resp = await fetchWithTimeout(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'data=' + encodeURIComponent(query)
-      }, 9000);
-      if(!resp.ok) continue;
-      data = await resp.json();
-      console.log(`✅ Radars: ${data.elements?.length} points depuis ${url}`);
-      break;
-    } catch(err) {
-      console.warn(`❌ ${url} : ${err.message}`);
-    }
+  try {
+    // Requête Overpass : tous les highway=speed_camera dans la bbox Europe/FR
+    const query = `[out:json][timeout:30];
+(
+  node["highway"="speed_camera"](42.0,  -5.5, 51.5, 10.0);
+  node["enforcement"="speed"](42.0,    -5.5, 51.5, 10.0);
+  node["enforcement"="red_light"](42.0,-5.5, 51.5, 10.0);
+  node["enforcement"="average_speed"](42.0,-5.5,51.5,10.0);
+);
+out body;`;
+    const resp = await fetch('https://overpass-api.de/api/interpreter', {
+      method:'POST',
+      body:'data='+encodeURIComponent(query)
+    });
+    const data = await resp.json();
+    allRadars = (data.elements || []).map(el => {
+      const type = getRadarType(el.tags || {});
+      const speed = parseInt(el.tags?.maxspeed) || null;
+      return {
+        id    : el.id,
+        type,
+        lat   : el.lat,
+        lng   : el.lon,
+        speed,
+        name  : el.tags?.name || el.tags?.['name:fr'] || '',
+        tags  : el.tags || {}
+      };
+    });
+    renderRadarMarkers();
+  } catch(e) {
+    console.warn('Radar load error:', e);
   }
-
-  restore();
-
-  if(!data || !data.elements || data.elements.length === 0){
-    // Pas de blocage — juste un toast discret
-    showToastError('Radars : aucun résultat pour cette zone (OSM)');
-    radarLoaded = false;
-    return;
-  }
-
-  allRadars = data.elements.map(el => {
-    const tags = el.tags || {};
-    return {
-      id   : el.id,
-      type : getRadarType(tags),
-      lat  : el.lat,
-      lng  : el.lon,
-      speed: parseInt(tags.maxspeed) || null,
-      name : tags.name || tags['name:fr'] || '',
-    };
-  });
-
-  console.log(`📷 ${allRadars.length} radars chargés`);
-  renderRadarMarkers();
 }
 
-// Recharge si on se déplace beaucoup (nouvelle zone) — anti-concurrent
-let lastRadarBbox = null;
-let radarReloading = false;
-async function reloadRadarsIfNeeded(){
-  if(!radarVisible || radarReloading) return;
-  const bounds = map.getBounds();
-  const bbox = `${bounds.getSouth().toFixed(1)},${bounds.getWest().toFixed(1)},${bounds.getNorth().toFixed(1)},${bounds.getEast().toFixed(1)}`;
-  if(bbox === lastRadarBbox) return;
-  lastRadarBbox = bbox;
-  radarReloading = true;
-  radarLoaded = false;
-  try { await loadRadars(); } finally { radarReloading = false; }
-}
-
-// Crée les marqueurs DOM
-let activeRadarPopup = null;
-
+// Crée les marqueurs DOM pour chaque radar
 function renderRadarMarkers(){
   radarMarkers.forEach(m => m.remove());
   radarMarkers = [];
   if(!radarVisible) return;
 
-  console.log(`🗺 Rendu de ${allRadars.length} marqueurs radar`);
-
   allRadars.forEach(r => {
     const cfg = RADAR_TYPES[r.type] || RADAR_TYPES['unknown'];
     const el  = document.createElement('div');
-    el.style.cssText = [
-      'width:32px','height:32px','border-radius:50%',
-      'background:white',
-      `border:3px solid ${cfg.color}`,
-      'display:flex','align-items:center','justify-content:center',
-      'font-size:15px','cursor:pointer',
-      'box-shadow:0 2px 10px rgba(0,0,0,.22)',
-      'transition:transform .15s',
-      'user-select:none',
-      'position:relative', // garantit que le marker ne dérive pas
-    ].join(';');
+    el.style.cssText = `
+      width:34px;height:34px;border-radius:50%;
+      background:white;
+      border:3px solid ${cfg.color};
+      display:flex;align-items:center;justify-content:center;
+      font-size:16px;cursor:pointer;
+      box-shadow:0 2px 10px rgba(0,0,0,.18);
+      transition:transform .15s;
+    `;
     el.textContent = cfg.icon;
-
-    el.addEventListener('mouseenter', () => el.style.transform = 'scale(1.3)');
+    el.title = `${cfg.label}${r.speed ? ' — '+r.speed+' km/h' : ''}`;
+    el.addEventListener('mouseenter', () => el.style.transform = 'scale(1.25)');
     el.addEventListener('mouseleave', () => el.style.transform = 'scale(1)');
 
-    // Clic : ouvrir popup fixé sur les coords du radar, PAS attaché au marker
-    el.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if(activeRadarPopup) { activeRadarPopup.remove(); activeRadarPopup = null; }
+    // Popup au clic
+    const popupHtml = `
+      <div style="line-height:1.8">
+        <b style="font-size:14px">${cfg.icon} ${cfg.label}</b>
+        ${r.speed ? `<br><span style="color:var(--muted2)">Limite : </span><b style="color:var(--red);font-family:'Orbitron',monospace">${r.speed} km/h</b>` : ''}
+        ${r.name  ? `<br><span style="color:var(--muted2)">${r.name}</span>` : ''}
+        <br><span style="font-size:10px;color:var(--muted)">Source : OpenStreetMap</span>
+      </div>`;
+    const popup = new maplibregl.Popup({offset:20}).setHTML(popupHtml);
 
-      const html = `
-        <div style="line-height:1.9">
-          <b style="font-size:14px">${cfg.icon} ${cfg.label}</b>
-          ${r.speed ? `<br><span style="color:var(--muted2)">Limite : </span><b style="color:#cc1a1f;font-family:'Orbitron',monospace">${r.speed} km/h</b>` : ''}
-          ${r.name  ? `<br><span style="color:var(--muted2)">${r.name}</span>` : ''}
-          <br><span style="font-size:10px;color:var(--muted)">Source : OpenStreetMap</span>
-        </div>`;
-
-      activeRadarPopup = new maplibregl.Popup({
-        offset: [0, -20],   // décalage vers le haut par rapport aux coords
-        closeButton: true,
-        closeOnClick: true,
-        anchor: 'bottom',   // popup s'affiche AU-DESSUS du point, marker ne bouge pas
-        maxWidth: '220px',
-      })
-        .setLngLat([r.lng, r.lat])  // ancré sur les coordonnées GPS, PAS sur le marker
-        .setHTML(html)
-        .addTo(map);
-    });
-
-    // Créer le marker SANS setPopup() — c'est ça qui causait le saut
-    const marker = new maplibregl.Marker({
-      element: el,
-      anchor: 'center',
-      draggable: false,
-    })
+    const marker = new maplibregl.Marker({element:el, anchor:'center'})
       .setLngLat([r.lng, r.lat])
+      .setPopup(popup)
       .addTo(map);
-
     radarMarkers.push(marker);
-  });
-
-  // Fermer le popup radar si on clique ailleurs sur la carte
-  map.once('click', () => {
-    if(activeRadarPopup){ activeRadarPopup.remove(); activeRadarPopup = null; }
   });
 }
 
-// Toggle bouton
+// Toggle couche radars
 async function toggleRadarLayer(){
   const btn = document.getElementById('radar-toggle-btn');
   radarVisible = !radarVisible;
   btn.classList.toggle('active', radarVisible);
 
   if(radarVisible){
-    await loadRadars();
-    // Recharger quand la carte est déplacée
-    map.on('moveend', reloadRadarsIfNeeded);
+    if(!radarLoaded){
+      setLoading(true,'CHARGEMENT DES RADARS…');
+      await loadRadars();
+      setLoading(false);
+    }
+    renderRadarMarkers();
   } else {
-    map.off('moveend', reloadRadarsIfNeeded);
     radarMarkers.forEach(m => m.remove());
     radarMarkers = [];
     hideRadarAlert();
@@ -2109,15 +1931,17 @@ function checkRadarProximity(userPos){
 
   let closest = null;
   let closestDist = Infinity;
+
   for(const r of allRadars){
-    const d = hav(userPos, [r.lng, r.lat]) * 1000;
+    const d = hav(userPos, [r.lng, r.lat]) * 1000; // mètres
     if(d < closestDist){ closestDist = d; closest = r; }
   }
+
   if(!closest) return;
 
   if(closestDist <= RADAR_ALERT_DIST_M){
     showRadarAlert(closest, closestDist);
-  } else if(closestDist > RADAR_ALERT_DIST_M * 2){
+  } else if(closestDist > RADAR_DISMISS_DIST_M * 3){
     hideRadarAlert();
   }
 }
@@ -2126,46 +1950,50 @@ function showRadarAlert(radar, distM){
   const cfg = RADAR_TYPES[radar.type] || RADAR_TYPES['unknown'];
   const alert = document.getElementById('radar-alert');
 
+  // Mettre à jour contenu
   document.getElementById('ra-stripe').style.background = cfg.color;
-  document.getElementById('ra-icon').textContent  = cfg.icon;
-  document.getElementById('ra-type').textContent  = cfg.label;
-  document.getElementById('ra-type').style.color  = cfg.color;
-  document.getElementById('ra-name').textContent  = radar.name || 'Contrôle de vitesse';
-  document.getElementById('ra-sub').textContent   = radar.speed ? `Limite : ${radar.speed} km/h` : 'Vitesse limite non renseignée';
+  document.getElementById('ra-icon').textContent   = cfg.icon;
+  document.getElementById('ra-type').textContent   = cfg.label;
+  document.getElementById('ra-type').style.color   = cfg.color;
+  document.getElementById('ra-name').textContent   = radar.name || 'Contrôle de vitesse';
+  document.getElementById('ra-sub').textContent    = radar.speed ? `Limite : ${radar.speed} km/h` : 'Limite non précisée';
   document.getElementById('ra-speed-circle').style.borderColor = cfg.color;
   document.getElementById('ra-speed-val').style.color = cfg.color;
-  document.getElementById('ra-speed-val').textContent = radar.speed || '?';
+  document.getElementById('ra-speed-val').textContent  = radar.speed || '?';
 
+  // Distance
   const d = distM >= 1000
     ? { val:(distM/1000).toFixed(1), unit:'km' }
-    : { val: Math.round(distM / 10) * 10 || Math.round(distM), unit:'m' };
+    : { val:Math.round(distM/10)*10, unit:'m' };
   document.getElementById('ra-dist-val').textContent  = d.val;
   document.getElementById('ra-dist-unit').textContent = d.unit;
 
+  // Barre de proximité (100% = tout près, 0% = loin)
   const pct = Math.min(100, Math.max(0, 100 - (distM / RADAR_ALERT_DIST_M) * 100));
   document.getElementById('ra-prox-fill').style.width = pct + '%';
 
   alert.classList.add('show');
 
-  // Bip progressif
+  // Bip sonore à l'approche — fréquence augmente selon proximité
   const now = Date.now();
-  const beepInterval = distM < 100 ? 300 : distM < 200 ? 600 : 1400;
+  const beepInterval = distM < 100 ? 400 : distM < 200 ? 700 : 1500;
   if(now - lastRadarBeepTime > beepInterval){
     lastRadarBeepTime = now;
     playRadarBeep(distM);
   }
 
-  // TTS une fois par radar
-  if(radar.id !== lastAlertedRadarId && distM < 350){
+  // TTS unique par radar
+  if(radar.id !== lastAlertedRadarId && distM < 300){
     lastAlertedRadarId = radar.id;
-    const msg = `Attention, ${cfg.label.toLowerCase()}${radar.speed ? `, limite ${radar.speed} kilomètres heure` : ''}, dans ${Math.round(distM)} mètres`;
+    const msg = `Attention, ${cfg.label.toLowerCase()}${radar.speed ? ` à ${radar.speed} kilomètres heure` : ''} dans ${Math.round(distM)} mètres`;
     speak(msg);
   }
 
+  // Auto-dismiss après passage
   clearTimeout(radarAlertTimer);
   radarAlertTimer = setTimeout(() => {
     if(lastAlertedRadarId === radar.id) hideRadarAlert();
-  }, 7000);
+  }, 8000);
 }
 
 function hideRadarAlert(){
@@ -2180,6 +2008,7 @@ function hideRadarAlert(){
   lastAlertedRadarId = null;
 }
 
+// Bip radar via Web Audio API
 function playRadarBeep(distM){
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -2187,270 +2016,14 @@ function playRadarBeep(distM){
     const gain = ctx.createGain();
     osc.connect(gain);
     gain.connect(ctx.destination);
+    // Plus proche = fréquence plus haute
     osc.frequency.value = distM < 100 ? 1200 : distM < 200 ? 900 : 660;
     osc.type = 'sine';
     gain.gain.setValueAtTime(0.18, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.18);
-  } catch(e){}
-}
-
-// ════════════════════════════════════════════════════════════════
-//  SYSTÈME POI — Points d'Intérêt via Overpass
-// ════════════════════════════════════════════════════════════════
-let activePOIChip   = null;   // chip DOM actif
-let poiMarkers      = [];     // marqueurs carte
-let activePOIPopup  = null;   // popup courant
-
-// Config par catégorie OSM
-const POI_CONFIG = {
-  fast_food   : { emoji:'🍔', label:'Fast-food',    tag:'amenity', val:'fast_food',    color:'#e8a020' },
-  fuel        : { emoji:'⛽', label:'Carburant',     tag:'amenity', val:'fuel',         color:'#cc1a1f' },
-  cafe        : { emoji:'☕', label:'Café',          tag:'amenity', val:'cafe',         color:'#8b5e3c' },
-  supermarket : { emoji:'🛒', label:'Supermarché',  tag:'shop',    val:'supermarket',  color:'#1b9e57' },
-  hotel       : { emoji:'🏨', label:'Hôtel',        tag:'tourism', val:'hotel',        color:'#7c4bc2' },
-  hospital    : { emoji:'🏥', label:'Hôpital',      tag:'amenity', val:'hospital',     color:'#cc1a1f' },
-  parking     : { emoji:'🅿️', label:'Parking',      tag:'amenity', val:'parking',      color:'#1a7fd4' },
-  restaurant  : { emoji:'🍽️', label:'Restaurant',   tag:'amenity', val:'restaurant',   color:'#c97c10' },
-};
-
-// Point de référence : position GPS ou centre de la carte
-function getSearchCenter(){
-  if(lastGpsPos) return lastGpsPos;
-  const c = map.getCenter();
-  return [c.lng, c.lat];
-}
-
-// Distance formatée
-function fmtPoiDist(km){
-  if(km < 1) return Math.round(km * 1000) + ' m';
-  return km.toFixed(1) + ' km';
-}
-
-async function searchPOI(chip){
-  const poiKey = chip.dataset.poi;
-  const cfg    = POI_CONFIG[poiKey];
-  if(!cfg) return;
-
-  // Toggle : si déjà actif, fermer
-  if(activePOIChip === chip){ closePOI(); return; }
-
-  document.querySelectorAll('.poi-chip').forEach(c => c.classList.remove('active'));
-  chip.classList.add('active');
-  activePOIChip = chip;
-
-  const radius = parseInt(document.getElementById('poi-radius').value) || 20000;
-  const [lng, lat] = getSearchCenter();
-
-  showPOILoading(cfg.emoji + ' ' + cfg.label + ' · ' + (radius/1000) + ' km');
-
-  const query = `[out:json][timeout:15];
-(
-  node["${cfg.tag}"="${cfg.val}"](around:${radius},${lat},${lng});
-  way["${cfg.tag}"="${cfg.val}"](around:${radius},${lat},${lng});
-);
-out center body qt 40;`;
-
-  await runPOIQuery(query, cfg, [lng, lat]);
-}
-
-async function searchPOIFree(){
-  const q = document.getElementById('poi-search-input').value.trim();
-  if(!q) return;
-
-  document.querySelectorAll('.poi-chip').forEach(c => c.classList.remove('active'));
-  activePOIChip = null;
-
-  const radius = parseInt(document.getElementById('poi-radius').value) || 20000;
-  const [lng, lat] = getSearchCenter();
-  const cfg = { emoji:'📍', label: q, color:'#1a7fd4' };
-
-  showPOILoading('🔍 "' + q + '" · ' + (radius/1000) + ' km');
-
-  // Recherche par nom OSM (name~"...") + recherche Nominatim combinée
-  const safeQ = q.replace(/"/g, '');
-  const query = `[out:json][timeout:15];
-(
-  node["name"~"${safeQ}",i](around:${radius},${lat},${lng});
-  way["name"~"${safeQ}",i](around:${radius},${lat},${lng});
-  node["brand"~"${safeQ}",i](around:${radius},${lat},${lng});
-  way["brand"~"${safeQ}",i](around:${radius},${lat},${lng});
-);
-out center body qt 40;`;
-
-  await runPOIQuery(query, cfg, [lng, lat]);
-}
-
-async function runPOIQuery(query, cfg, center){
-  const [lng, lat] = center;
-
-  const mirrors = [
-    'https://overpass-api.de/api/interpreter',
-    'https://overpass.kumi.systems/api/interpreter',
-  ];
-  const fetchWithTimeout = (url, opts, ms=12000) => {
-    const ctrl = new AbortController();
-    const tid  = setTimeout(() => ctrl.abort(), ms);
-    return fetch(url, {...opts, signal: ctrl.signal}).finally(() => clearTimeout(tid));
-  };
-
-  let data = null;
-  for(const url of mirrors){
-    try {
-      const r = await fetchWithTimeout(url, {
-        method:'POST',
-        headers:{'Content-Type':'application/x-www-form-urlencoded'},
-        body:'data='+encodeURIComponent(query)
-      });
-      if(!r.ok) continue;
-      data = await r.json();
-      break;
-    } catch(e){ console.warn('POI fetch failed:', e.message); }
-  }
-
-  if(!data || !data.elements || !data.elements.length){
-    document.getElementById('poi-list').innerHTML =
-      `<div style="padding:14px 22px;font-size:12px;color:var(--muted2)">Aucun résultat dans cette zone. Essayez un rayon plus grand.</div>`;
-    return;
-  }
-
-  const items = data.elements.map(el => {
-    const elLat = el.lat ?? el.center?.lat;
-    const elLng = el.lon ?? el.center?.lon;
-    if(!elLat || !elLng) return null;
-    const dist = hav([lng, lat], [elLng, elLat]);
-    const tags = el.tags || {};
-    return {
-      id   : el.id,
-      name : tags.name || tags['name:fr'] || tags.brand || cfg.label,
-      brand: tags.brand || tags.operator || '',
-      addr : [tags['addr:housenumber'], tags['addr:street'], tags['addr:city']].filter(Boolean).join(' '),
-      phone: tags.phone || tags['contact:phone'] || '',
-      open : tags['opening_hours'] || '',
-      lat  : elLat, lng: elLng, dist,
-    };
-  }).filter(Boolean).sort((a,b) => a.dist - b.dist).slice(0, 30);
-
-  clearPOIMarkers();
-
-  document.getElementById('poi-results-title').textContent =
-    cfg.emoji + ' ' + items.length + ' résultat' + (items.length > 1 ? 's' : '');
-
-  document.getElementById('poi-list').innerHTML = items.map((p, i) =>
-    `<div class="poi-item" onclick="focusPOI(${i})">
-      <div class="poi-item-icon">${cfg.emoji}</div>
-      <div class="poi-item-info">
-        <div class="poi-item-name">${esc(p.name)}${p.brand && p.brand !== p.name ? `<span style="font-size:10px;color:var(--muted2);font-weight:400"> · ${esc(p.brand)}</span>` : ''}</div>
-        <div class="poi-item-addr">${esc(p.addr || '—')}</div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
-        <span class="poi-item-dist">${fmtPoiDist(p.dist)}</span>
-        <button class="poi-item-set-dest" onclick="setPOIDest(event,${i})">→ DEST</button>
-      </div>
-    </div>`
-  ).join('');
-
-  // Marqueurs carte
-  items.forEach((p, i) => {
-    const el = document.createElement('div');
-    el.style.cssText = [
-      'width:30px','height:30px','border-radius:50%','background:white',
-      `border:3px solid ${cfg.color}`,
-      'display:flex','align-items:center','justify-content:center',
-      'font-size:14px','cursor:pointer',
-      'box-shadow:0 2px 8px rgba(0,0,0,.2)','transition:transform .15s',
-    ].join(';');
-    el.textContent = cfg.emoji;
-    el.addEventListener('mouseenter', () => el.style.transform = 'scale(1.25)');
-    el.addEventListener('mouseleave', () => el.style.transform = 'scale(1)');
-    el.addEventListener('click', (e) => { e.stopPropagation(); focusPOIPopup(p, cfg); });
-    const marker = new maplibregl.Marker({element:el, anchor:'center'})
-      .setLngLat([p.lng, p.lat]).addTo(map);
-    poiMarkers.push({marker, data:p});
-  });
-
-  if(items.length > 0){
-    const bounds = items.reduce(
-      (b,p) => b.extend([p.lng, p.lat]),
-      new maplibregl.LngLatBounds([items[0].lng, items[0].lat],[items[0].lng, items[0].lat])
-    );
-    map.fitBounds(bounds, {padding:{top:80,bottom:80,left:420,right:60},maxZoom:14,duration:800});
-  }
-
-  window._poiItems = items;
-  window._poiCfg   = cfg;
-}
-
-function showPOILoading(title){
-  const panel = document.getElementById('poi-results');
-  panel.classList.add('show');
-  document.getElementById('poi-results-title').textContent = title;
-  document.getElementById('poi-list').innerHTML =
-    `<div id="poi-loading"><div class="poi-spin"></div>Recherche en cours…</div>`;
-}
-
-function focusPOI(idx){
-  const p   = window._poiItems?.[idx];
-  const cfg = window._poiCfg;
-  if(!p || !cfg) return;
-  map.flyTo({center:[p.lng, p.lat], zoom:16, duration:700});
-  focusPOIPopup(p, cfg);
-}
-
-function focusPOIPopup(p, cfg){
-  if(activePOIPopup){ activePOIPopup.remove(); activePOIPopup = null; }
-  const html = `
-    <div style="line-height:1.9;min-width:190px">
-      <b style="font-size:14px">${cfg.emoji} ${esc(p.name)}</b>
-      ${p.brand && p.brand !== p.name ? `<br><span style="color:var(--muted2);font-size:11px">${esc(p.brand)}</span>` : ''}
-      ${p.addr  ? `<br><span style="color:var(--muted2)">📍 </span>${esc(p.addr)}` : ''}
-      ${p.phone ? `<br><span style="color:var(--muted2)">📞 </span>${esc(p.phone)}` : ''}
-      ${p.open  ? `<br><span style="color:var(--muted2)">🕐 </span><span style="font-size:11px">${esc(p.open)}</span>` : ''}
-      <br><span style="color:var(--blue);font-family:'Orbitron',monospace;font-size:11px">${fmtPoiDist(p.dist)}</span>
-      <br><button onclick="setPOIDestDirect(${p.lat},${p.lng},'${esc(p.name)}')"
-        style="margin-top:6px;width:100%;padding:7px;background:var(--blue);border:none;border-radius:7px;color:#fff;font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;cursor:pointer">
-        → DÉFINIR COMME DESTINATION
-      </button>
-    </div>`;
-  activePOIPopup = new maplibregl.Popup({offset:[0,-18], anchor:'bottom', closeButton:true, closeOnClick:true, maxWidth:'240px'})
-    .setLngLat([p.lng, p.lat])
-    .setHTML(html)
-    .addTo(map);
-}
-
-function setPOIDest(event, idx){
-  event.stopPropagation();
-  const p = window._poiItems?.[idx];
-  if(!p) return;
-  setPOIDestDirect(p.lat, p.lng, p.name);
-}
-
-function setPOIDestDirect(lat, lng, name){
-  coords.dest = [parseFloat(lng), parseFloat(lat)];
-  document.getElementById('input-dest').value = name;
-  if(destMarker) destMarker.remove();
-  destMarker = new maplibregl.Marker({color:'#cc1a1f'})
-    .setLngLat([lng, lat])
-    .setPopup(new maplibregl.Popup({offset:25}).setHTML(`<b>Destination</b><br>${esc(name)}`))
-    .addTo(map);
-  if(activePOIPopup){ activePOIPopup.remove(); activePOIPopup = null; }
-  showToastError(`✅ Destination : ${name}`);
-}
-
-function clearPOIMarkers(){
-  poiMarkers.forEach(({marker}) => marker.remove());
-  poiMarkers = [];
-  if(activePOIPopup){ activePOIPopup.remove(); activePOIPopup = null; }
-  window._poiItems = null;
-  window._poiCfg   = null;
-}
-
-function closePOI(){
-  document.querySelectorAll('.poi-chip').forEach(c => c.classList.remove('active'));
-  activePOIChip = null;
-  document.getElementById('poi-results').classList.remove('show');
-  clearPOIMarkers();
+  } catch(e) {}
 }
 
 buildModelSelector();
