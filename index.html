@@ -256,6 +256,61 @@
     @keyframes spin{to{transform:rotate(360deg);}}
     .loading-text{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:3px;color:var(--muted2);}
 
+    /* ─── GUIDAGE BANDEAU ─── */
+    #guidance-bar{
+      position:absolute;top:0;left:0;right:0;z-index:250;
+      display:none;
+      background:rgba(26,127,212,.97);
+      backdrop-filter:blur(20px);
+      box-shadow:0 4px 28px rgba(26,127,212,.35);
+      transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .3s;
+      transform:translateY(-100%);
+      border-bottom:2px solid rgba(255,255,255,.18);
+    }
+    #guidance-bar.show{display:flex;transform:translateY(0);}
+    #guidance-bar.slide-in{animation:gb-in .38s cubic-bezier(.4,0,.2,1) forwards;}
+    @keyframes gb-in{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
+
+    /* Zone manœuvre gauche */
+    #gb-maneuver{
+      width:100px;min-width:100px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      padding:14px 10px;
+      border-right:1px solid rgba(255,255,255,.15);
+      background:rgba(0,0,0,.15);
+    }
+    #gb-arrow-svg{width:52px;height:52px;transition:all .3s;}
+    #gb-dist-big{font-family:'Orbitron',monospace;font-size:18px;font-weight:700;color:#fff;margin-top:6px;line-height:1;}
+    #gb-dist-unit{font-size:10px;color:rgba(255,255,255,.65);letter-spacing:1px;margin-top:2px;}
+
+    /* Zone instruction centre */
+    #gb-instruction{flex:1;padding:14px 18px;display:flex;flex-direction:column;justify-content:center;gap:4px;}
+    #gb-step-txt{font-size:17px;font-weight:600;color:#fff;line-height:1.3;letter-spacing:-.2px;}
+    #gb-road-name{font-size:12px;color:rgba(255,255,255,.7);margin-top:2px;font-style:italic;}
+    #gb-step-sub{font-size:11px;color:rgba(255,255,255,.55);margin-top:4px;display:flex;align-items:center;gap:10px;}
+
+    /* Zone ETA droite */
+    #gb-eta{
+      width:110px;min-width:110px;
+      padding:14px 14px 14px 10px;
+      display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:3px;
+      border-left:1px solid rgba(255,255,255,.15);
+    }
+    #gb-eta-time{font-family:'Orbitron',monospace;font-size:18px;font-weight:700;color:#fff;}
+    #gb-eta-label{font-size:9px;color:rgba(255,255,255,.55);letter-spacing:1px;text-transform:uppercase;}
+    #gb-rem-dist{font-size:11px;color:rgba(255,255,255,.7);margin-top:4px;}
+
+    /* Barre de progression en bas du bandeau */
+    #gb-progress{position:absolute;bottom:0;left:0;height:3px;background:rgba(255,255,255,.5);border-radius:0 3px 3px 0;transition:width .8s ease;}
+
+    /* Bouton stop guidage */
+    #gb-stop{position:absolute;top:6px;right:6px;background:rgba(255,255,255,.18);border:none;border-radius:6px;color:#fff;font-size:10px;padding:3px 8px;cursor:pointer;font-family:'Orbitron',monospace;letter-spacing:1px;transition:background .2s;}
+    #gb-stop:hover{background:rgba(255,255,255,.3);}
+
+    /* top-pill descend quand bandeau actif */
+    #top-pill{transition:top .35s cubic-bezier(.4,0,.2,1);}
+    #top-pill.pushed{top:calc(14px + 88px);}
+
     /* ─── GPS TRACKING ─── */
     /* Flèche directionnelle SVG animée */
     #gps-arrow-wrap{position:relative;width:36px;height:36px;flex-shrink:0;}
@@ -379,6 +434,7 @@
         </div>
         <button id="go-btn" onclick="calcRoute()">⚡ CALCULER L'ITINÉRAIRE</button>
         <button id="reset-btn" onclick="resetRoute()">✕ Effacer l'itinéraire</button>
+        <button id="guidance-btn" onclick="startGuidance()" style="display:none;width:100%;margin-top:6px;padding:10px;background:var(--blue);border:none;border-radius:9px;color:#fff;font-family:'Orbitron',monospace;font-size:10px;font-weight:600;letter-spacing:3px;cursor:pointer;transition:all .2s;box-shadow:0 3px 14px rgba(26,127,212,.28);">▶ DÉMARRER LE GUIDAGE</button>
       </div>
 
       <div id="route-summary">
@@ -455,6 +511,32 @@
   <!-- ══ MAP ══ -->
   <div id="map-area">
     <div id="map"></div>
+
+    <!-- ── BANDEAU GUIDAGE ── -->
+    <div id="guidance-bar">
+      <div id="gb-maneuver">
+        <svg id="gb-arrow-svg" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="26" cy="26" r="25" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/>
+          <path id="gb-arrow-path" d="M26 38 L26 16 M18 24 L26 16 L34 24" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div id="gb-dist-big">—</div>
+        <div id="gb-dist-unit">m</div>
+      </div>
+      <div id="gb-instruction">
+        <div id="gb-step-txt">Calcul en cours…</div>
+        <div id="gb-road-name"></div>
+        <div id="gb-step-sub">
+          <span id="gb-next-preview"></span>
+        </div>
+      </div>
+      <div id="gb-eta">
+        <div id="gb-eta-label">Arrivée</div>
+        <div id="gb-eta-time">—</div>
+        <div id="gb-rem-dist">— km</div>
+      </div>
+      <div id="gb-progress" style="width:0%"></div>
+      <button id="gb-stop" onclick="stopGuidance()">✕ STOP</button>
+    </div>
 
     <div id="top-pill">
       <div class="pill-item">📍 <span class="pill-val" id="pill-loc">France</span></div>
@@ -536,6 +618,7 @@ let allChargers=[], scStatusFilter=new Set(['OPEN']), scCountryFilter='ALL', scS
 let scVisible=false, scLoaded=false;
 let originMarker=null, destMarker=null, stopMarkers=[];
 let userMarker=null, scPopup=null;
+let activeRouteCoords=null, activeRouteTotalDist=0, activeRouteTotalDur=0;
 
 map = new maplibregl.Map({container:'map',style:MAP_STYLES.bright,center:[2.35,46.8],zoom:5,pitch:30});
 map.addControl(new maplibregl.NavigationControl({visualizePitch:true}),'top-right');
@@ -699,9 +782,10 @@ function showSug(f){const b=document.getElementById('sug-'+f);if(b.innerHTML)b.c
 function closeSug(f){document.getElementById('sug-'+f).classList.remove('open');}
 document.addEventListener('click',e=>{if(!e.target.closest('.input-wrap')){closeSug('origin');closeSug('dest');}});
 
-async function fetchRoute(wps){
+async function fetchRoute(wps, withSteps=false){
   const c=wps.map(w=>w.join(',')).join(';');
-  const r=await fetch(`https://router.project-osrm.org/route/v1/driving/${c}?overview=full&geometries=geojson&steps=false`);
+  const stepsParam = withSteps ? 'true' : 'false';
+  const r=await fetch(`https://router.project-osrm.org/route/v1/driving/${c}?overview=full&geometries=geojson&steps=${stepsParam}&annotations=false`);
   const d=await r.json();if(d.code!=='Ok')throw new Error('No route');
   return d.routes[0];
 }
@@ -842,7 +926,12 @@ async function calcRoute(){
     renderSummaryDetail(stops,totalDist,totalDur,totalChargeMins,finalBattPct);
     document.getElementById('route-summary').classList.add('show');
     document.getElementById('reset-btn').classList.add('show');
+    document.getElementById('guidance-btn').style.display='block';
     renderTimeline(stops,totalDistKm,totalDur,finalBattPct,totalChargeMins);
+    // Store route for guidance
+    activeRouteCoords = finalRoute.geometry.coordinates;
+    activeRouteTotalDist = finalRoute.distance / 1000;
+    activeRouteTotalDur = finalRoute.duration;
 
   }catch(e){console.error(e);alert('Impossible de calculer l\'itinéraire. Vérifiez votre connexion.');}
   finally{setLoading(false);}
@@ -959,12 +1048,15 @@ function resetRoute(){
   ['input-origin','input-dest'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('route-summary').classList.remove('show');
   document.getElementById('reset-btn').classList.remove('show');
+  document.getElementById('guidance-btn').style.display='none';
   document.getElementById('tl-content').style.display='none';
   document.getElementById('hint').style.display='block';
+  if(guidanceActive) stopGuidance();
   if(map.getSource('route'))map.getSource('route').setData(emptyGeo());
   if(originMarker){originMarker.remove();originMarker=null;}
   if(destMarker){destMarker.remove();destMarker=null;}
   stopMarkers.forEach(m=>m.remove());stopMarkers=[];
+  activeRouteCoords=null; activeRouteTotalDist=0; activeRouteTotalDur=0;
 }
 
 async function loadSuperchargers(){
@@ -1110,11 +1202,252 @@ async function toggleScLayer(){
 }
 
 // ════════════════════════════════════════════════════════════════
+//  GUIDAGE VIRAGE PAR VIRAGE
+// ════════════════════════════════════════════════════════════════
+let guidanceActive = false;
+let guidanceSteps = [];          // étapes OSRM parsées
+let guidanceStepIdx = 0;         // étape courante
+let activeRouteCoords = null;    // coordonnées de la polyligne complète
+let activeRouteTotalDist = 0;
+let activeRouteTotalDur = 0;
+let guidanceDistTravelled = 0;
+let lastSpokenStep = -1;
+let ttsEnabled = true;
+const synth = window.speechSynthesis;
+
+// Mapping type OSRM → SVG path + label FR
+const MANEUVER_MAP = {
+  'turn-left':        { path:'M30 38 L30 22 L18 22 M24 16 L18 22 L24 28', label:'Tournez à gauche' },
+  'turn-right':       { path:'M22 38 L22 22 L34 22 M28 16 L34 22 L28 28', label:'Tournez à droite' },
+  'turn-sharp-left':  { path:'M32 38 L32 28 L16 18 M16 26 L16 18 L24 18', label:'Virage serré à gauche' },
+  'turn-sharp-right': { path:'M20 38 L20 28 L36 18 M28 18 L36 18 L36 26', label:'Virage serré à droite' },
+  'turn-slight-left': { path:'M30 38 L26 20 M18 22 L26 20 L28 28', label:'Légèrement à gauche' },
+  'turn-slight-right':{ path:'M22 38 L26 20 M34 22 L26 20 L24 28', label:'Légèrement à droite' },
+  'straight':         { path:'M26 38 L26 16 M18 24 L26 16 L34 24', label:'Continuez tout droit' },
+  'roundabout':       { path:'M26 14 A12 12 0 1 1 14 26 M14 20 L14 26 L20 26', label:'Prenez le rond-point' },
+  'roundabout-left':  { path:'M26 14 A12 12 0 0 0 14 26 M14 20 L14 26 L20 26', label:'Rond-point (gauche)' },
+  'merge':            { path:'M26 38 L26 16 M18 30 L26 20 M34 30 L26 20', label:'Rejoignez la voie' },
+  'on-ramp':          { path:'M26 38 L26 22 M34 14 L26 22 L34 30', label:'Prenez la bretelle' },
+  'off-ramp':         { path:'M26 38 L26 22 M26 22 L36 14 M36 14 L36 22', label:'Quittez la voie rapide' },
+  'fork-left':        { path:'M26 38 L26 26 M26 26 L18 16 M26 26 L30 18', label:'Bifurcation à gauche' },
+  'fork-right':       { path:'M26 38 L26 26 M26 26 L34 16 M26 26 L22 18', label:'Bifurcation à droite' },
+  'arrive':           { path:'M26 16 L26 32 M20 32 L26 38 L32 32', label:'Vous êtes arrivé·e !' },
+  'depart':           { path:'M26 38 L26 16 M18 24 L26 16 L34 24', label:'Démarrez' },
+  'default':          { path:'M26 38 L26 16 M18 24 L26 16 L34 24', label:'Continuez' },
+};
+
+function getManeuver(step){
+  if(!step) return MANEUVER_MAP['default'];
+  const t = step.maneuver?.type || '';
+  const m = step.maneuver?.modifier || '';
+  const key = m ? `${t}-${m}`.replace(/ /g,'-') : t;
+  // Try exact key, then type only, then default
+  return MANEUVER_MAP[key] || MANEUVER_MAP[t] || MANEUVER_MAP['default'];
+}
+
+// Parse OSRM legs → flat step list
+function parseSteps(legs){
+  const steps = [];
+  for(const leg of legs){
+    for(const step of (leg.steps||[])){
+      const loc = step.maneuver?.location; // [lng, lat]
+      steps.push({
+        instruction: step.maneuver?.instruction || step.name || '',
+        name: step.name || '',
+        type: step.maneuver?.type || 'straight',
+        modifier: step.maneuver?.modifier || '',
+        distance: step.distance || 0,    // metres
+        duration: step.duration || 0,    // seconds
+        location: loc ? [loc[0], loc[1]] : null,
+      });
+    }
+  }
+  return steps;
+}
+
+// Génère un texte d'instruction lisible en français
+function buildInstructionText(step){
+  const man = getManeuver(step);
+  const road = step.name ? ` sur ${step.name}` : '';
+  if(step.type === 'arrive') return 'Vous êtes arrivé·e à destination !';
+  if(step.type === 'depart') return `Démarrez${road}`;
+  return `${man.label}${road}`;
+}
+
+// Formatte une distance en m ou km
+function fmtDist(m){
+  if(m >= 1000) return { val: (m/1000).toFixed(1), unit: 'km' };
+  return { val: Math.round(m/10)*10 || m, unit: 'm' };
+}
+
+// Formatte une durée restante en h/min
+function fmtEta(secs){
+  const totalSec = secs;
+  const h = Math.floor(totalSec/3600);
+  const min = Math.floor((totalSec%3600)/60);
+  if(h > 0) return `${h}h${String(min).padStart(2,'0')}`;
+  return `${min} min`;
+}
+
+// Parole TTS
+function speak(text){
+  if(!ttsEnabled || !synth) return;
+  synth.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'fr-FR';
+  utt.rate = 1.05;
+  utt.pitch = 1;
+  // Préférer une voix française si disponible
+  const voices = synth.getVoices();
+  const frVoice = voices.find(v => v.lang.startsWith('fr'));
+  if(frVoice) utt.voice = frVoice;
+  synth.speak(utt);
+}
+
+// Lance le guidage (récupère les steps depuis OSRM)
+async function startGuidance(){
+  if(!coords.origin || !coords.dest){ alert('Calculez d\'abord un itinéraire.'); return; }
+  setLoading(true, 'CHARGEMENT DU GUIDAGE…');
+  try{
+    // Refetch avec steps=true
+    const wps = [coords.origin, coords.dest];
+    const routeWithSteps = await fetchRoute(wps, true);
+    guidanceSteps = parseSteps(routeWithSteps.legs || []);
+    if(!guidanceSteps.length){ alert('Aucune étape de guidage disponible.'); return; }
+    guidanceStepIdx = 0;
+    lastSpokenStep = -1;
+    guidanceDistTravelled = 0;
+    guidanceActive = true;
+
+    // Afficher le bandeau
+    const bar = document.getElementById('guidance-bar');
+    bar.style.display = 'flex';
+    bar.classList.add('show','slide-in');
+    document.getElementById('top-pill').classList.add('pushed');
+
+    // Démarrer GPS si pas encore actif
+    if(!gpsTracking) startGpsTracking();
+
+    updateGuidanceBanner();
+    speak('Guidage démarré. ' + buildInstructionText(guidanceSteps[0]));
+  }catch(e){ console.error(e); alert('Impossible de charger le guidage.'); }
+  finally{ setLoading(false); }
+}
+
+function stopGuidance(){
+  guidanceActive = false;
+  guidanceSteps = [];
+  guidanceStepIdx = 0;
+  const bar = document.getElementById('guidance-bar');
+  bar.classList.remove('show');
+  setTimeout(()=>{ bar.style.display='none'; }, 350);
+  document.getElementById('top-pill').classList.remove('pushed');
+  document.getElementById('gb-progress').style.width = '0%';
+  synth && synth.cancel();
+}
+
+// Met à jour le bandeau avec l'étape courante
+function updateGuidanceBanner(){
+  if(!guidanceActive || guidanceStepIdx >= guidanceSteps.length) return;
+  const step = guidanceSteps[guidanceStepIdx];
+  const nextStep = guidanceSteps[guidanceStepIdx + 1];
+  const man = getManeuver(step);
+
+  // Flèche SVG
+  document.getElementById('gb-arrow-path').setAttribute('d', man.path);
+
+  // Distance jusqu'au prochain virage
+  const d = fmtDist(step.distance);
+  document.getElementById('gb-dist-big').textContent = d.val;
+  document.getElementById('gb-dist-unit').textContent = d.unit;
+
+  // Instruction
+  document.getElementById('gb-step-txt').textContent = buildInstructionText(step);
+  document.getElementById('gb-road-name').textContent = step.name || '';
+
+  // Aperçu étape suivante
+  if(nextStep){
+    const nm = getManeuver(nextStep);
+    document.getElementById('gb-next-preview').textContent =
+      `Ensuite : ${nm.label}${nextStep.name ? ' sur ' + nextStep.name : ''}`;
+  } else {
+    document.getElementById('gb-next-preview').textContent = '';
+  }
+
+  // ETA
+  const remDist = guidanceSteps.slice(guidanceStepIdx).reduce((s,st)=>s+st.distance,0);
+  const remDur  = guidanceSteps.slice(guidanceStepIdx).reduce((s,st)=>s+st.duration,0);
+  document.getElementById('gb-eta-time').textContent = fmtEta(remDur);
+  const rd = fmtDist(remDist);
+  document.getElementById('gb-rem-dist').textContent = rd.val + ' ' + rd.unit + ' restants';
+
+  // Barre de progression
+  const totalDist = guidanceSteps.reduce((s,st)=>s+st.distance,0);
+  const pct = totalDist > 0 ? Math.min(100, (guidanceDistTravelled / totalDist) * 100) : 0;
+  document.getElementById('gb-progress').style.width = pct + '%';
+}
+
+// Appelée à chaque update GPS — avance les étapes si nécessaire
+function advanceGuidance(pos){
+  if(!guidanceActive || !guidanceSteps.length) return;
+  const userPt = [pos.coords.longitude, pos.coords.latitude];
+
+  // Trouver l'étape courante : chercher le step le plus proche devant nous
+  let closestDist = Infinity;
+  let closestIdx = guidanceStepIdx;
+
+  for(let i = guidanceStepIdx; i < Math.min(guidanceStepIdx + 5, guidanceSteps.length); i++){
+    const step = guidanceSteps[i];
+    if(!step.location) continue;
+    const d = hav(userPt, step.location) * 1000; // en mètres
+    if(d < closestDist){ closestDist = d; closestIdx = i; }
+  }
+
+  // Si on passe à moins de 40 m d'un waypoint de step → avancer
+  if(closestIdx > guidanceStepIdx && closestDist < 40){
+    guidanceDistTravelled += guidanceSteps.slice(guidanceStepIdx, closestIdx).reduce((s,st)=>s+st.distance,0);
+    guidanceStepIdx = closestIdx;
+    updateGuidanceBanner();
+    // TTS annonce nouvelle instruction
+    if(guidanceStepIdx !== lastSpokenStep){
+      lastSpokenStep = guidanceStepIdx;
+      speak(buildInstructionText(guidanceSteps[guidanceStepIdx]));
+    }
+  }
+
+  // Annonce préventive : parler à 200 m du prochain virage
+  const curStep = guidanceSteps[guidanceStepIdx];
+  if(curStep && curStep.location && guidanceStepIdx !== lastSpokenStep){
+    const distToNext = hav(userPt, curStep.location) * 1000;
+    if(distToNext < 200 && distToNext > 0){
+      lastSpokenStep = guidanceStepIdx;
+      const d = fmtDist(distToNext);
+      speak(`Dans ${d.val} ${d.unit}, ${getManeuver(curStep).label}`);
+    }
+  }
+
+  // Mise à jour distance restante affichée en temps réel
+  if(guidanceActive) updateGuidanceBanner();
+
+  // Arrivée
+  if(guidanceStepIdx >= guidanceSteps.length - 1){
+    const last = guidanceSteps[guidanceSteps.length - 1];
+    if(last && last.location){
+      const distToArrival = hav(userPt, last.location) * 1000;
+      if(distToArrival < 30){
+        speak('Vous êtes arrivé à destination !');
+        setTimeout(stopGuidance, 3000);
+      }
+    }
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
 //  GPS TEMPS RÉEL
 // ════════════════════════════════════════════════════════════════
 let gpsWatchId = null;
 let gpsTracking = false;
-let gpsFollowMap = true;          // centrage automatique
+let gpsFollowMap = true;
 let lastGpsPos = null;
 let lastGpsHeading = null;
 let gpsMarkerEl = null;
@@ -1122,8 +1455,8 @@ let gpsMarker = null;
 let gpsAccuracyEl = null;
 let deviationTimer = null;
 let lastRouteRecalc = 0;
-const DEVIATION_THRESHOLD_M = 300;  // recalcul si > 300 m de la route
-const RECALC_COOLDOWN_MS = 30000;   // cooldown 30 s entre recalculs
+const DEVIATION_THRESHOLD_M = 300;
+const RECALC_COOLDOWN_MS = 30000;
 
 // Crée la flèche SVG directionnelle
 function buildArrowMarker(){
@@ -1271,6 +1604,9 @@ function onGpsUpdate(pos){
       }
     }
   }
+
+  // ── Avancement guidage ──
+  if(guidanceActive) advanceGuidance(pos);
 }
 
 function onGpsError(err){
