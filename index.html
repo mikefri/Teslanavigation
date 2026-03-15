@@ -1,210 +1,223 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Tesla Navigation</title>
-
-  <link href="https://unpkg.com/maplibre-gl@5.20.1/dist/maplibre-gl.css" rel="stylesheet" />
+  <link href="https://unpkg.com/maplibre-gl@5.20.1/dist/maplibre-gl.css" rel="stylesheet"/>
   <script src="https://unpkg.com/maplibre-gl@5.20.1/dist/maplibre-gl.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
     :root {
-      --red: #e82127;
-      --red-dim: rgba(232,33,39,0.12);
-      --red-glow: rgba(232,33,39,0.4);
-      --dark: #080808;
-      --s1: #101010;
-      --s2: #181818;
-      --s3: #202020;
-      --border: rgba(255,255,255,0.07);
-      --border2: rgba(255,255,255,0.13);
-      --text: #efefef;
-      --muted: #555;
-      --muted2: #888;
-      --blue: #44aaff;
-      --green: #2ecc71;
-      --orange: #f39c12;
+      --red:#e82127; --red-dim:rgba(232,33,39,.12); --red-glow:rgba(232,33,39,.4);
+      --dark:#080808; --s1:#101010; --s2:#181818; --s3:#202020;
+      --border:rgba(255,255,255,.07); --border2:rgba(255,255,255,.13);
+      --text:#efefef; --muted:#555; --muted2:#888;
+      --blue:#44aaff; --green:#2ecc71; --orange:#f39c12;
     }
-    * { margin:0; padding:0; box-sizing:border-box; }
-    html, body { height:100%; background:var(--dark); color:var(--text); font-family:'DM Sans',sans-serif; overflow:hidden; }
-    #app { display:flex; height:100vh; }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html,body{height:100%;background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;overflow:hidden;}
+    #app{display:flex;height:100vh;}
 
-    /* ── SIDEBAR ── */
-    #sidebar {
-      width:360px; min-width:360px;
-      background:var(--s1);
-      border-right:1px solid var(--border);
-      display:flex; flex-direction:column;
-      z-index:10; overflow:hidden;
-    }
+    /* SIDEBAR */
+    #sidebar{width:370px;min-width:370px;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:10;overflow:hidden;}
 
-    #header { padding:20px 22px 16px; border-bottom:1px solid var(--border); }
-    .logo-row { display:flex; align-items:center; gap:12px; }
-    .logo-t { font-family:'Orbitron',monospace; font-size:28px; font-weight:800; color:var(--red); filter:drop-shadow(0 0 10px var(--red-glow)); line-height:1; }
-    .logo-text { font-family:'Orbitron',monospace; font-size:16px; font-weight:800; letter-spacing:5px; }
-    .logo-tag { font-size:10px; color:var(--muted2); letter-spacing:3px; text-transform:uppercase; margin-top:4px; margin-left:44px; }
+    #header{padding:18px 22px 14px;border-bottom:1px solid var(--border);}
+    .logo-row{display:flex;align-items:center;gap:12px;}
+    .logo-t{font-family:'Orbitron',monospace;font-size:28px;font-weight:800;color:var(--red);filter:drop-shadow(0 0 10px var(--red-glow));line-height:1;}
+    .logo-text{font-family:'Orbitron',monospace;font-size:16px;font-weight:800;letter-spacing:5px;}
+    .logo-tag{font-size:10px;color:var(--muted2);letter-spacing:3px;text-transform:uppercase;margin-top:3px;margin-left:44px;}
 
     /* Tabs */
-    #tabs { display:flex; border-bottom:1px solid var(--border); }
-    .tab {
-      flex:1; padding:11px 0; text-align:center;
-      font-size:11px; font-family:'Orbitron',monospace; letter-spacing:1px;
-      color:var(--muted2); cursor:pointer; border-bottom:2px solid transparent;
-      transition:all .2s;
-    }
-    .tab:hover { color:var(--text); }
-    .tab.active { color:var(--red); border-bottom-color:var(--red); }
+    #tabs{display:flex;border-bottom:1px solid var(--border);}
+    .tab{flex:1;padding:10px 0;text-align:center;font-size:10px;font-family:'Orbitron',monospace;letter-spacing:1px;color:var(--muted2);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;}
+    .tab:hover{color:var(--text);}
+    .tab.active{color:var(--red);border-bottom-color:var(--red);}
 
-    /* Panels */
-    .panel { display:none; flex:1; flex-direction:column; overflow:hidden; }
-    .panel.active { display:flex; }
+    .panel{display:none;flex:1;flex-direction:column;overflow:hidden;}
+    .panel.active{display:flex;}
 
-    /* Vehicle chips */
-    #vehicle-bar { display:flex; gap:6px; padding:12px 22px; border-bottom:1px solid var(--border); overflow-x:auto; }
-    #vehicle-bar::-webkit-scrollbar { display:none; }
-    .v-chip { background:var(--s2); border:1px solid var(--border); border-radius:20px; padding:5px 13px; font-size:11px; font-family:'Orbitron',monospace; letter-spacing:1px; color:var(--muted2); cursor:pointer; white-space:nowrap; transition:all .2s; }
-    .v-chip:hover { border-color:var(--border2); color:var(--text); }
-    .v-chip.active { background:var(--red-dim); border-color:var(--red); color:var(--red); }
+    /* Vehicle */
+    #vehicle-bar{display:flex;gap:6px;padding:10px 22px;border-bottom:1px solid var(--border);overflow-x:auto;}
+    #vehicle-bar::-webkit-scrollbar{display:none;}
+    .v-chip{background:var(--s2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:11px;font-family:'Orbitron',monospace;letter-spacing:1px;color:var(--muted2);cursor:pointer;white-space:nowrap;transition:all .2s;}
+    .v-chip:hover{border-color:var(--border2);color:var(--text);}
+    .v-chip.active{background:var(--red-dim);border-color:var(--red);color:var(--red);}
 
     /* Battery */
-    #battery-block { padding:14px 22px; border-bottom:1px solid var(--border); }
-    .bat-top { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:8px; }
-    .bat-pct { font-family:'Orbitron',monospace; font-size:22px; font-weight:600; color:var(--green); }
-    .bat-range { font-size:12px; color:var(--muted2); }
-    .bat-range b { color:var(--text); font-weight:500; }
-    .bat-track { height:6px; background:var(--s3); border-radius:4px; overflow:hidden; margin-bottom:10px; }
-    .bat-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,#27ae60,#2ecc71); transition:width .5s ease; }
-    .bat-slider-row { display:flex; align-items:center; gap:10px; }
-    .bat-slider-row label { font-size:10px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; white-space:nowrap; }
-    .bat-slider-row input[type=range] { flex:1; -webkit-appearance:none; height:4px; background:var(--s3); border-radius:2px; outline:none; cursor:pointer; }
-    .bat-slider-row input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; background:var(--green); border-radius:50%; box-shadow:0 0 8px rgba(46,204,113,.5); }
+    #battery-block{padding:12px 22px;border-bottom:1px solid var(--border);}
+    .bat-top{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:6px;}
+    .bat-pct{font-family:'Orbitron',monospace;font-size:20px;font-weight:600;color:var(--green);}
+    .bat-range{font-size:12px;color:var(--muted2);}
+    .bat-range b{color:var(--text);font-weight:500;}
+    .bat-track{height:5px;background:var(--s3);border-radius:4px;overflow:hidden;margin-bottom:8px;}
+    .bat-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#27ae60,#2ecc71);transition:width .5s;}
+    .bat-row{display:flex;align-items:center;gap:10px;}
+    .bat-row label{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;white-space:nowrap;}
+    .bat-row input[type=range]{flex:1;-webkit-appearance:none;height:4px;background:var(--s3);border-radius:2px;outline:none;cursor:pointer;}
+    .bat-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:var(--green);border-radius:50%;box-shadow:0 0 8px rgba(46,204,113,.5);}
+
+    /* Options */
+    #options-bar{display:flex;gap:8px;padding:10px 22px;border-bottom:1px solid var(--border);align-items:center;}
+    .opt-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;}
+    .toggle-wrap{display:flex;align-items:center;gap:6px;margin-left:auto;}
+    .toggle-label{font-size:11px;color:var(--muted2);}
+    .toggle{position:relative;width:36px;height:20px;cursor:pointer;}
+    .toggle input{opacity:0;width:0;height:0;}
+    .toggle-slider{position:absolute;inset:0;background:var(--s3);border-radius:20px;transition:background .2s;}
+    .toggle-slider:before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:var(--muted2);border-radius:50%;transition:transform .2s,background .2s;}
+    .toggle input:checked + .toggle-slider{background:var(--red-dim);}
+    .toggle input:checked + .toggle-slider:before{transform:translateX(16px);background:var(--red);}
+
+    /* Charge target */
+    #charge-target-row{display:flex;align-items:center;gap:10px;padding:8px 22px;border-bottom:1px solid var(--border);}
+    #charge-target-row label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;}
+    #charge-target-row input[type=range]{flex:1;-webkit-appearance:none;height:4px;background:var(--s3);border-radius:2px;outline:none;cursor:pointer;}
+    #charge-target-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:var(--orange);border-radius:50%;box-shadow:0 0 8px rgba(243,156,18,.5);}
+    #charge-target-val{font-family:'Orbitron',monospace;font-size:12px;color:var(--orange);min-width:32px;text-align:right;}
 
     /* Route form */
-    #route-form { padding:16px 22px; border-bottom:1px solid var(--border); }
-    .input-wrap { position:relative; margin-bottom:8px; }
-    .dot { position:absolute; left:13px; top:50%; transform:translateY(-50%); width:8px; height:8px; border-radius:50%; z-index:2; pointer-events:none; }
-    .dot.start { background:var(--blue); box-shadow:0 0 8px var(--blue); }
-    .dot.end   { background:var(--red);  box-shadow:0 0 8px var(--red-glow); }
-    .v-line { width:1px; height:10px; background:var(--border2); margin:0 0 8px 17px; }
-    .input-wrap input { width:100%; background:var(--s2); border:1px solid var(--border); border-radius:10px; padding:11px 12px 11px 32px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:13px; outline:none; transition:border-color .15s,background .15s; }
-    .input-wrap input:focus { border-color:var(--border2); background:var(--s3); }
-    .input-wrap input::placeholder { color:var(--muted); }
-    .suggestions { position:absolute; top:calc(100% + 4px); left:0; right:0; background:var(--s3); border:1px solid var(--border2); border-radius:10px; z-index:9999; max-height:200px; overflow-y:auto; display:none; box-shadow:0 12px 40px rgba(0,0,0,.6); }
-    .suggestions.open { display:block; }
-    .sug-item { padding:9px 14px; font-size:13px; cursor:pointer; border-bottom:1px solid var(--border); transition:background .1s; }
-    .sug-item:last-child { border-bottom:none; }
-    .sug-item:hover { background:rgba(255,255,255,.04); }
-    .sug-name { color:var(--text); }
-    .sug-sub  { color:var(--muted2); font-size:11px; margin-top:2px; }
+    #route-form{padding:14px 22px;border-bottom:1px solid var(--border);}
+    .input-wrap{position:relative;margin-bottom:8px;}
+    .dot{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;z-index:2;pointer-events:none;}
+    .dot.start{background:var(--blue);box-shadow:0 0 8px var(--blue);}
+    .dot.end{background:var(--red);box-shadow:0 0 8px var(--red-glow);}
+    .v-line{width:1px;height:10px;background:var(--border2);margin:0 0 8px 17px;}
+    .input-wrap input{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 12px 10px 32px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .15s,background .15s;}
+    .input-wrap input:focus{border-color:var(--border2);background:var(--s3);}
+    .input-wrap input::placeholder{color:var(--muted);}
+    .suggestions{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--s3);border:1px solid var(--border2);border-radius:10px;z-index:9999;max-height:200px;overflow-y:auto;display:none;box-shadow:0 12px 40px rgba(0,0,0,.6);}
+    .suggestions.open{display:block;}
+    .sug-item{padding:9px 14px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s;}
+    .sug-item:last-child{border-bottom:none;}
+    .sug-item:hover{background:rgba(255,255,255,.04);}
+    .sug-name{color:var(--text);}
+    .sug-sub{color:var(--muted2);font-size:11px;margin-top:2px;}
 
-    #go-btn { width:100%; padding:12px; background:var(--red); border:none; border-radius:10px; color:#fff; font-family:'Orbitron',monospace; font-size:11px; font-weight:600; letter-spacing:3px; cursor:pointer; transition:all .2s; box-shadow:0 0 20px rgba(232,33,39,.22); }
-    #go-btn:hover { background:#ff2d34; box-shadow:0 0 32px rgba(232,33,39,.5); transform:translateY(-1px); }
-    #go-btn:active { transform:translateY(0); }
+    #go-btn{width:100%;padding:11px;background:var(--red);border:none;border-radius:10px;color:#fff;font-family:'Orbitron',monospace;font-size:11px;font-weight:600;letter-spacing:3px;cursor:pointer;transition:all .2s;box-shadow:0 0 20px rgba(232,33,39,.22);}
+    #go-btn:hover{background:#ff2d34;box-shadow:0 0 32px rgba(232,33,39,.5);transform:translateY(-1px);}
+    #go-btn:active{transform:translateY(0);}
+    #reset-btn{display:none;width:100%;margin-top:8px;padding:8px;background:transparent;border:1px solid var(--border2);border-radius:10px;color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all .2s;}
+    #reset-btn:hover{color:var(--text);}
+    #reset-btn.show{display:block;}
 
-    #reset-btn { display:none; width:100%; margin-top:8px; padding:9px; background:transparent; border:1px solid var(--border2); border-radius:10px; color:var(--muted2); font-family:'DM Sans',sans-serif; font-size:12px; cursor:pointer; transition:all .2s; }
-    #reset-btn:hover { color:var(--text); }
-    #reset-btn.show { display:block; }
+    /* Summary */
+    #route-summary{padding:12px 22px;border-bottom:1px solid var(--border);display:none;}
+    #route-summary.show{display:block;}
+    .summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+    .scard{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 6px;text-align:center;}
+    .scard-val{font-family:'Orbitron',monospace;font-size:13px;font-weight:600;}
+    .scard-val.ok{color:var(--green);}
+    .scard-val.warn{color:var(--orange);}
+    .scard-val.bad{color:var(--red);}
+    .scard-val.plain{color:var(--text);}
+    .scard-val.blue{color:var(--blue);}
+    .scard-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:3px;}
 
-    /* Route stats */
-    #route-stats { padding:14px 22px; border-bottom:1px solid var(--border); display:none; }
-    #route-stats.show { display:block; }
-    .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-    .stat { background:var(--s2); border:1px solid var(--border); border-radius:10px; padding:12px 8px; text-align:center; }
-    .stat-val { font-family:'Orbitron',monospace; font-size:14px; font-weight:600; }
-    .stat-val.ok   { color:var(--green); }
-    .stat-val.warn { color:var(--orange); }
-    .stat-val.bad  { color:var(--red); }
-    .stat-val.plain{ color:var(--text); }
-    .stat-lbl { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
-    .charge-warn { display:none; margin-top:10px; background:rgba(232,33,39,.1); border:1px solid rgba(232,33,39,.3); border-radius:8px; padding:10px 14px; font-size:12px; color:#f88; line-height:1.5; }
-    .charge-warn.show { display:block; }
+    /* Itinerary timeline */
+    #timeline{flex:1;overflow-y:auto;padding:14px 22px;}
+    #timeline::-webkit-scrollbar{width:3px;}
+    #timeline::-webkit-scrollbar-thumb{background:var(--s3);}
+    .tl-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
 
-    /* Steps */
-    #steps-panel { flex:1; overflow-y:auto; padding:14px 22px; }
-    #steps-panel::-webkit-scrollbar { width:3px; }
-    #steps-panel::-webkit-scrollbar-thumb { background:var(--s3); }
-    .steps-title { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
-    .step { display:flex; gap:12px; padding:9px 0; border-bottom:1px solid var(--border); align-items:flex-start; animation:fadeIn .3s ease both; }
-    .step:last-child { border-bottom:none; }
-    .step-icon { width:26px; height:26px; min-width:26px; background:var(--s2); border:1px solid var(--border); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:12px; }
-    .step-text { font-size:13px; color:#ccc; line-height:1.4; }
-    .step-dist { font-size:11px; color:var(--muted2); margin-top:3px; }
+    /* Timeline segments */
+    .segment{margin-bottom:4px;}
+    .seg-drive{display:flex;gap:12px;align-items:flex-start;padding:8px 0;}
+    .seg-line{display:flex;flex-direction:column;align-items:center;gap:0;}
+    .seg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px;}
+    .seg-dot.origin{background:var(--blue);box-shadow:0 0 8px var(--blue);}
+    .seg-dot.dest{background:var(--red);box-shadow:0 0 6px var(--red-glow);}
+    .seg-dot.charger{background:var(--orange);box-shadow:0 0 6px rgba(243,156,18,.6);}
+    .seg-vbar{flex:1;width:1px;background:var(--border2);min-height:20px;}
+    .seg-info{flex:1;}
+    .seg-place{font-size:13px;font-weight:500;color:var(--text);}
+    .seg-meta{font-size:11px;color:var(--muted2);margin-top:2px;line-height:1.5;}
 
-    /* ── CHARGER TAB ── */
-    #charger-panel { overflow:hidden; }
-    #charger-search-wrap { padding:14px 22px; border-bottom:1px solid var(--border); }
-    #charger-search { width:100%; background:var(--s2); border:1px solid var(--border); border-radius:10px; padding:10px 14px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:13px; outline:none; }
-    #charger-search:focus { border-color:var(--border2); background:var(--s3); }
-    #charger-search::placeholder { color:var(--muted); }
+    /* Drive block between stops */
+    .drive-block{display:flex;gap:12px;align-items:center;padding:4px 0 4px 0;}
+    .drive-bar-col{display:flex;flex-direction:column;align-items:center;width:10px;}
+    .drive-vbar{width:1px;background:linear-gradient(180deg,var(--border2),var(--border2));flex:1;min-height:30px;}
+    .drive-info{flex:1;display:flex;gap:8px;align-items:center;}
+    .drive-pill{background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--muted2);}
+    .drive-pill b{color:var(--text);}
+    .batt-pill{background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;}
 
-    #charger-filters { display:flex; gap:6px; padding:0 22px 12px; flex-wrap:wrap; border-bottom:1px solid var(--border); }
-    .filter-chip { background:var(--s2); border:1px solid var(--border); border-radius:20px; padding:4px 12px; font-size:11px; color:var(--muted2); cursor:pointer; transition:all .2s; white-space:nowrap; }
-    .filter-chip:hover { border-color:var(--border2); color:var(--text); }
-    .filter-chip.on { background:var(--red-dim); border-color:var(--red); color:var(--red); }
+    /* Charger stop card */
+    .charger-stop{background:rgba(243,156,18,.07);border:1px solid rgba(243,156,18,.25);border-radius:12px;padding:12px 14px;margin:4px 0;}
+    .cs-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+    .cs-icon{font-size:16px;}
+    .cs-name{font-size:13px;font-weight:500;color:var(--text);}
+    .cs-badge{margin-left:auto;background:rgba(243,156,18,.2);border:1px solid rgba(243,156,18,.4);border-radius:6px;padding:2px 8px;font-size:10px;font-family:'Orbitron',monospace;color:var(--orange);}
+    .cs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+    .cs-stat{text-align:center;}
+    .cs-stat-val{font-family:'Orbitron',monospace;font-size:12px;color:var(--text);}
+    .cs-stat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
 
-    #charger-stats-bar { display:flex; justify-content:space-around; padding:10px 22px; border-bottom:1px solid var(--border); }
-    .cstat { text-align:center; }
-    .cstat-val { font-family:'Orbitron',monospace; font-size:15px; font-weight:600; color:var(--text); }
-    .cstat-lbl { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
+    /* Hint */
+    #hint{padding:20px 22px;text-align:center;color:var(--muted2);font-size:13px;line-height:1.7;}
+    #hint .hint-icon{font-size:32px;margin-bottom:8px;}
 
-    #charger-list { flex:1; overflow-y:auto; }
-    #charger-list::-webkit-scrollbar { width:3px; }
-    #charger-list::-webkit-scrollbar-thumb { background:var(--s3); }
+    /* Charger tab */
+    #charger-panel{overflow:hidden;}
+    #charger-search-wrap{padding:12px 22px;border-bottom:1px solid var(--border);}
+    #charger-search{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;}
+    #charger-search:focus{border-color:var(--border2);background:var(--s3);}
+    #charger-search::placeholder{color:var(--muted);}
+    #charger-filters{display:flex;gap:6px;padding:0 22px 10px;flex-wrap:wrap;border-bottom:1px solid var(--border);}
+    .filter-chip{background:var(--s2);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:11px;color:var(--muted2);cursor:pointer;transition:all .2s;white-space:nowrap;}
+    .filter-chip:hover{border-color:var(--border2);color:var(--text);}
+    .filter-chip.on{background:var(--red-dim);border-color:var(--red);color:var(--red);}
+    #charger-stats-bar{display:flex;justify-content:space-around;padding:10px 22px;border-bottom:1px solid var(--border);}
+    .cstat{text-align:center;}
+    .cstat-val{font-family:'Orbitron',monospace;font-size:15px;font-weight:600;color:var(--text);}
+    .cstat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+    #charger-list-wrap{flex:1;overflow-y:auto;}
+    #charger-list-wrap::-webkit-scrollbar{width:3px;}
+    #charger-list-wrap::-webkit-scrollbar-thumb{background:var(--s3);}
+    .charger-item{padding:10px 22px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;display:flex;gap:12px;align-items:flex-start;}
+    .charger-item:hover{background:rgba(255,255,255,.03);}
+    .charger-dot{width:9px;height:9px;min-width:9px;border-radius:50%;margin-top:4px;}
+    .charger-dot.open{background:var(--green);box-shadow:0 0 6px rgba(46,204,113,.6);}
+    .charger-dot.closed{background:var(--red);}
+    .charger-dot.constr{background:var(--orange);}
+    .charger-name{font-size:13px;color:var(--text);font-weight:500;}
+    .charger-meta{font-size:11px;color:var(--muted2);margin-top:2px;}
+    .charger-stalls{font-family:'Orbitron',monospace;font-size:11px;color:var(--muted2);margin-left:auto;text-align:right;white-space:nowrap;}
+    #charger-loading{padding:24px 22px;text-align:center;}
+    .loader-ring{width:32px;height:32px;border:2px solid var(--border2);border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px;}
+    .loader-text{font-size:11px;color:var(--muted2);letter-spacing:2px;}
 
-    .charger-item { padding:12px 22px; border-bottom:1px solid var(--border); cursor:pointer; transition:background .15s; display:flex; gap:12px; align-items:flex-start; }
-    .charger-item:hover { background:rgba(255,255,255,.03); }
-    .charger-dot { width:10px; height:10px; min-width:10px; border-radius:50%; margin-top:4px; }
-    .charger-dot.open   { background:var(--green); box-shadow:0 0 6px rgba(46,204,113,.6); }
-    .charger-dot.closed { background:var(--red); }
-    .charger-dot.constr { background:var(--orange); }
-    .charger-name { font-size:13px; color:var(--text); font-weight:500; }
-    .charger-meta { font-size:11px; color:var(--muted2); margin-top:3px; }
-    .charger-stalls { font-family:'Orbitron',monospace; font-size:11px; color:var(--muted2); margin-left:auto; text-align:right; white-space:nowrap; }
+    /* MAP */
+    #map-area{flex:1;position:relative;overflow:hidden;}
+    #map{width:100%;height:100%;}
+    #top-pill{position:absolute;top:16px;left:50%;transform:translateX(-50%);background:rgba(8,8,8,.88);backdrop-filter:blur(16px);border:1px solid var(--border2);border-radius:40px;padding:8px 20px;z-index:200;display:flex;align-items:center;gap:16px;font-size:12px;white-space:nowrap;box-shadow:0 4px 30px rgba(0,0,0,.5);}
+    .pill-item{display:flex;align-items:center;gap:6px;color:var(--muted2);}
+    .pill-val{font-family:'Orbitron',monospace;font-size:11px;color:var(--text);}
+    .pill-sep{color:var(--border2);}
+    #locate-btn{position:absolute;bottom:24px;left:16px;z-index:200;width:42px;height:42px;background:rgba(8,8,8,.88);backdrop-filter:blur(12px);border:1px solid var(--border2);border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;transition:all .2s;color:var(--blue);}
+    #locate-btn:hover{border-color:var(--blue);box-shadow:0 0 14px rgba(68,170,255,.4);}
+    #style-toggle{position:absolute;bottom:24px;right:16px;z-index:200;display:flex;flex-direction:column;gap:8px;}
+    .map-btn{width:42px;height:42px;background:rgba(8,8,8,.88);backdrop-filter:blur(12px);border:1px solid var(--border2);border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;transition:all .2s;color:var(--muted2);}
+    .map-btn:hover{border-color:var(--red);color:var(--red);}
+    .map-btn.active{border-color:var(--red);color:var(--red);background:var(--red-dim);}
+    #sc-toggle-btn{position:absolute;top:16px;right:16px;z-index:200;background:rgba(8,8,8,.88);backdrop-filter:blur(12px);border:1px solid var(--border2);border-radius:10px;padding:8px 14px;cursor:pointer;font-size:11px;font-family:'Orbitron',monospace;letter-spacing:1px;color:var(--muted2);transition:all .2s;display:flex;align-items:center;gap:8px;}
+    #sc-toggle-btn:hover{border-color:var(--red);color:var(--red);}
+    #sc-toggle-btn.active{border-color:var(--red);color:var(--red);background:var(--red-dim);}
+    #sc-toggle-btn .dot-ind{width:8px;height:8px;border-radius:50%;background:var(--muted);transition:background .2s;}
+    #sc-toggle-btn.active .dot-ind{background:var(--green);box-shadow:0 0 6px rgba(46,204,113,.7);}
 
-    #charger-loading { padding:24px 22px; text-align:center; }
-    .loader-ring { width:32px; height:32px; border:2px solid var(--border2); border-top-color:var(--red); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 12px; }
-    .loader-text { font-size:11px; color:var(--muted2); letter-spacing:2px; }
+    #loading{display:none;position:fixed;inset:0;background:rgba(8,8,8,.75);backdrop-filter:blur(4px);z-index:9000;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+    #loading.show{display:flex;}
+    .spinner{width:40px;height:40px;border:2px solid var(--border2);border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .loading-text{font-family:'Orbitron',monospace;font-size:11px;letter-spacing:3px;color:var(--muted2);}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 
-    /* ── MAP ── */
-    #map-area { flex:1; position:relative; overflow:hidden; }
-    #map { width:100%; height:100%; }
-
-    #top-pill { position:absolute; top:16px; left:50%; transform:translateX(-50%); background:rgba(8,8,8,.88); backdrop-filter:blur(16px); border:1px solid var(--border2); border-radius:40px; padding:8px 22px; z-index:200; display:flex; align-items:center; gap:18px; font-size:12px; white-space:nowrap; box-shadow:0 4px 30px rgba(0,0,0,.5); }
-    .pill-item { display:flex; align-items:center; gap:7px; color:var(--muted2); }
-    .pill-val { font-family:'Orbitron',monospace; font-size:11px; color:var(--text); }
-    .pill-sep { color:var(--border2); }
-
-    #locate-btn { position:absolute; bottom:24px; left:16px; z-index:200; width:42px; height:42px; background:rgba(8,8,8,.88); backdrop-filter:blur(12px); border:1px solid var(--border2); border-radius:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px; transition:all .2s; color:var(--blue); }
-    #locate-btn:hover { border-color:var(--blue); box-shadow:0 0 14px rgba(68,170,255,.4); }
-
-    #style-toggle { position:absolute; bottom:24px; right:16px; z-index:200; display:flex; flex-direction:column; gap:8px; }
-    .map-btn { width:42px; height:42px; background:rgba(8,8,8,.88); backdrop-filter:blur(12px); border:1px solid var(--border2); border-radius:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:17px; transition:all .2s; color:var(--muted2); }
-    .map-btn:hover { border-color:var(--red); color:var(--red); }
-    .map-btn.active { border-color:var(--red); color:var(--red); background:var(--red-dim); }
-
-    /* Supercharger toggle */
-    #sc-toggle-btn { position:absolute; top:16px; right:16px; z-index:200; background:rgba(8,8,8,.88); backdrop-filter:blur(12px); border:1px solid var(--border2); border-radius:10px; padding:8px 14px; cursor:pointer; font-size:12px; font-family:'Orbitron',monospace; letter-spacing:1px; color:var(--muted2); transition:all .2s; display:flex; align-items:center; gap:8px; }
-    #sc-toggle-btn:hover { border-color:var(--red); color:var(--red); }
-    #sc-toggle-btn.active { border-color:var(--red); color:var(--red); background:var(--red-dim); }
-    #sc-toggle-btn .dot-ind { width:8px; height:8px; border-radius:50%; background:var(--muted); transition:background .2s; }
-    #sc-toggle-btn.active .dot-ind { background:var(--green); box-shadow:0 0 6px rgba(46,204,113,.7); }
-
-    /* Loading */
-    #loading { display:none; position:fixed; inset:0; background:rgba(8,8,8,.7); backdrop-filter:blur(4px); z-index:9000; align-items:center; justify-content:center; flex-direction:column; gap:16px; }
-    #loading.show { display:flex; }
-    .spinner { width:40px; height:40px; border:2px solid var(--border2); border-top-color:var(--red); border-radius:50%; animation:spin .8s linear infinite; }
-    @keyframes spin { to { transform:rotate(360deg); } }
-    .loading-text { font-family:'Orbitron',monospace; font-size:11px; letter-spacing:3px; color:var(--muted2); }
-    @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
-
-    /* MapLibre overrides */
-    .maplibregl-ctrl-attrib { background:rgba(8,8,8,.7)!important; color:#444!important; }
-    .maplibregl-ctrl-attrib a { color:#666!important; }
-    .maplibregl-popup-content { background:var(--s2)!important; color:var(--text)!important; border:1px solid var(--border2)!important; border-radius:12px!important; font-family:'DM Sans',sans-serif!important; font-size:13px!important; padding:14px 16px!important; box-shadow:0 8px 30px rgba(0,0,0,.6)!important; min-width:200px; }
-    .maplibregl-popup-tip { border-top-color:var(--s2)!important; }
-    .maplibregl-popup-close-button { color:var(--muted2)!important; font-size:18px!important; top:6px!important; right:8px!important; }
+    .maplibregl-ctrl-attrib{background:rgba(8,8,8,.7)!important;color:#444!important;}
+    .maplibregl-ctrl-attrib a{color:#666!important;}
+    .maplibregl-popup-content{background:var(--s2)!important;color:var(--text)!important;border:1px solid var(--border2)!important;border-radius:12px!important;font-family:'DM Sans',sans-serif!important;font-size:13px!important;padding:14px 16px!important;box-shadow:0 8px 30px rgba(0,0,0,.6)!important;min-width:190px;}
+    .maplibregl-popup-tip{border-top-color:var(--s2)!important;}
+    .maplibregl-popup-close-button{color:var(--muted2)!important;font-size:18px!important;top:6px!important;right:8px!important;}
   </style>
 </head>
 <body>
@@ -212,7 +225,6 @@
 
   <!-- SIDEBAR -->
   <div id="sidebar">
-
     <div id="header">
       <div class="logo-row">
         <span class="logo-t">T</span>
@@ -221,7 +233,6 @@
       <div class="logo-tag">Navigation System</div>
     </div>
 
-    <!-- Tabs -->
     <div id="tabs">
       <div class="tab active" onclick="switchTab('nav')">🗺 Navigation</div>
       <div class="tab" onclick="switchTab('chargers')">⚡ Superchargeurs</div>
@@ -244,9 +255,26 @@
           <span class="bat-range">Autonomie : <b id="bat-km">468 km</b></span>
         </div>
         <div class="bat-track"><div class="bat-fill" id="bat-fill" style="width:78%"></div></div>
-        <div class="bat-slider-row">
-          <label>Batterie</label>
-          <input type="range" id="bat-slider" min="5" max="100" value="78" oninput="updateBattery(this.value)" />
+        <div class="bat-row">
+          <label>Batterie actuelle</label>
+          <input type="range" id="bat-slider" min="5" max="100" value="78" oninput="updateBattery(this.value)"/>
+        </div>
+      </div>
+
+      <div id="charge-target-row">
+        <label>Recharger jusqu'à</label>
+        <input type="range" id="charge-target" min="50" max="100" value="80" oninput="updateChargeTarget(this.value)"/>
+        <span id="charge-target-val">80%</span>
+      </div>
+
+      <div id="options-bar">
+        <span class="opt-label">Options</span>
+        <div class="toggle-wrap">
+          <span class="toggle-label">Superchargeurs auto</span>
+          <label class="toggle">
+            <input type="checkbox" id="sc-auto" checked onchange="onScAutoChange()"/>
+            <span class="toggle-slider"></span>
+          </label>
         </div>
       </div>
 
@@ -254,68 +282,65 @@
         <div class="input-wrap">
           <div class="dot start"></div>
           <input id="input-origin" type="text" placeholder="Départ…" autocomplete="off"
-                 oninput="onInput(this,'origin')" onfocus="showSug('origin')" />
+                 oninput="onInput(this,'origin')" onfocus="showSug('origin')"/>
           <div class="suggestions" id="sug-origin"></div>
         </div>
         <div class="v-line"></div>
         <div class="input-wrap">
           <div class="dot end"></div>
           <input id="input-dest" type="text" placeholder="Destination…" autocomplete="off"
-                 oninput="onInput(this,'dest')" onfocus="showSug('dest')" />
+                 oninput="onInput(this,'dest')" onfocus="showSug('dest')"/>
           <div class="suggestions" id="sug-dest"></div>
         </div>
         <button id="go-btn" onclick="calcRoute()">⚡ CALCULER L'ITINÉRAIRE</button>
         <button id="reset-btn" onclick="resetRoute()">✕ Effacer l'itinéraire</button>
       </div>
 
-      <div id="route-stats">
-        <div class="stats-grid">
-          <div class="stat"><div class="stat-val plain" id="s-dist">—</div><div class="stat-lbl">Distance</div></div>
-          <div class="stat"><div class="stat-val plain" id="s-time">—</div><div class="stat-lbl">Durée</div></div>
-          <div class="stat"><div class="stat-val ok" id="s-batt">—</div><div class="stat-lbl">Batterie arr.</div></div>
+      <div id="route-summary">
+        <div class="summary-grid">
+          <div class="scard"><div class="scard-val plain" id="s-dist">—</div><div class="scard-lbl">Distance</div></div>
+          <div class="scard"><div class="scard-val plain" id="s-time">—</div><div class="scard-lbl">Trajet</div></div>
+          <div class="scard"><div class="scard-val blue"  id="s-stops">—</div><div class="scard-lbl">Arrêts</div></div>
+          <div class="scard"><div class="scard-val ok"    id="s-batt">—</div><div class="scard-lbl">Batterie arr.</div></div>
         </div>
-        <div class="charge-warn" id="charge-warn">⚠️ Autonomie insuffisante. Prévoir une recharge en cours de route.</div>
       </div>
 
-      <div id="steps-panel">
-        <div class="steps-title" id="steps-title">Entrez un itinéraire pour commencer</div>
-        <div id="steps-list"></div>
+      <div id="timeline">
+        <div id="hint">
+          <div class="hint-icon">🚗</div>
+          Entrez votre départ et destination.<br>Les arrêts Superchargeurs seront<br>calculés automatiquement.
+        </div>
+        <div id="tl-content" style="display:none">
+          <div class="tl-title" id="tl-title">Itinéraire</div>
+          <div id="tl-list"></div>
+        </div>
       </div>
 
     </div>
 
-    <!-- CHARGER PANEL -->
+    <!-- CHARGER TAB -->
     <div class="panel" id="panel-chargers">
       <div id="charger-search-wrap">
-        <input id="charger-search" type="text" placeholder="Rechercher un Superchargeur…"
-               oninput="filterChargers()" />
+        <input id="charger-search" type="text" placeholder="Rechercher un Superchargeur…" oninput="filterChargers()"/>
       </div>
-
       <div id="charger-filters">
         <div class="filter-chip on" data-status="OPEN" onclick="toggleFilter(this)">✅ Ouvert</div>
-        <div class="filter-chip" data-status="CONSTRUCTION" onclick="toggleFilter(this)">🚧 En construction</div>
-        <div class="filter-chip" data-status="CLOSED_TEMP" onclick="toggleFilter(this)">⏸ Fermé temp.</div>
+        <div class="filter-chip" data-status="CONSTRUCTION" onclick="toggleFilter(this)">🚧 Construction</div>
+        <div class="filter-chip" data-status="CLOSED_TEMP" onclick="toggleFilter(this)">⏸ Fermé</div>
       </div>
-
       <div id="charger-stats-bar">
         <div class="cstat"><div class="cstat-val" id="cs-total">—</div><div class="cstat-lbl">Total</div></div>
         <div class="cstat"><div class="cstat-val" id="cs-open" style="color:var(--green)">—</div><div class="cstat-lbl">Ouverts</div></div>
         <div class="cstat"><div class="cstat-val" id="cs-stalls" style="color:var(--blue)">—</div><div class="cstat-lbl">Bornes</div></div>
       </div>
-
-      <div id="charger-loading">
-        <div class="loader-ring"></div>
-        <div class="loader-text">CHARGEMENT…</div>
-      </div>
-      <div id="charger-list"></div>
+      <div id="charger-loading"><div class="loader-ring"></div><div class="loader-text">CHARGEMENT…</div></div>
+      <div id="charger-list-wrap"><div id="charger-list"></div></div>
     </div>
-
   </div>
 
   <!-- MAP -->
   <div id="map-area">
     <div id="map"></div>
-
     <div id="top-pill">
       <div class="pill-item">📍 <span class="pill-val" id="pill-loc">Paris, France</span></div>
       <span class="pill-sep">|</span>
@@ -323,14 +348,10 @@
       <span class="pill-sep">|</span>
       <div class="pill-item">🔋 <span class="pill-val" id="pill-batt">78%</span></div>
     </div>
-
-    <!-- Supercharger toggle -->
     <button id="sc-toggle-btn" onclick="toggleSuperchargers()">
       <span class="dot-ind"></span>⚡ SUPERCHARGEURS
     </button>
-
     <button id="locate-btn" title="Ma position" onclick="locateMe()">◎</button>
-
     <div id="style-toggle">
       <button class="map-btn active" id="btn-dark"   onclick="setStyle('dark')">🌙</button>
       <button class="map-btn"        id="btn-bright" onclick="setStyle('bright')">☀️</button>
@@ -339,409 +360,545 @@
   </div>
 </div>
 
-<div id="loading"><div class="spinner"></div><div class="loading-text">CALCUL EN COURS…</div></div>
+<div id="loading"><div class="spinner"></div><div class="loading-text" id="loading-text">CALCUL EN COURS…</div></div>
 
 <script>
-// ── Map styles ──────────────────────────────────
+// ─── Config ───────────────────────────────────────────────────────────────────
 const STYLES = {
   dark:   'https://tiles.openfreemap.org/styles/dark',
   bright: 'https://tiles.openfreemap.org/styles/bright',
   topo:   'https://tiles.openfreemap.org/styles/liberty'
 };
+const CONSUMPTION_KWH_PER_KM = 0.20; // ~200 Wh/km moyenne Tesla
+const BATTERY_CAPACITY_KWH = 100;    // base 100 kWh (scale par autonomie)
+const MIN_ARRIVAL_PCT = 15;          // % batterie minimum à l'arrivée d'un segment
+const MARGIN_KM = 30;                // marge de sécurité en km
 
+// ─── State ────────────────────────────────────────────────────────────────────
 let map, coords = { origin:null, dest:null };
-let maxRange = 600, battery = 78;
-let routeActive = false, userMarker = null;
-let originMarker = null, destMarker = null;
+let maxRange = 600, battery = 78, chargeTargetPct = 80;
 let allChargers = [], filterStatuses = new Set(['OPEN']);
-let scVisible = false;
-let scLoaded = false;
+let scVisible = false, scLoaded = false;
+let originMarker = null, destMarker = null, stopMarkers = [];
+let userMarker = null, scPopup = null;
+let currentStops = []; // computed charger stops
 
-// ── Init MapLibre ────────────────────────────────
-map = new maplibregl.Map({
-  container: 'map',
-  style: STYLES.dark,
-  center: [2.3522, 48.8566],
-  zoom: 5,
-  pitch: 30
-});
-
+// ─── Map init ─────────────────────────────────────────────────────────────────
+map = new maplibregl.Map({ container:'map', style:STYLES.dark, center:[2.3522,48.8566], zoom:5, pitch:30 });
 map.addControl(new maplibregl.NavigationControl({ visualizePitch:true }), 'top-right');
 map.addControl(new maplibregl.ScaleControl({ unit:'metric' }), 'bottom-right');
-map.on('load', addRouteLayers);
+map.on('load', addBaseLayers);
 
-function emptyGeo() { return { type:'FeatureCollection', features:[] }; }
+function emptyGeo(){ return { type:'FeatureCollection', features:[] }; }
 
-function addRouteLayers() {
-  if (!map.getSource('route')) {
+function addBaseLayers(){
+  // Route segments (we draw each leg separately)
+  if (!map.getSource('route')){
     map.addSource('route', { type:'geojson', data:emptyGeo() });
-    map.addLayer({ id:'route-glow', type:'line', source:'route', paint:{ 'line-color':'#e82127','line-width':16,'line-opacity':0.13,'line-blur':10 } });
-    map.addLayer({ id:'route-line', type:'line', source:'route', paint:{ 'line-color':'#e82127','line-width':4,'line-opacity':0.95 }, layout:{ 'line-cap':'round','line-join':'round' } });
+    map.addLayer({ id:'route-glow', type:'line', source:'route', paint:{ 'line-color':'#e82127','line-width':16,'line-opacity':0.12,'line-blur':10 } });
+    map.addLayer({ id:'route-line', type:'line', source:'route', paint:{ 'line-color':'#e82127','line-width':4,'line-opacity':0.9 }, layout:{ 'line-cap':'round','line-join':'round' } });
   }
 }
 
-// ── Clock ──────────────────────────────────────
-function tick() {
-  const n = new Date();
-  document.getElementById('pill-time').textContent = n.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-}
-tick(); setInterval(tick, 30000);
+// ─── Clock ────────────────────────────────────────────────────────────────────
+function tick(){ document.getElementById('pill-time').textContent = new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}); }
+tick(); setInterval(tick,30000);
 
-// ── Tabs ───────────────────────────────────────
-function switchTab(t) {
-  document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active', (i===0&&t==='nav')||(i===1&&t==='chargers')));
+// ─── Tabs ─────────────────────────────────────────────────────────────────────
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active',(i===0&&t==='nav')||(i===1&&t==='chargers')));
   document.getElementById('panel-nav').classList.toggle('active', t==='nav');
   document.getElementById('panel-chargers').classList.toggle('active', t==='chargers');
-  if (t === 'chargers' && !scLoaded) loadSuperchargers();
+  if (t==='chargers' && !scLoaded) loadSuperchargers();
 }
 
-// ── Battery ────────────────────────────────────
-function selectModel(el, range) {
-  document.querySelectorAll('.v-chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-  maxRange = range;
-  updateBattery(battery);
+// ─── Battery / model ─────────────────────────────────────────────────────────
+function selectModel(el, range){
+  document.querySelectorAll('.v-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active'); maxRange = range; updateBattery(battery);
 }
-
-function updateBattery(val) {
+function updateBattery(val){
   battery = parseInt(val);
-  const km = Math.round(maxRange * battery / 100);
-  document.getElementById('bat-pct').textContent = battery + '%';
-  document.getElementById('bat-km').textContent = km + ' km';
-  document.getElementById('bat-fill').style.width = battery + '%';
-  document.getElementById('pill-batt').textContent = battery + '%';
+  const km = Math.round(maxRange*battery/100);
+  document.getElementById('bat-pct').textContent = battery+'%';
+  document.getElementById('bat-km').textContent = km+' km';
+  document.getElementById('bat-fill').style.width = battery+'%';
+  document.getElementById('pill-batt').textContent = battery+'%';
   const fill = document.getElementById('bat-fill');
-  fill.style.background = battery > 50 ? 'linear-gradient(90deg,#27ae60,#2ecc71)' :
-                          battery > 20 ? 'linear-gradient(90deg,#d35400,#f39c12)' :
-                                         'linear-gradient(90deg,#c0392b,#e82127)';
-  document.getElementById('bat-pct').style.color = battery > 50 ? 'var(--green)' : battery > 20 ? '#f39c12' : 'var(--red)';
-  if (routeActive) recalcBattStats();
+  fill.style.background = battery>50?'linear-gradient(90deg,#27ae60,#2ecc71)':battery>20?'linear-gradient(90deg,#d35400,#f39c12)':'linear-gradient(90deg,#c0392b,#e82127)';
+  document.getElementById('bat-pct').style.color = battery>50?'var(--green)':battery>20?'#f39c12':'var(--red)';
 }
+function updateChargeTarget(v){ chargeTargetPct = parseInt(v); document.getElementById('charge-target-val').textContent = v+'%'; }
+function onScAutoChange(){}
 
-// ── Geocoding ──────────────────────────────────
-let deb = {};
-async function onInput(el, f) {
-  clearTimeout(deb[f]);
-  const q = el.value.trim();
-  if (q.length < 3) { closeSug(f); return; }
-  deb[f] = setTimeout(async () => {
-    try {
-      const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=6&accept-language=fr`);
-      renderSug(f, await r.json());
-    } catch(e) {}
-  }, 300);
+// ─── Geocoding ────────────────────────────────────────────────────────────────
+let deb={};
+async function onInput(el,f){
+  clearTimeout(deb[f]); const q=el.value.trim();
+  if(q.length<3){closeSug(f);return;}
+  deb[f]=setTimeout(async()=>{
+    try{ const r=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=6&accept-language=fr`);
+    renderSug(f,await r.json()); }catch(e){}
+  },300);
 }
-
-function renderSug(f, items) {
-  const box = document.getElementById('sug-' + f);
-  if (!items.length) { box.classList.remove('open'); return; }
-  box.innerHTML = items.map(it => {
-    const p = it.display_name.split(',');
-    return `<div class="sug-item" onclick="pickSug('${f}',${it.lon},${it.lat},this)">
-      <div class="sug-name">${p[0]}</div>
-      <div class="sug-sub">${p.slice(1,3).join(',').trim()}</div>
-    </div>`;
-  }).join('');
+function renderSug(f,items){
+  const box=document.getElementById('sug-'+f);
+  if(!items.length){box.classList.remove('open');return;}
+  box.innerHTML=items.map(it=>{const p=it.display_name.split(',');return `<div class="sug-item" onclick="pickSug('${f}',${it.lon},${it.lat},this)"><div class="sug-name">${p[0]}</div><div class="sug-sub">${p.slice(1,3).join(',').trim()}</div></div>`;}).join('');
   box.classList.add('open');
 }
-
-function pickSug(f, lon, lat, el) {
-  coords[f] = [parseFloat(lon), parseFloat(lat)];
-  const name = el.querySelector('.sug-name').textContent;
-  document.getElementById('input-' + f).value = name;
-  closeSug(f);
-  if (f === 'origin') {
-    if (originMarker) originMarker.remove();
-    originMarker = new maplibregl.Marker({ color:'#44aaff' }).setLngLat(coords[f])
-      .setPopup(new maplibregl.Popup({ offset:25 }).setHTML(`<b>Départ</b><br>${name}`)).addTo(map);
-    document.getElementById('pill-loc').textContent = name;
-    map.flyTo({ center: coords[f], zoom:12, duration:800 });
+function pickSug(f,lon,lat,el){
+  coords[f]=[parseFloat(lon),parseFloat(lat)];
+  const name=el.querySelector('.sug-name').textContent;
+  document.getElementById('input-'+f).value=name; closeSug(f);
+  if(f==='origin'){
+    if(originMarker) originMarker.remove();
+    originMarker=new maplibregl.Marker({color:'#44aaff'}).setLngLat(coords[f]).setPopup(new maplibregl.Popup({offset:25}).setHTML(`<b>Départ</b><br>${name}`)).addTo(map);
+    document.getElementById('pill-loc').textContent=name;
+    map.flyTo({center:coords[f],zoom:12,duration:800});
   } else {
-    if (destMarker) destMarker.remove();
-    destMarker = new maplibregl.Marker({ color:'#e82127' }).setLngLat(coords[f])
-      .setPopup(new maplibregl.Popup({ offset:25 }).setHTML(`<b>Destination</b><br>${name}`)).addTo(map);
+    if(destMarker) destMarker.remove();
+    destMarker=new maplibregl.Marker({color:'#e82127'}).setLngLat(coords[f]).setPopup(new maplibregl.Popup({offset:25}).setHTML(`<b>Destination</b><br>${name}`)).addTo(map);
   }
 }
+function showSug(f){const b=document.getElementById('sug-'+f);if(b.innerHTML)b.classList.add('open');}
+function closeSug(f){document.getElementById('sug-'+f).classList.remove('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('.input-wrap')){closeSug('origin');closeSug('dest');}});
 
-function showSug(f) { const b = document.getElementById('sug-' + f); if (b.innerHTML) b.classList.add('open'); }
-function closeSug(f) { document.getElementById('sug-' + f).classList.remove('open'); }
-document.addEventListener('click', e => { if (!e.target.closest('.input-wrap')) { closeSug('origin'); closeSug('dest'); } });
+// ─── OSRM fetch ───────────────────────────────────────────────────────────────
+async function fetchRoute(waypoints){
+  const coords_ = waypoints.map(w=>w.join(',')).join(';');
+  const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${coords_}?overview=full&geometries=geojson&steps=false`);
+  const d = await r.json();
+  if(d.code!=='Ok') throw new Error('No route');
+  return d.routes[0];
+}
 
-// ── Route ──────────────────────────────────────
-async function calcRoute() {
-  if (!coords.origin || !coords.dest) { alert('Sélectionnez départ et destination via les suggestions.'); return; }
-  document.getElementById('loading').classList.add('show');
-  const [ox,oy] = coords.origin, [dx,dy] = coords.dest;
+// ─── Haversine distance (km) ──────────────────────────────────────────────────
+function haversine([lon1,lat1],[lon2,lat2]){
+  const R=6371, dLat=(lat2-lat1)*Math.PI/180, dLon=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+// ─── Find nearest OPEN supercharger to a point, not too far off-route ─────────
+function findBestCharger(nearPoint, routeCoords, alreadyUsed){
+  const openChargers = allChargers.filter(c=>c.status==='OPEN' && !alreadyUsed.has(c.id));
+  // Score = closeness to point + closeness to route line
+  let best=null, bestScore=Infinity;
+  for(const c of openChargers){
+    const cp=[c.gps.longitude,c.gps.latitude];
+    const distToPoint = haversine(nearPoint, cp);
+    if(distToPoint > 120) continue; // skip if > 120km away from ideal point
+    // Also check deviation from route (nearest point on route)
+    let minRouteD = Infinity;
+    const step = Math.max(1, Math.floor(routeCoords.length/200));
+    for(let i=0;i<routeCoords.length;i+=step){
+      const d=haversine(routeCoords[i],cp);
+      if(d<minRouteD) minRouteD=d;
+    }
+    if(minRouteD > 50) continue; // skip if > 50km off route
+    const score = distToPoint*0.6 + minRouteD*0.4;
+    if(score<bestScore){ bestScore=score; best=c; }
+  }
+  return best;
+}
+
+// ─── MAIN: plan stops ─────────────────────────────────────────────────────────
+async function planStops(originCoord, destCoord, routeCoords, totalDistKm){
+  const useAuto = document.getElementById('sc-auto').checked;
+  if(!useAuto || !allChargers.length) return [];
+
+  const availKm = Math.round(maxRange * battery / 100);
+  const safeRange = availKm - MARGIN_KM;
+
+  if(totalDistKm <= safeRange) return []; // no stop needed
+
+  const stops = [];
+  const usedIds = new Set();
+  let remainingKm = totalDistKm;
+  let currentKm = 0;
+  let currentBattKm = safeRange;
+  let currentCoord = originCoord;
+
+  // Interpolate position on route at a given km distance from start
+  function coordAtKm(targetKm){
+    let acc=0;
+    for(let i=1;i<routeCoords.length;i++){
+      const d=haversine(routeCoords[i-1],routeCoords[i]);
+      if(acc+d>=targetKm){
+        const frac=(targetKm-acc)/d;
+        return [
+          routeCoords[i-1][0]+(routeCoords[i][0]-routeCoords[i-1][0])*frac,
+          routeCoords[i-1][1]+(routeCoords[i][1]-routeCoords[i-1][1])*frac
+        ];
+      }
+      acc+=d;
+    }
+    return routeCoords[routeCoords.length-1];
+  }
+
+  let iterations = 0;
+  while(remainingKm > maxRange*(chargeTargetPct/100) - MARGIN_KM && iterations < 10){
+    iterations++;
+    // Ideal stop point: push as far as we can (80% of safe range from current)
+    const targetKm = currentKm + currentBattKm * 0.85;
+    const idealPoint = coordAtKm(Math.min(targetKm, currentKm + remainingKm * 0.5));
+
+    const charger = findBestCharger(idealPoint, routeCoords, usedIds);
+    if(!charger) break;
+
+    // Compute distance from current position to charger
+    const chargerCoord = [charger.gps.longitude, charger.gps.latitude];
+    const distToCharger = haversine(currentCoord, chargerCoord);
+
+    // Compute distance from charger to dest
+    const distChargerToDest = haversine(chargerCoord, destCoord);
+
+    const battAtCharger = currentBattKm - distToCharger;
+    if(battAtCharger < maxRange * (MIN_ARRIVAL_PCT/100)){
+      // Can't reach this charger safely — try closer
+      const closePoint = coordAtKm(currentKm + currentBattKm * 0.5);
+      const closeCharger = findBestCharger(closePoint, routeCoords, usedIds);
+      if(!closeCharger || closeCharger.id === charger.id) break;
+      usedIds.add(charger.id); // skip this one
+      continue;
+    }
+
+    usedIds.add(charger.id);
+    const chargeKm = Math.round(maxRange * chargeTargetPct / 100);
+
+    stops.push({
+      charger,
+      distFromPrev: Math.round(distToCharger),
+      battOnArrival: Math.round((battAtCharger / maxRange) * 100),
+      battAfterCharge: chargeTargetPct,
+      chargeKmAdded: chargeKm - Math.round(battAtCharger),
+      distToDest: Math.round(distChargerToDest)
+    });
+
+    currentCoord = chargerCoord;
+    currentKm += distToCharger;
+    remainingKm = distChargerToDest;
+    currentBattKm = chargeKm - MARGIN_KM;
+  }
+
+  return stops;
+}
+
+// ─── MAIN ROUTE CALC ──────────────────────────────────────────────────────────
+async function calcRoute(){
+  if(!coords.origin||!coords.dest){ alert('Sélectionnez départ et destination.'); return; }
+  setLoading(true,'CHARGEMENT DES DONNÉES…');
+  if(!scLoaded) await loadSuperchargers();
+
+  setLoading(true,'CALCUL DE L\'ITINÉRAIRE…');
   try {
-    const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${ox},${oy};${dx},${dy}?overview=full&geometries=geojson&steps=true`);
-    const data = await r.json();
-    if (data.code !== 'Ok') throw new Error();
-    const route = data.routes[0];
-    map.getSource('route').setData(route.geometry);
-    const cs = route.geometry.coordinates;
-    const bounds = cs.reduce((b,c) => b.extend(c), new maplibregl.LngLatBounds(cs[0],cs[0]));
-    map.fitBounds(bounds, { padding:{ top:60,bottom:80,left:60,right:60 }, duration:1000 });
-    const distKm = (route.distance/1000).toFixed(1);
-    const h = Math.floor(route.duration/3600), m = Math.floor((route.duration%3600)/60);
-    document.getElementById('s-dist').textContent = distKm + ' km';
-    document.getElementById('s-time').textContent = h > 0 ? `${h}h${String(m).padStart(2,'0')}` : `${m} min`;
-    document.getElementById('route-stats').classList.add('show');
+    // 1. Direct route to get total distance + route shape
+    const directRoute = await fetchRoute([coords.origin, coords.dest]);
+    const totalDistKm = directRoute.distance/1000;
+    const routeCoords = directRoute.geometry.coordinates;
+
+    // 2. Plan charger stops
+    setLoading(true,'OPTIMISATION DES ARRÊTS…');
+    const stops = await planStops(coords.origin, coords.dest, routeCoords, totalDistKm);
+    currentStops = stops;
+
+    // 3. Fetch full route with waypoints
+    let finalRoute = directRoute;
+    let legs = [{ distKm: totalDistKm, durationSec: directRoute.duration, geometry: directRoute.geometry }];
+
+    if(stops.length > 0){
+      const waypoints = [coords.origin, ...stops.map(s=>[s.charger.gps.longitude, s.charger.gps.latitude]), coords.dest];
+      try {
+        const multi = await fetchRoute(waypoints);
+        finalRoute = multi;
+        // Split legs info (OSRM legs)
+        legs = (multi.legs || [{ distance: multi.distance, duration: multi.duration }]).map(l => ({
+          distKm: l.distance/1000, durationSec: l.duration
+        }));
+        legs[legs.length-1].geometry = multi.geometry; // use full geometry for display
+      } catch(e){ /* fallback to direct */ }
+    }
+
+    // 4. Draw route on map
+    map.getSource('route').setData(finalRoute.geometry);
+    const cs2 = finalRoute.geometry.coordinates;
+    const bounds = cs2.reduce((b,c)=>b.extend(c), new maplibregl.LngLatBounds(cs2[0],cs2[0]));
+    map.fitBounds(bounds,{ padding:{top:60,bottom:80,left:60,right:60}, duration:1000 });
+
+    // 5. Draw stop markers
+    stopMarkers.forEach(m=>m.remove()); stopMarkers=[];
+    stops.forEach((stop,i)=>{
+      const el=document.createElement('div');
+      el.style.cssText='width:28px;height:28px;background:#f39c12;border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 0 12px rgba(243,156,18,.7);cursor:pointer;';
+      el.textContent='⚡';
+      const m = new maplibregl.Marker({element:el})
+        .setLngLat([stop.charger.gps.longitude,stop.charger.gps.latitude])
+        .setPopup(new maplibregl.Popup({offset:20}).setHTML(`
+          <div style="line-height:1.8">
+            <b style="font-size:14px">⚡ Arrêt ${i+1} — ${stop.charger.name}</b><br>
+            <span style="color:var(--muted2)">Batterie à l'arrivée : </span><b style="color:var(--orange)">${stop.battOnArrival}%</b><br>
+            <span style="color:var(--muted2)">Recharge jusqu'à : </span><b style="color:var(--green)">${stop.battAfterCharge}%</b><br>
+            <span style="color:var(--muted2)">Bornes : </span><b>${stop.charger.stallCount||'?'}</b>
+            ${stop.charger.powerKilowatt?`<br><span style="color:var(--muted2)">Puissance : </span><b style="color:var(--blue)">${stop.charger.powerKilowatt} kW</b>`:''}
+          </div>`))
+        .addTo(map);
+      stopMarkers.push(m);
+    });
+
+    // 6. Compute final battery
+    const totalDist = finalRoute.distance/1000;
+    const totalDur = finalRoute.duration;
+    let finalBattPct;
+    if(stops.length===0){
+      finalBattPct = Math.round(battery - (totalDist/maxRange)*100);
+    } else {
+      const lastStop = stops[stops.length-1];
+      finalBattPct = Math.round(lastStop.battAfterCharge - (lastStop.distToDest/maxRange)*100);
+    }
+    finalBattPct = Math.max(0, finalBattPct);
+
+    const h=Math.floor(totalDur/3600), m=Math.floor((totalDur%3600)/60);
+
+    // 7. Summary
+    document.getElementById('s-dist').textContent = totalDist.toFixed(0)+' km';
+    document.getElementById('s-time').textContent = h>0?`${h}h${String(m).padStart(2,'0')}`:`${m} min`;
+    document.getElementById('s-stops').textContent = stops.length || '0';
+    document.getElementById('s-batt').textContent = finalBattPct+'%';
+    document.getElementById('s-batt').className = 'scard-val '+(finalBattPct<0?'bad':finalBattPct<20?'warn':'ok');
+    document.getElementById('route-summary').classList.add('show');
     document.getElementById('reset-btn').classList.add('show');
-    routeActive = true;
-    recalcBattStats(parseFloat(distKm));
-    renderSteps(route.legs[0].steps);
-  } catch(e) { alert('Impossible de calculer l\'itinéraire.'); }
-  finally { document.getElementById('loading').classList.remove('show'); }
+
+    // 8. Render timeline
+    renderTimeline(stops, totalDist, totalDur, finalBattPct);
+
+  } catch(e){ console.error(e); alert('Impossible de calculer l\'itinéraire.'); }
+  finally { setLoading(false); }
 }
 
-function recalcBattStats(d) {
-  if (d === undefined) d = parseFloat(document.getElementById('s-dist').textContent);
-  const pct = Math.round((Math.round(maxRange*battery/100) - d) / maxRange * 100);
-  const el = document.getElementById('s-batt');
-  el.textContent = Math.max(0,pct) + '%';
-  el.className = 'stat-val ' + (pct < 0 ? 'bad' : pct < 20 ? 'warn' : 'ok');
-  document.getElementById('charge-warn').classList.toggle('show', pct < 10);
-}
+// ─── Timeline render ──────────────────────────────────────────────────────────
+function renderTimeline(stops, totalDistKm, totalDurSec, finalBattPct){
+  document.getElementById('hint').style.display='none';
+  document.getElementById('tl-content').style.display='block';
 
-const ICONS = { depart:'🚗',arrive:'📍','turn-right':'→','turn-left':'←','turn-slight right':'↗','turn-slight left':'↖','turn-sharp right':'⇒','turn-sharp left':'⇐',uturn:'↩',roundabout:'🔄',merge:'⤵',straight:'↑',continue:'↑' };
-const FR_DIR = { right:'à droite',left:'à gauche','slight right':'légèrement à droite','slight left':'légèrement à gauche','sharp right':'fortement à droite','sharp left':'fortement à gauche',uturn:'demi-tour',straight:'tout droit' };
+  const origin = document.getElementById('input-origin').value;
+  const dest   = document.getElementById('input-dest').value;
+  const h=Math.floor(totalDurSec/3600), m=Math.floor((totalDurSec%3600)/60);
+  const timeStr = h>0?`${h}h${String(m).padStart(2,'0')}`:`${m} min`;
 
-function renderSteps(steps) {
-  document.getElementById('steps-title').textContent = steps.length + ' étapes';
-  document.getElementById('steps-list').innerHTML = steps.map((s,i) => {
-    const d = s.distance>=1000 ? (s.distance/1000).toFixed(1)+' km' : Math.round(s.distance)+' m';
-    const n = s.name||s.ref||'', mod = s.maneuver.modifier||'';
-    const icon = ICONS[`${s.maneuver.type}-${mod}`]||ICONS[`${s.maneuver.type} ${mod}`]||ICONS[s.maneuver.type]||'•';
-    let inst = s.maneuver.type==='depart' ? `Départ${n?' : '+n:''}` :
-               s.maneuver.type==='arrive' ? `Arrivée${n?' : '+n:''}` :
-               mod ? `Tourner ${FR_DIR[mod]||mod}${n?' sur '+n:''}` : `Continuer${n?' sur '+n:''}`;
-    return `<div class="step" style="animation-delay:${i*25}ms">
-      <div class="step-icon">${icon}</div>
-      <div><div class="step-text">${inst}</div><div class="step-dist">${d}</div></div>
-    </div>`;
-  }).join('');
-}
-
-function resetRoute() {
-  coords = { origin:null, dest:null }; routeActive = false;
-  ['input-origin','input-dest'].forEach(id => document.getElementById(id).value='');
-  document.getElementById('route-stats').classList.remove('show');
-  document.getElementById('reset-btn').classList.remove('show');
-  document.getElementById('steps-list').innerHTML='';
-  document.getElementById('steps-title').textContent='Entrez un itinéraire pour commencer';
-  if (map.getSource('route')) map.getSource('route').setData(emptyGeo());
-  if (originMarker) { originMarker.remove(); originMarker=null; }
-  if (destMarker) { destMarker.remove(); destMarker=null; }
-}
-
-// ── SUPERCHARGERS ──────────────────────────────
-let scPopup = null;
-
-async function loadSuperchargers() {
-  scLoaded = true;
-  try {
-    const r = await fetch('https://supercharge.info/service/supercharge/allSites');
-    allChargers = await r.json();
-    updateChargerStats();
-    renderChargerList();
-    buildMapLayers();
-    document.getElementById('charger-loading').style.display = 'none';
-  } catch(e) {
-    document.getElementById('charger-loading').innerHTML = '<div class="loader-text" style="color:#f88">Erreur de chargement</div>';
+  // Estimate time to charge: Tesla V3 ~250kW, older ~150kW
+  function chargeTime(stop){
+    const kw = stop.charger.powerKilowatt || 150;
+    const kwNeeded = (stop.chargeKmAdded / maxRange) * 100; // rough %
+    const kwToAdd = (stop.battAfterCharge - stop.battOnArrival) / 100 * BATTERY_CAPACITY_KWH;
+    const mins = Math.round((kwToAdd / kw) * 60);
+    return mins;
   }
+
+  let totalChargeMins = stops.reduce((s,st)=>s+chargeTime(st),0);
+  document.getElementById('tl-title').textContent =
+    `${stops.length} arrêt${stops.length>1?'s':''} · ${timeStr} de route${totalChargeMins>0?' · ~'+totalChargeMins+' min de recharge':''}`;
+
+  let html='';
+  let cumDist=0, prevBatt=battery;
+
+  // START
+  html+=`<div class="segment">
+    <div class="seg-drive">
+      <div class="seg-line"><div class="seg-dot origin"></div><div class="seg-vbar"></div></div>
+      <div class="seg-info">
+        <div class="seg-place">📍 ${origin}</div>
+        <div class="seg-meta">Batterie : <b style="color:var(--green)">${battery}%</b> · ${Math.round(maxRange*battery/100)} km d'autonomie</div>
+      </div>
+    </div>
+  </div>`;
+
+  // Each stop
+  stops.forEach((stop,i)=>{
+    const d=stop.distFromPrev, battLost=Math.round((d/maxRange)*100);
+    const chargeMins=chargeTime(stop);
+    cumDist+=d;
+
+    html+=`
+    <div class="drive-block">
+      <div class="drive-bar-col"><div class="drive-vbar"></div></div>
+      <div class="drive-info">
+        <div class="drive-pill">🛣 <b>${d} km</b></div>
+        <div class="batt-pill" style="color:var(--orange)">-${battLost}%</div>
+      </div>
+    </div>
+    <div class="charger-stop">
+      <div class="cs-header">
+        <span class="cs-icon">⚡</span>
+        <span class="cs-name">${stop.charger.name}</span>
+        <span class="cs-badge">ARRÊT ${i+1}</span>
+      </div>
+      <div class="cs-grid">
+        <div class="cs-stat"><div class="cs-stat-val" style="color:var(--orange)">${stop.battOnArrival}%</div><div class="cs-stat-lbl">Arrivée</div></div>
+        <div class="cs-stat"><div class="cs-stat-val" style="color:var(--green)">${stop.battAfterCharge}%</div><div class="cs-stat-lbl">Départ</div></div>
+        <div class="cs-stat"><div class="cs-stat-val">~${chargeMins} min</div><div class="cs-stat-lbl">Recharge</div></div>
+      </div>
+      <div style="margin-top:6px;font-size:11px;color:var(--muted2)">${stop.charger.address?.city||''} · ${stop.charger.stallCount||'?'} bornes${stop.charger.powerKilowatt?' · '+stop.charger.powerKilowatt+' kW max':''}</div>
+    </div>`;
+    prevBatt=stop.battAfterCharge;
+  });
+
+  // Last leg
+  const lastDist = stops.length>0 ? stops[stops.length-1].distToDest : totalDistKm;
+  const lastBattLost = Math.round((lastDist/maxRange)*100);
+  html+=`
+  <div class="drive-block">
+    <div class="drive-bar-col"><div class="drive-vbar"></div></div>
+    <div class="drive-info">
+      <div class="drive-pill">🛣 <b>${Math.round(lastDist)} km</b></div>
+      <div class="batt-pill" style="color:var(--orange)">-${lastBattLost}%</div>
+    </div>
+  </div>
+  <div class="segment">
+    <div class="seg-drive">
+      <div class="seg-line"><div class="seg-dot dest"></div></div>
+      <div class="seg-info">
+        <div class="seg-place">🏁 ${dest}</div>
+        <div class="seg-meta">Batterie à l'arrivée : <b style="color:${finalBattPct<20?'var(--orange)':'var(--green)'}">${finalBattPct}%</b>${finalBattPct<15?' ⚠️ Recharge recommandée':''}</div>
+      </div>
+    </div>
+  </div>`;
+
+  document.getElementById('tl-list').innerHTML=html;
 }
 
-function updateChargerStats() {
-  const open = allChargers.filter(c => c.status === 'OPEN');
-  const stalls = open.reduce((s,c) => s + (c.stallCount||0), 0);
-  document.getElementById('cs-total').textContent = allChargers.length.toLocaleString('fr');
-  document.getElementById('cs-open').textContent = open.length.toLocaleString('fr');
-  document.getElementById('cs-stalls').textContent = stalls.toLocaleString('fr');
+// ─── Reset ────────────────────────────────────────────────────────────────────
+function resetRoute(){
+  coords={origin:null,dest:null}; currentStops=[];
+  ['input-origin','input-dest'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('route-summary').classList.remove('show');
+  document.getElementById('reset-btn').classList.remove('show');
+  document.getElementById('tl-list').innerHTML='';
+  document.getElementById('tl-content').style.display='none';
+  document.getElementById('hint').style.display='block';
+  if(map.getSource('route')) map.getSource('route').setData(emptyGeo());
+  if(originMarker){originMarker.remove();originMarker=null;}
+  if(destMarker){destMarker.remove();destMarker=null;}
+  stopMarkers.forEach(m=>m.remove()); stopMarkers=[];
 }
 
-function toggleFilter(el) {
-  const s = el.dataset.status;
-  el.classList.toggle('on');
-  if (filterStatuses.has(s)) filterStatuses.delete(s); else filterStatuses.add(s);
-  renderChargerList();
-  if (scVisible) updateMapChargers();
+// ─── Superchargers ────────────────────────────────────────────────────────────
+async function loadSuperchargers(){
+  scLoaded=true;
+  document.getElementById('charger-loading').style.display='block';
+  try {
+    const r=await fetch('https://supercharge.info/service/supercharge/allSites');
+    allChargers=await r.json();
+    updateChargerStats(); renderChargerList(); buildScMapLayers();
+    document.getElementById('charger-loading').style.display='none';
+  } catch(e){ document.getElementById('charger-loading').innerHTML='<div class="loader-text" style="color:#f88">Erreur de chargement</div>'; }
 }
 
-function filterChargers() {
-  renderChargerList();
-  if (scVisible) updateMapChargers();
+function updateChargerStats(){
+  const open=allChargers.filter(c=>c.status==='OPEN');
+  document.getElementById('cs-total').textContent=allChargers.length.toLocaleString('fr');
+  document.getElementById('cs-open').textContent=open.length.toLocaleString('fr');
+  document.getElementById('cs-stalls').textContent=open.reduce((s,c)=>s+(c.stallCount||0),0).toLocaleString('fr');
 }
+function toggleFilter(el){
+  const s=el.dataset.status; el.classList.toggle('on');
+  if(filterStatuses.has(s)) filterStatuses.delete(s); else filterStatuses.add(s);
+  renderChargerList(); if(scVisible) updateScMapData();
+}
+function filterChargers(){ renderChargerList(); if(scVisible) updateScMapData(); }
 
-function getFilteredChargers() {
-  const q = document.getElementById('charger-search').value.trim().toLowerCase();
-  return allChargers.filter(c => {
-    if (!filterStatuses.has(c.status) && c.status !== 'OPEN') {
-      if (!filterStatuses.has(c.status)) return false;
-    } else if (!filterStatuses.has(c.status)) return false;
-    if (q && !c.name.toLowerCase().includes(q) &&
-        !(c.address?.city||'').toLowerCase().includes(q) &&
-        !(c.address?.country||'').toLowerCase().includes(q)) return false;
+function getFiltered(){
+  const q=(document.getElementById('charger-search').value||'').trim().toLowerCase();
+  return allChargers.filter(c=>{
+    if(!filterStatuses.has(c.status)) return false;
+    if(q&&!c.name.toLowerCase().includes(q)&&!(c.address?.city||'').toLowerCase().includes(q)&&!(c.address?.country||'').toLowerCase().includes(q)) return false;
     return true;
   });
 }
 
-function renderChargerList() {
-  if (!allChargers.length) return;
-  const items = getFilteredChargers().slice(0, 200);
-  const dotClass = s => s==='OPEN'?'open':s==='CONSTRUCTION'?'constr':'closed';
-  document.getElementById('charger-list').innerHTML = items.map(c => `
-    <div class="charger-item" onclick="flyToCharger(${c.gps.latitude},${c.gps.longitude},'${escHtml(c.name)}','${c.status}',${c.stallCount||0},${c.powerKilowatt||0})">
-      <div class="charger-dot ${dotClass(c.status)}"></div>
-      <div style="flex:1">
-        <div class="charger-name">${escHtml(c.name)}</div>
-        <div class="charger-meta">${c.address?.city||''}, ${c.address?.country||''}</div>
-      </div>
-      <div class="charger-stalls">${c.stallCount||'?'}<br><span style="font-size:9px;letter-spacing:1px">bornes</span></div>
-    </div>
-  `).join('') + (getFilteredChargers().length > 200 ? `<div style="padding:12px 22px;font-size:11px;color:var(--muted);text-align:center">${getFilteredChargers().length - 200} résultats supplémentaires — affinez la recherche</div>` : '');
+function renderChargerList(){
+  if(!allChargers.length) return;
+  const items=getFiltered().slice(0,200);
+  const dc=s=>s==='OPEN'?'open':s==='CONSTRUCTION'?'constr':'closed';
+  document.getElementById('charger-list').innerHTML=items.map(c=>`
+    <div class="charger-item" onclick="flyToCharger(${c.gps.latitude},${c.gps.longitude},'${esc(c.name)}','${c.status}',${c.stallCount||0},${c.powerKilowatt||0})">
+      <div class="charger-dot ${dc(c.status)}"></div>
+      <div style="flex:1"><div class="charger-name">${esc(c.name)}</div><div class="charger-meta">${c.address?.city||''}, ${c.address?.country||''}</div></div>
+      <div class="charger-stalls">${c.stallCount||'?'}<br><span style="font-size:9px">bornes</span></div>
+    </div>`).join('')+(getFiltered().length>200?`<div style="padding:12px 22px;font-size:11px;color:var(--muted);text-align:center">${getFiltered().length-200} autres — affinez la recherche</div>`:'');
 }
 
-function escHtml(s) { return (s||'').replace(/'/g, "\\'").replace(/"/g,'&quot;'); }
+function esc(s){ return (s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
 
-function flyToCharger(lat, lng, name, status, stalls, kw) {
-  switchTab('nav');
-  map.flyTo({ center:[lng,lat], zoom:14, duration:1000 });
-  if (scPopup) scPopup.remove();
-  const statusLabel = status==='OPEN'?'<span style="color:var(--green)">● Ouvert</span>':
-                      status==='CONSTRUCTION'?'<span style="color:var(--orange)">● En construction</span>':
-                      '<span style="color:var(--red)">● Fermé</span>';
-  scPopup = new maplibregl.Popup({ offset:20 })
-    .setLngLat([lng,lat])
-    .setHTML(`
-      <div style="line-height:1.7">
-        <b style="font-size:14px">⚡ ${name}</b><br>
-        ${statusLabel}<br>
-        <span style="color:var(--muted2)">Bornes : <b style="color:var(--text)">${stalls||'?'}</b></span><br>
-        ${kw ? `<span style="color:var(--muted2)">Puissance max : <b style="color:var(--blue)">${kw} kW</b></span>` : ''}
-      </div>`)
-    .addTo(map);
+function flyToCharger(lat,lng,name,status,stalls,kw){
+  switchTab('nav'); map.flyTo({center:[lng,lat],zoom:14,duration:1000});
+  if(scPopup) scPopup.remove();
+  const sl=status==='OPEN'?`<span style="color:var(--green)">● Ouvert</span>`:status==='CONSTRUCTION'?`<span style="color:var(--orange)">● Construction</span>`:`<span style="color:var(--red)">● Fermé</span>`;
+  scPopup=new maplibregl.Popup({offset:20}).setLngLat([lng,lat]).setHTML(`<div style="line-height:1.8"><b style="font-size:14px">⚡ ${name}</b><br>${sl}<br><span style="color:var(--muted2)">Bornes : <b>${stalls||'?'}</b></span>${kw?`<br><span style="color:var(--muted2)">Puissance : <b style="color:var(--blue)">${kw} kW</b></span>`:''}</div>`).addTo(map);
 }
 
-// ── Map SC layers ──────────────────────────────
-function buildMapLayers() {
-  const geo = buildGeoJSON(allChargers);
-
-  if (!map.getSource('superchargers')) {
-    map.addSource('superchargers', { type:'geojson', data:geo, cluster:true, clusterMaxZoom:11, clusterRadius:50 });
-
-    // Clusters circles
-    map.addLayer({ id:'sc-clusters', type:'circle', source:'superchargers', filter:['has','point_count'],
-      paint: { 'circle-color':['step',['get','point_count'],'#e82127',10,'#c0392b',50,'#922b21'], 'circle-radius':['step',['get','point_count'],16,10,22,50,28], 'circle-opacity':0.85, 'circle-stroke-width':2, 'circle-stroke-color':'rgba(255,255,255,0.15)' }
-    });
-
-    // Cluster count labels
-    map.addLayer({ id:'sc-cluster-count', type:'symbol', source:'superchargers', filter:['has','point_count'],
-      layout: { 'text-field':['get','point_count_abbreviated'], 'text-font':['Open Sans Bold','Arial Unicode MS Bold'], 'text-size':13 },
-      paint: { 'text-color':'#fff' }
-    });
-
-    // Single points
-    map.addLayer({ id:'sc-points', type:'circle', source:'superchargers', filter:['!',['has','point_count']],
-      paint: { 'circle-color':['match',['get','status'],'OPEN','#2ecc71','CONSTRUCTION','#f39c12','#888'], 'circle-radius':7, 'circle-stroke-width':2, 'circle-stroke-color':'rgba(0,0,0,0.5)', 'circle-opacity':0.9 }
-    });
-  } else {
-    map.getSource('superchargers').setData(geo);
-  }
-
-  // Click cluster → zoom
-  map.on('click', 'sc-clusters', e => {
-    const f = map.queryRenderedFeatures(e.point, { layers:['sc-clusters'] })[0];
-    map.getSource('superchargers').getClusterExpansionZoom(f.properties.cluster_id, (err,zoom) => {
-      if (!err) map.flyTo({ center: f.geometry.coordinates, zoom, duration:600 });
-    });
-  });
-
-  // Click single point → popup
-  map.on('click', 'sc-points', e => {
-    const p = e.features[0].properties;
-    const [lng,lat] = e.features[0].geometry.coordinates;
-    if (scPopup) scPopup.remove();
-    const statusLabel = p.status==='OPEN'?'<span style="color:var(--green)">● Ouvert</span>':
-                        p.status==='CONSTRUCTION'?'<span style="color:var(--orange)">● En construction</span>':
-                        '<span style="color:var(--red)">● Fermé</span>';
-    scPopup = new maplibregl.Popup({ offset:14 })
-      .setLngLat([lng,lat])
-      .setHTML(`<div style="line-height:1.8"><b style="font-size:14px">⚡ ${p.name}</b><br>${statusLabel}<br>
-        <span style="color:var(--muted2)">Bornes : <b style="color:var(--text)">${p.stalls||'?'}</b></span><br>
-        ${p.kw ? `<span style="color:var(--muted2)">Puissance : <b style="color:var(--blue)">${p.kw} kW</b></span>` : ''}
-        </div>`)
-      .addTo(map);
-  });
-
-  // Cursors
-  ['sc-clusters','sc-points'].forEach(l => {
-    map.on('mouseenter', l, () => { map.getCanvas().style.cursor = 'pointer'; });
-    map.on('mouseleave', l, () => { map.getCanvas().style.cursor = ''; });
-  });
+function scGeoJSON(list){
+  return { type:'FeatureCollection', features:list.map(c=>({ type:'Feature', geometry:{type:'Point',coordinates:[c.gps.longitude,c.gps.latitude]}, properties:{name:c.name,status:c.status,stalls:c.stallCount||0,kw:c.powerKilowatt||0,city:c.address?.city||''} })) };
 }
 
-function buildGeoJSON(chargers) {
-  return { type:'FeatureCollection', features: chargers.map(c => ({
-    type:'Feature',
-    geometry: { type:'Point', coordinates:[c.gps.longitude, c.gps.latitude] },
-    properties: { name:c.name, status:c.status, stalls:c.stallCount||0, kw:c.powerKilowatt||0, city:c.address?.city||'' }
-  })) };
-}
-
-function updateMapChargers() {
-  if (!map.getSource('superchargers')) return;
-  map.getSource('superchargers').setData(buildGeoJSON(getFilteredChargers()));
-}
-
-function toggleSuperchargers() {
-  const btn = document.getElementById('sc-toggle-btn');
-  scVisible = !scVisible;
-  btn.classList.toggle('active', scVisible);
-
-  const layers = ['sc-clusters','sc-cluster-count','sc-points'];
-  const vis = scVisible ? 'visible' : 'none';
-
-  if (scVisible && !scLoaded) {
-    loadSuperchargers().then(() => {
-      layers.forEach(l => { if (map.getLayer(l)) map.setLayoutProperty(l, 'visibility', 'visible'); });
+function buildScMapLayers(){
+  if(!map.getSource('sc')){
+    map.addSource('sc',{ type:'geojson', data:scGeoJSON(allChargers), cluster:true, clusterMaxZoom:11, clusterRadius:50 });
+    map.addLayer({ id:'sc-clusters',type:'circle',source:'sc',filter:['has','point_count'],paint:{ 'circle-color':['step',['get','point_count'],'#e82127',10,'#c0392b',50,'#922b21'],'circle-radius':['step',['get','point_count'],16,10,22,50,28],'circle-opacity':0.85,'circle-stroke-width':2,'circle-stroke-color':'rgba(255,255,255,0.15)' } });
+    map.addLayer({ id:'sc-count',type:'symbol',source:'sc',filter:['has','point_count'],layout:{ 'text-field':['get','point_count_abbreviated'],'text-font':['Open Sans Bold','Arial Unicode MS Bold'],'text-size':13 },paint:{'text-color':'#fff'} });
+    map.addLayer({ id:'sc-pts',type:'circle',source:'sc',filter:['!',['has','point_count']],paint:{ 'circle-color':['match',['get','status'],'OPEN','#2ecc71','CONSTRUCTION','#f39c12','#888'],'circle-radius':7,'circle-stroke-width':2,'circle-stroke-color':'rgba(0,0,0,0.5)','circle-opacity':0.9 } });
+    // Hide by default
+    ['sc-clusters','sc-count','sc-pts'].forEach(l=>map.setLayoutProperty(l,'visibility','none'));
+    // Events
+    map.on('click','sc-clusters',e=>{
+      const f=map.queryRenderedFeatures(e.point,{layers:['sc-clusters']})[0];
+      map.getSource('sc').getClusterExpansionZoom(f.properties.cluster_id,(err,zoom)=>{ if(!err) map.flyTo({center:f.geometry.coordinates,zoom,duration:600}); });
     });
-  } else {
-    layers.forEach(l => { if (map.getLayer(l)) map.setLayoutProperty(l, 'visibility', vis); });
+    map.on('click','sc-pts',e=>{
+      const p=e.features[0].properties; const [lng,lat]=e.features[0].geometry.coordinates;
+      if(scPopup) scPopup.remove();
+      const sl=p.status==='OPEN'?`<span style="color:var(--green)">● Ouvert</span>`:p.status==='CONSTRUCTION'?`<span style="color:var(--orange)">● Construction</span>`:`<span style="color:var(--red)">● Fermé</span>`;
+      scPopup=new maplibregl.Popup({offset:14}).setLngLat([lng,lat]).setHTML(`<div style="line-height:1.8"><b style="font-size:14px">⚡ ${p.name}</b><br>${sl}<br><span style="color:var(--muted2)">Bornes : <b>${p.stalls||'?'}</b></span>${p.kw?`<br><span style="color:var(--muted2)">Puissance : <b style="color:var(--blue)">${p.kw} kW</b></span>`:''}</div>`).addTo(map);
+    });
+    ['sc-clusters','sc-pts'].forEach(l=>{ map.on('mouseenter',l,()=>map.getCanvas().style.cursor='pointer'); map.on('mouseleave',l,()=>map.getCanvas().style.cursor=''); });
   }
 }
 
-// ── Locate ─────────────────────────────────────
-function locateMe() {
-  if (!navigator.geolocation) return;
-  navigator.geolocation.getCurrentPosition(pos => {
-    const {longitude:lng, latitude:lat} = pos.coords;
-    map.flyTo({ center:[lng,lat], zoom:13, duration:1000 });
-    if (userMarker) userMarker.remove();
-    const el = document.createElement('div');
-    el.style.cssText = 'width:14px;height:14px;background:#44aaff;border:2px solid #fff;border-radius:50%;box-shadow:0 0 14px rgba(68,170,255,.8)';
-    userMarker = new maplibregl.Marker({ element:el }).setLngLat([lng,lat])
-      .setPopup(new maplibregl.Popup({ offset:20 }).setHTML('<b>Ma position</b>')).addTo(map);
-    if (!coords.origin) {
-      coords.origin = [lng,lat];
-      document.getElementById('input-origin').value = 'Ma position';
-      document.getElementById('pill-loc').textContent = 'Ma position';
-    }
-  }, () => alert('Géolocalisation non disponible.'));
+function updateScMapData(){ if(map.getSource('sc')) map.getSource('sc').setData(scGeoJSON(getFiltered())); }
+
+function toggleSuperchargers(){
+  const btn=document.getElementById('sc-toggle-btn');
+  scVisible=!scVisible; btn.classList.toggle('active',scVisible);
+  const vis=scVisible?'visible':'none';
+  if(scVisible&&!scLoaded){ loadSuperchargers().then(()=>{ ['sc-clusters','sc-count','sc-pts'].forEach(l=>{if(map.getLayer(l))map.setLayoutProperty(l,'visibility','visible');}); }); }
+  else { ['sc-clusters','sc-count','sc-pts'].forEach(l=>{if(map.getLayer(l))map.setLayoutProperty(l,'visibility',vis);}); }
 }
 
-// ── Style ──────────────────────────────────────
-function setStyle(s) {
-  document.querySelectorAll('.map-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('btn-' + s).classList.add('active');
+// ─── Locate / Style ───────────────────────────────────────────────────────────
+function locateMe(){
+  if(!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const{longitude:lng,latitude:lat}=pos.coords;
+    map.flyTo({center:[lng,lat],zoom:13,duration:1000});
+    if(userMarker) userMarker.remove();
+    const el=document.createElement('div');
+    el.style.cssText='width:14px;height:14px;background:#44aaff;border:2px solid #fff;border-radius:50%;box-shadow:0 0 14px rgba(68,170,255,.8)';
+    userMarker=new maplibregl.Marker({element:el}).setLngLat([lng,lat]).setPopup(new maplibregl.Popup({offset:20}).setHTML('<b>Ma position</b>')).addTo(map);
+    if(!coords.origin){ coords.origin=[lng,lat]; document.getElementById('input-origin').value='Ma position'; document.getElementById('pill-loc').textContent='Ma position'; }
+  },()=>alert('Géolocalisation non disponible.'));
+}
+
+function setStyle(s){
+  document.querySelectorAll('.map-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('btn-'+s).classList.add('active');
   map.setStyle(STYLES[s]);
-  map.once('styledata', () => {
-    addRouteLayers();
-    if (scLoaded) buildMapLayers();
-    // Restore route
-    if (routeActive && map.getSource('route')) {
-      // route will be empty after style reload — acceptable
-    }
-  });
+  map.once('styledata',()=>{ addBaseLayers(); if(scLoaded) buildScMapLayers(); });
+}
+
+function setLoading(on,txt='CALCUL EN COURS…'){
+  document.getElementById('loading').classList.toggle('show',on);
+  document.getElementById('loading-text').textContent=txt;
 }
 </script>
 </body>
