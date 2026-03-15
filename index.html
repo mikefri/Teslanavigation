@@ -1795,109 +1795,186 @@ function setLoading(on,txt='CALCUL EN COURS…'){
   document.getElementById('loading-text').textContent=txt;
 }
 
+function showToastError(msg){
+  // Toast discret en bas — ne bloque pas l'UI
+  let t = document.getElementById('_err-toast');
+  if(!t){
+    t = document.createElement('div');
+    t.id = '_err-toast';
+    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(30,30,30,.92);color:#fff;font-size:12px;padding:9px 18px;border-radius:20px;z-index:9999;pointer-events:none;transition:opacity .4s;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.3)';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => t.style.opacity = '0', 3500);
+}
+
 // ════════════════════════════════════════════════════════════════
 //  SYSTÈME RADARS — OpenStreetMap Overpass API
 // ════════════════════════════════════════════════════════════════
 let radarVisible  = false;
 let radarLoaded   = false;
-let allRadars     = [];          // [{id,type,lat,lng,maxspeed,name}]
-let radarMarkers  = [];          // maplibregl.Marker[]
-let radarAlertActive = false;
+let allRadars     = [];
+let radarMarkers  = [];
 let lastAlertedRadarId = null;
 let radarAlertTimer = null;
 let lastRadarBeepTime = 0;
-const RADAR_ALERT_DIST_M  = 400;   // alerte à X m
-const RADAR_DISMISS_DIST_M = 100;  // efface alerte une fois passé
+const RADAR_ALERT_DIST_M   = 400;
+const RADAR_DISMISS_DIST_M = 150;
 
-// Types de radars OSM → config affichage
 const RADAR_TYPES = {
-  'speed'        : { label:'Radar fixe',          icon:'🚨', color:'#cc1a1f', stripe:'#cc1a1f' },
-  'red_light'    : { label:'Radar feu rouge',     icon:'🚦', color:'#c97c10', stripe:'#c97c10' },
-  'average_speed': { label:'Radar de tronçon',    icon:'📏', color:'#7c4bc2', stripe:'#7c4bc2' },
-  'mobile'       : { label:'Radar mobile',        icon:'🚐', color:'#1a7fd4', stripe:'#1a7fd4' },
-  'unknown'      : { label:'Contrôle vitesse',    icon:'📷', color:'#888',    stripe:'#888'    },
+  'speed'        : { label:'Radar fixe',         icon:'🚨', color:'#cc1a1f' },
+  'red_light'    : { label:'Radar feu rouge',    icon:'🚦', color:'#c97c10' },
+  'average_speed': { label:'Radar de tronçon',   icon:'📏', color:'#7c4bc2' },
+  'mobile'       : { label:'Radar mobile',       icon:'🚐', color:'#1a7fd4' },
+  'unknown'      : { label:'Contrôle vitesse',   icon:'📷', color:'#888'    },
 };
 
 function getRadarType(tags){
-  const t = tags['enforcement'] || tags['highway:enforcement'] || '';
-  if(t.includes('average_speed') || t.includes('section')) return 'average_speed';
-  if(t.includes('red_light'))   return 'red_light';
-  if(t.includes('mobile'))      return 'mobile';
-  if(t.includes('speed') || tags['maxspeed']) return 'speed';
+  const t = (tags['enforcement'] || tags['camera:type'] || tags['highway:enforcement'] || '').toLowerCase();
+  if(t.includes('average') || t.includes('section')) return 'average_speed';
+  if(t.includes('red_light')) return 'red_light';
+  if(t.includes('mobile'))    return 'mobile';
+  if(t.includes('speed') || tags['maxspeed'] || tags['highway']==='speed_camera') return 'speed';
   return 'unknown';
 }
 
-// Charge les radars via Overpass dans la bbox courante (France étendue par défaut)
+// Charge les radars dans la bbox visible de la carte
 async function loadRadars(){
   radarLoaded = true;
-  try {
-    // Requête Overpass : tous les highway=speed_camera dans la bbox Europe/FR
-    const query = `[out:json][timeout:30];
-(
-  node["highway"="speed_camera"](42.0,  -5.5, 51.5, 10.0);
-  node["enforcement"="speed"](42.0,    -5.5, 51.5, 10.0);
-  node["enforcement"="red_light"](42.0,-5.5, 51.5, 10.0);
-  node["enforcement"="average_speed"](42.0,-5.5,51.5,10.0);
-);
-out body;`;
-    const resp = await fetch('https://overpass-api.de/api/interpreter', {
-      method:'POST',
-      body:'data='+encodeURIComponent(query)
-    });
-    const data = await resp.json();
-    allRadars = (data.elements || []).map(el => {
-      const type = getRadarType(el.tags || {});
-      const speed = parseInt(el.tags?.maxspeed) || null;
-      return {
-        id    : el.id,
-        type,
-        lat   : el.lat,
-        lng   : el.lon,
-        speed,
-        name  : el.tags?.name || el.tags?.['name:fr'] || '',
-        tags  : el.tags || {}
-      };
-    });
-    renderRadarMarkers();
-  } catch(e) {
-    console.warn('Radar load error:', e);
+
+  // Indicateur léger NON-bloquant (pas le spinner global)
+  const btn = document.getElementById('radar-toggle-btn');
+  const origHTML = btn.innerHTML;
+  btn.innerHTML = '<span style="font-size:11px;letter-spacing:1px;font-family:Orbitron,monospace">⏳ …</span>';
+  btn.style.pointerEvents = 'none';
+
+  const restore = () => {
+    btn.innerHTML = origHTML;
+    btn.style.pointerEvents = '';
+    // Ré-appliquer l'état actif si besoin
+    btn.classList.toggle('active', radarVisible);
+    // Restaurer le dot
+    const dot = btn.querySelector('.dot-ind-r');
+    if(dot) dot.style.background = radarVisible ? 'var(--orange)' : 'var(--muted)';
+  };
+
+  // Helper : fetch avec timeout strict de 8 s
+  const fetchWithTimeout = (url, options, ms=8000) => {
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), ms);
+    return fetch(url, { ...options, signal: ctrl.signal })
+      .finally(() => clearTimeout(tid));
+  };
+
+  // Bbox visible + marge raisonnable (0.3°)
+  const bounds = map.getBounds();
+  const s = Math.max(-90,  bounds.getSouth() - 0.3).toFixed(4);
+  const w = Math.max(-180, bounds.getWest()  - 0.3).toFixed(4);
+  const n = Math.min( 90,  bounds.getNorth() + 0.3).toFixed(4);
+  const e = Math.min( 180, bounds.getEast()  + 0.3).toFixed(4);
+
+  // Requête Overpass — uniquement highway=speed_camera (tag universel, léger)
+  const query = `[out:json][timeout:10];node["highway"="speed_camera"](${s},${w},${n},${e});out body qt;`;
+
+  const mirrors = [
+    'https://overpass-api.de/api/interpreter',
+    'https://overpass.kumi.systems/api/interpreter',
+    'https://overpass.openstreetmap.ru/api/interpreter',
+  ];
+
+  let data = null;
+  for(const url of mirrors){
+    try {
+      const resp = await fetchWithTimeout(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'data=' + encodeURIComponent(query)
+      }, 9000);
+      if(!resp.ok) continue;
+      data = await resp.json();
+      console.log(`✅ Radars: ${data.elements?.length} points depuis ${url}`);
+      break;
+    } catch(err) {
+      console.warn(`❌ ${url} : ${err.message}`);
+    }
   }
+
+  restore();
+
+  if(!data || !data.elements || data.elements.length === 0){
+    // Pas de blocage — juste un toast discret
+    showToastError('Radars : aucun résultat pour cette zone (OSM)');
+    radarLoaded = false;
+    return;
+  }
+
+  allRadars = data.elements.map(el => {
+    const tags = el.tags || {};
+    return {
+      id   : el.id,
+      type : getRadarType(tags),
+      lat  : el.lat,
+      lng  : el.lon,
+      speed: parseInt(tags.maxspeed) || null,
+      name : tags.name || tags['name:fr'] || '',
+    };
+  });
+
+  console.log(`📷 ${allRadars.length} radars chargés`);
+  renderRadarMarkers();
 }
 
-// Crée les marqueurs DOM pour chaque radar
+// Recharge si on se déplace beaucoup (nouvelle zone) — anti-concurrent
+let lastRadarBbox = null;
+let radarReloading = false;
+async function reloadRadarsIfNeeded(){
+  if(!radarVisible || radarReloading) return;
+  const bounds = map.getBounds();
+  const bbox = `${bounds.getSouth().toFixed(1)},${bounds.getWest().toFixed(1)},${bounds.getNorth().toFixed(1)},${bounds.getEast().toFixed(1)}`;
+  if(bbox === lastRadarBbox) return;
+  lastRadarBbox = bbox;
+  radarReloading = true;
+  radarLoaded = false;
+  try { await loadRadars(); } finally { radarReloading = false; }
+}
+
+// Crée les marqueurs DOM
 function renderRadarMarkers(){
   radarMarkers.forEach(m => m.remove());
   radarMarkers = [];
   if(!radarVisible) return;
 
+  console.log(`🗺 Rendu de ${allRadars.length} marqueurs radar`);
+
   allRadars.forEach(r => {
     const cfg = RADAR_TYPES[r.type] || RADAR_TYPES['unknown'];
     const el  = document.createElement('div');
-    el.style.cssText = `
-      width:34px;height:34px;border-radius:50%;
-      background:white;
-      border:3px solid ${cfg.color};
-      display:flex;align-items:center;justify-content:center;
-      font-size:16px;cursor:pointer;
-      box-shadow:0 2px 10px rgba(0,0,0,.18);
-      transition:transform .15s;
-    `;
+    el.style.cssText = [
+      'width:32px','height:32px','border-radius:50%',
+      'background:white',
+      `border:3px solid ${cfg.color}`,
+      'display:flex','align-items:center','justify-content:center',
+      'font-size:15px','cursor:pointer',
+      'box-shadow:0 2px 10px rgba(0,0,0,.22)',
+      'transition:transform .15s',
+      'user-select:none',
+    ].join(';');
     el.textContent = cfg.icon;
-    el.title = `${cfg.label}${r.speed ? ' — '+r.speed+' km/h' : ''}`;
-    el.addEventListener('mouseenter', () => el.style.transform = 'scale(1.25)');
+    el.addEventListener('mouseenter', () => el.style.transform = 'scale(1.3)');
     el.addEventListener('mouseleave', () => el.style.transform = 'scale(1)');
 
-    // Popup au clic
     const popupHtml = `
-      <div style="line-height:1.8">
+      <div style="line-height:1.9">
         <b style="font-size:14px">${cfg.icon} ${cfg.label}</b>
-        ${r.speed ? `<br><span style="color:var(--muted2)">Limite : </span><b style="color:var(--red);font-family:'Orbitron',monospace">${r.speed} km/h</b>` : ''}
+        ${r.speed ? `<br><span style="color:var(--muted2)">Limite : </span><b style="color:#cc1a1f;font-family:'Orbitron',monospace">${r.speed} km/h</b>` : ''}
         ${r.name  ? `<br><span style="color:var(--muted2)">${r.name}</span>` : ''}
         <br><span style="font-size:10px;color:var(--muted)">Source : OpenStreetMap</span>
       </div>`;
-    const popup = new maplibregl.Popup({offset:20}).setHTML(popupHtml);
+    const popup = new maplibregl.Popup({ offset: 20 }).setHTML(popupHtml);
 
-    const marker = new maplibregl.Marker({element:el, anchor:'center'})
+    const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
       .setLngLat([r.lng, r.lat])
       .setPopup(popup)
       .addTo(map);
@@ -1905,20 +1982,18 @@ function renderRadarMarkers(){
   });
 }
 
-// Toggle couche radars
+// Toggle bouton
 async function toggleRadarLayer(){
   const btn = document.getElementById('radar-toggle-btn');
   radarVisible = !radarVisible;
   btn.classList.toggle('active', radarVisible);
 
   if(radarVisible){
-    if(!radarLoaded){
-      setLoading(true,'CHARGEMENT DES RADARS…');
-      await loadRadars();
-      setLoading(false);
-    }
-    renderRadarMarkers();
+    await loadRadars();
+    // Recharger quand la carte est déplacée
+    map.on('moveend', reloadRadarsIfNeeded);
   } else {
+    map.off('moveend', reloadRadarsIfNeeded);
     radarMarkers.forEach(m => m.remove());
     radarMarkers = [];
     hideRadarAlert();
@@ -1931,17 +2006,15 @@ function checkRadarProximity(userPos){
 
   let closest = null;
   let closestDist = Infinity;
-
   for(const r of allRadars){
-    const d = hav(userPos, [r.lng, r.lat]) * 1000; // mètres
+    const d = hav(userPos, [r.lng, r.lat]) * 1000;
     if(d < closestDist){ closestDist = d; closest = r; }
   }
-
   if(!closest) return;
 
   if(closestDist <= RADAR_ALERT_DIST_M){
     showRadarAlert(closest, closestDist);
-  } else if(closestDist > RADAR_DISMISS_DIST_M * 3){
+  } else if(closestDist > RADAR_ALERT_DIST_M * 2){
     hideRadarAlert();
   }
 }
@@ -1950,50 +2023,46 @@ function showRadarAlert(radar, distM){
   const cfg = RADAR_TYPES[radar.type] || RADAR_TYPES['unknown'];
   const alert = document.getElementById('radar-alert');
 
-  // Mettre à jour contenu
   document.getElementById('ra-stripe').style.background = cfg.color;
-  document.getElementById('ra-icon').textContent   = cfg.icon;
-  document.getElementById('ra-type').textContent   = cfg.label;
-  document.getElementById('ra-type').style.color   = cfg.color;
-  document.getElementById('ra-name').textContent   = radar.name || 'Contrôle de vitesse';
-  document.getElementById('ra-sub').textContent    = radar.speed ? `Limite : ${radar.speed} km/h` : 'Limite non précisée';
+  document.getElementById('ra-icon').textContent  = cfg.icon;
+  document.getElementById('ra-type').textContent  = cfg.label;
+  document.getElementById('ra-type').style.color  = cfg.color;
+  document.getElementById('ra-name').textContent  = radar.name || 'Contrôle de vitesse';
+  document.getElementById('ra-sub').textContent   = radar.speed ? `Limite : ${radar.speed} km/h` : 'Vitesse limite non renseignée';
   document.getElementById('ra-speed-circle').style.borderColor = cfg.color;
   document.getElementById('ra-speed-val').style.color = cfg.color;
-  document.getElementById('ra-speed-val').textContent  = radar.speed || '?';
+  document.getElementById('ra-speed-val').textContent = radar.speed || '?';
 
-  // Distance
   const d = distM >= 1000
     ? { val:(distM/1000).toFixed(1), unit:'km' }
-    : { val:Math.round(distM/10)*10, unit:'m' };
+    : { val: Math.round(distM / 10) * 10 || Math.round(distM), unit:'m' };
   document.getElementById('ra-dist-val').textContent  = d.val;
   document.getElementById('ra-dist-unit').textContent = d.unit;
 
-  // Barre de proximité (100% = tout près, 0% = loin)
   const pct = Math.min(100, Math.max(0, 100 - (distM / RADAR_ALERT_DIST_M) * 100));
   document.getElementById('ra-prox-fill').style.width = pct + '%';
 
   alert.classList.add('show');
 
-  // Bip sonore à l'approche — fréquence augmente selon proximité
+  // Bip progressif
   const now = Date.now();
-  const beepInterval = distM < 100 ? 400 : distM < 200 ? 700 : 1500;
+  const beepInterval = distM < 100 ? 300 : distM < 200 ? 600 : 1400;
   if(now - lastRadarBeepTime > beepInterval){
     lastRadarBeepTime = now;
     playRadarBeep(distM);
   }
 
-  // TTS unique par radar
-  if(radar.id !== lastAlertedRadarId && distM < 300){
+  // TTS une fois par radar
+  if(radar.id !== lastAlertedRadarId && distM < 350){
     lastAlertedRadarId = radar.id;
-    const msg = `Attention, ${cfg.label.toLowerCase()}${radar.speed ? ` à ${radar.speed} kilomètres heure` : ''} dans ${Math.round(distM)} mètres`;
+    const msg = `Attention, ${cfg.label.toLowerCase()}${radar.speed ? `, limite ${radar.speed} kilomètres heure` : ''}, dans ${Math.round(distM)} mètres`;
     speak(msg);
   }
 
-  // Auto-dismiss après passage
   clearTimeout(radarAlertTimer);
   radarAlertTimer = setTimeout(() => {
     if(lastAlertedRadarId === radar.id) hideRadarAlert();
-  }, 8000);
+  }, 7000);
 }
 
 function hideRadarAlert(){
@@ -2008,7 +2077,6 @@ function hideRadarAlert(){
   lastAlertedRadarId = null;
 }
 
-// Bip radar via Web Audio API
 function playRadarBeep(distM){
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -2016,14 +2084,13 @@ function playRadarBeep(distM){
     const gain = ctx.createGain();
     osc.connect(gain);
     gain.connect(ctx.destination);
-    // Plus proche = fréquence plus haute
     osc.frequency.value = distM < 100 ? 1200 : distM < 200 ? 900 : 660;
     osc.type = 'sine';
     gain.gain.setValueAtTime(0.18, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.18);
-  } catch(e) {}
+  } catch(e){}
 }
 
 buildModelSelector();
