@@ -1795,6 +1795,21 @@ function setLoading(on,txt='CALCUL EN COURS…'){
   document.getElementById('loading-text').textContent=txt;
 }
 
+function showToastError(msg){
+  // Toast discret en bas — ne bloque pas l'UI
+  let t = document.getElementById('_err-toast');
+  if(!t){
+    t = document.createElement('div');
+    t.id = '_err-toast';
+    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(30,30,30,.92);color:#fff;font-size:12px;padding:9px 18px;border-radius:20px;z-index:9999;pointer-events:none;transition:opacity .4s;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.3)';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => t.style.opacity = '0', 3500);
+}
+
 // ════════════════════════════════════════════════════════════════
 //  SYSTÈME RADARS — OpenStreetMap Overpass API
 // ════════════════════════════════════════════════════════════════
@@ -1828,23 +1843,41 @@ function getRadarType(tags){
 // Charge les radars dans la bbox visible de la carte
 async function loadRadars(){
   radarLoaded = true;
-  setLoading(true, 'CHARGEMENT DES RADARS…');
 
-  // Utiliser la bbox courante de la carte (+ marge)
+  // Indicateur léger NON-bloquant (pas le spinner global)
+  const btn = document.getElementById('radar-toggle-btn');
+  const origHTML = btn.innerHTML;
+  btn.innerHTML = '<span style="font-size:11px;letter-spacing:1px;font-family:Orbitron,monospace">⏳ …</span>';
+  btn.style.pointerEvents = 'none';
+
+  const restore = () => {
+    btn.innerHTML = origHTML;
+    btn.style.pointerEvents = '';
+    // Ré-appliquer l'état actif si besoin
+    btn.classList.toggle('active', radarVisible);
+    // Restaurer le dot
+    const dot = btn.querySelector('.dot-ind-r');
+    if(dot) dot.style.background = radarVisible ? 'var(--orange)' : 'var(--muted)';
+  };
+
+  // Helper : fetch avec timeout strict de 8 s
+  const fetchWithTimeout = (url, options, ms=8000) => {
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), ms);
+    return fetch(url, { ...options, signal: ctrl.signal })
+      .finally(() => clearTimeout(tid));
+  };
+
+  // Bbox visible + marge raisonnable (0.3°)
   const bounds = map.getBounds();
-  const s = (bounds.getSouth() - 0.5).toFixed(4);
-  const w = (bounds.getWest()  - 0.5).toFixed(4);
-  const n = (bounds.getNorth() + 0.5).toFixed(4);
-  const e = (bounds.getEast()  + 0.5).toFixed(4);
+  const s = Math.max(-90,  bounds.getSouth() - 0.3).toFixed(4);
+  const w = Math.max(-180, bounds.getWest()  - 0.3).toFixed(4);
+  const n = Math.min( 90,  bounds.getNorth() + 0.3).toFixed(4);
+  const e = Math.min( 180, bounds.getEast()  + 0.3).toFixed(4);
 
-  const query = `[out:json][timeout:25];
-(
-  node["highway"="speed_camera"](${s},${w},${n},${e});
-  node["man_made"="surveillance"]["surveillance:type"="camera"]["surveillance"="public"](${s},${w},${n},${e});
-);
-out body qt;`;
+  // Requête Overpass — uniquement highway=speed_camera (tag universel, léger)
+  const query = `[out:json][timeout:10];node["highway"="speed_camera"](${s},${w},${n},${e});out body qt;`;
 
-  // Essayer plusieurs miroirs Overpass
   const mirrors = [
     'https://overpass-api.de/api/interpreter',
     'https://overpass.kumi.systems/api/interpreter',
@@ -1854,58 +1887,57 @@ out body qt;`;
   let data = null;
   for(const url of mirrors){
     try {
-      const resp = await fetch(url, {
+      const resp = await fetchWithTimeout(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: 'data=' + encodeURIComponent(query)
-      });
+      }, 9000);
       if(!resp.ok) continue;
       data = await resp.json();
-      console.log(`✅ Radars chargés depuis ${url} : ${data.elements?.length} éléments`);
+      console.log(`✅ Radars: ${data.elements?.length} points depuis ${url}`);
       break;
-    } catch(e) {
-      console.warn(`❌ Miroir ${url} échoué:`, e.message);
+    } catch(err) {
+      console.warn(`❌ ${url} : ${err.message}`);
     }
   }
 
-  if(!data || !data.elements){
-    setLoading(false);
-    alert('Impossible de charger les radars. Vérifiez votre connexion.');
+  restore();
+
+  if(!data || !data.elements || data.elements.length === 0){
+    // Pas de blocage — juste un toast discret
+    showToastError('Radars : aucun résultat pour cette zone (OSM)');
     radarLoaded = false;
-    radarVisible = false;
-    document.getElementById('radar-toggle-btn').classList.remove('active');
     return;
   }
 
   allRadars = data.elements.map(el => {
     const tags = el.tags || {};
-    const type  = getRadarType(tags);
-    const speed = parseInt(tags.maxspeed) || parseInt(tags['maxspeed:advisory']) || null;
     return {
       id   : el.id,
-      type,
+      type : getRadarType(tags),
       lat  : el.lat,
       lng  : el.lon,
-      speed,
-      name : tags.name || tags['name:fr'] || tags.description || '',
+      speed: parseInt(tags.maxspeed) || null,
+      name : tags.name || tags['name:fr'] || '',
     };
   });
 
   console.log(`📷 ${allRadars.length} radars chargés`);
-  setLoading(false);
   renderRadarMarkers();
 }
 
-// Recharge si on se déplace beaucoup (nouvelle zone)
+// Recharge si on se déplace beaucoup (nouvelle zone) — anti-concurrent
 let lastRadarBbox = null;
+let radarReloading = false;
 async function reloadRadarsIfNeeded(){
-  if(!radarVisible) return;
+  if(!radarVisible || radarReloading) return;
   const bounds = map.getBounds();
   const bbox = `${bounds.getSouth().toFixed(1)},${bounds.getWest().toFixed(1)},${bounds.getNorth().toFixed(1)},${bounds.getEast().toFixed(1)}`;
   if(bbox === lastRadarBbox) return;
   lastRadarBbox = bbox;
+  radarReloading = true;
   radarLoaded = false;
-  await loadRadars();
+  try { await loadRadars(); } finally { radarReloading = false; }
 }
 
 // Crée les marqueurs DOM
