@@ -388,6 +388,36 @@
     /* Marqueurs radar sur la carte — rendu via canvas MapLibre */
     /* (styles appliqués via JS aux éléments DOM des markers) */
 
+    /* ─── POI ─── */
+    #poi-bar{display:flex;gap:5px;padding:7px 22px 0;flex-wrap:wrap;flex-shrink:0;}
+    .poi-chip{display:flex;align-items:center;gap:4px;background:var(--s2);border:1px solid var(--border2);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--muted2);cursor:pointer;transition:all .18s;white-space:nowrap;box-shadow:var(--shadow-soft);}
+    .poi-chip:hover{border-color:var(--blue);color:var(--text);transform:translateY(-1px);}
+    .poi-chip.active{background:rgba(26,127,212,.12);border-color:var(--blue);color:var(--blue);}
+    .poi-chip .poi-emoji{font-size:13px;}
+
+    /* Panneau résultats POI */
+    #poi-results{display:none;flex-direction:column;flex-shrink:0;border-top:1px solid var(--border);background:var(--s1);max-height:220px;overflow:hidden;}
+    #poi-results.show{display:flex;}
+    #poi-results-header{display:flex;align-items:center;justify-content:space-between;padding:7px 22px 5px;flex-shrink:0;}
+    #poi-results-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-family:'Orbitron',monospace;}
+    #poi-results-close{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:14px;padding:0 2px;transition:color .15s;}
+    #poi-results-close:hover{color:var(--red);}
+    #poi-list{overflow-y:auto;flex:1;}
+    #poi-list::-webkit-scrollbar{width:3px;}
+    #poi-list::-webkit-scrollbar-thumb{background:var(--border2);}
+    .poi-item{display:flex;align-items:center;gap:10px;padding:8px 22px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;}
+    .poi-item:hover{background:var(--s2);}
+    .poi-item:last-child{border-bottom:none;}
+    .poi-item-icon{font-size:20px;flex-shrink:0;width:28px;text-align:center;}
+    .poi-item-info{flex:1;min-width:0;}
+    .poi-item-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .poi-item-addr{font-size:11px;color:var(--muted2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .poi-item-dist{font-family:'Orbitron',monospace;font-size:11px;color:var(--blue);flex-shrink:0;text-align:right;}
+    .poi-item-set-dest{flex-shrink:0;background:var(--blue);border:none;border-radius:7px;color:#fff;font-size:10px;padding:4px 8px;cursor:pointer;font-family:'Orbitron',monospace;letter-spacing:1px;transition:all .15s;}
+    .poi-item-set-dest:hover{background:#1568b8;transform:scale(1.05);}
+    #poi-loading{padding:12px 22px;font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:8px;}
+    .poi-spin{width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+
     /* MapLibre overrides for light theme */
     .maplibregl-ctrl-attrib{background:rgba(250,249,247,.8)!important;color:#999!important;}
     .maplibregl-ctrl-attrib a{color:#bbb!important;}
@@ -482,9 +512,31 @@
                  oninput="onInput(this,'dest')" onfocus="showSug('dest')"/>
           <div class="suggestions" id="sug-dest"></div>
         </div>
-        <button id="go-btn" onclick="calcRoute()">⚡ CALCULER L'ITINÉRAIRE</button>
+
+        <!-- Chips POI -->
+        <div id="poi-bar">
+          <div class="poi-chip" data-poi="fast_food" data-brands="McDonald's|KFC|Burger King|Quick|Five Guys" onclick="searchPOI(this)"><span class="poi-emoji">🍔</span> Fast-food</div>
+          <div class="poi-chip" data-poi="fuel"      onclick="searchPOI(this)"><span class="poi-emoji">⛽</span> Carburant</div>
+          <div class="poi-chip" data-poi="cafe"      onclick="searchPOI(this)"><span class="poi-emoji">☕</span> Café</div>
+          <div class="poi-chip" data-poi="supermarket" onclick="searchPOI(this)"><span class="poi-emoji">🛒</span> Supermarché</div>
+          <div class="poi-chip" data-poi="hotel"     onclick="searchPOI(this)"><span class="poi-emoji">🏨</span> Hôtel</div>
+          <div class="poi-chip" data-poi="hospital"  onclick="searchPOI(this)"><span class="poi-emoji">🏥</span> Hôpital</div>
+          <div class="poi-chip" data-poi="parking"   onclick="searchPOI(this)"><span class="poi-emoji">🅿️</span> Parking</div>
+          <div class="poi-chip" data-poi="restaurant" onclick="searchPOI(this)"><span class="poi-emoji">🍽️</span> Restaurant</div>
+        </div>
+
+        <button id="go-btn" onclick="calcRoute()" style="margin-top:7px">⚡ CALCULER L'ITINÉRAIRE</button>
         <button id="reset-btn" onclick="resetRoute()">✕ Effacer l'itinéraire</button>
         <button id="guidance-btn" onclick="startGuidance()" style="display:none;width:100%;margin-top:6px;padding:10px;background:var(--blue);border:none;border-radius:9px;color:#fff;font-family:'Orbitron',monospace;font-size:10px;font-weight:600;letter-spacing:3px;cursor:pointer;transition:all .2s;box-shadow:0 3px 14px rgba(26,127,212,.28);">▶ DÉMARRER LE GUIDAGE</button>
+      </div>
+
+      <!-- Résultats POI (sous le form, au-dessus du summary) -->
+      <div id="poi-results">
+        <div id="poi-results-header">
+          <span id="poi-results-title">POI à proximité</span>
+          <button id="poi-results-close" onclick="closePOI()">✕</button>
+        </div>
+        <div id="poi-list"></div>
       </div>
 
       <div id="route-summary">
@@ -1136,6 +1188,7 @@ function resetRoute(){
   stopMarkers.forEach(m=>m.remove());stopMarkers=[];
   activeRouteCoords=null; activeRouteTotalDist=0; activeRouteTotalDur=0;
   hideRadarAlert();
+  closePOI();
 }
 
 async function loadSuperchargers(){
@@ -1941,6 +1994,8 @@ async function reloadRadarsIfNeeded(){
 }
 
 // Crée les marqueurs DOM
+let activeRadarPopup = null;
+
 function renderRadarMarkers(){
   radarMarkers.forEach(m => m.remove());
   radarMarkers = [];
@@ -1960,25 +2015,53 @@ function renderRadarMarkers(){
       'box-shadow:0 2px 10px rgba(0,0,0,.22)',
       'transition:transform .15s',
       'user-select:none',
+      'position:relative', // garantit que le marker ne dérive pas
     ].join(';');
     el.textContent = cfg.icon;
+
     el.addEventListener('mouseenter', () => el.style.transform = 'scale(1.3)');
     el.addEventListener('mouseleave', () => el.style.transform = 'scale(1)');
 
-    const popupHtml = `
-      <div style="line-height:1.9">
-        <b style="font-size:14px">${cfg.icon} ${cfg.label}</b>
-        ${r.speed ? `<br><span style="color:var(--muted2)">Limite : </span><b style="color:#cc1a1f;font-family:'Orbitron',monospace">${r.speed} km/h</b>` : ''}
-        ${r.name  ? `<br><span style="color:var(--muted2)">${r.name}</span>` : ''}
-        <br><span style="font-size:10px;color:var(--muted)">Source : OpenStreetMap</span>
-      </div>`;
-    const popup = new maplibregl.Popup({ offset: 20 }).setHTML(popupHtml);
+    // Clic : ouvrir popup fixé sur les coords du radar, PAS attaché au marker
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if(activeRadarPopup) { activeRadarPopup.remove(); activeRadarPopup = null; }
 
-    const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
+      const html = `
+        <div style="line-height:1.9">
+          <b style="font-size:14px">${cfg.icon} ${cfg.label}</b>
+          ${r.speed ? `<br><span style="color:var(--muted2)">Limite : </span><b style="color:#cc1a1f;font-family:'Orbitron',monospace">${r.speed} km/h</b>` : ''}
+          ${r.name  ? `<br><span style="color:var(--muted2)">${r.name}</span>` : ''}
+          <br><span style="font-size:10px;color:var(--muted)">Source : OpenStreetMap</span>
+        </div>`;
+
+      activeRadarPopup = new maplibregl.Popup({
+        offset: [0, -20],   // décalage vers le haut par rapport aux coords
+        closeButton: true,
+        closeOnClick: true,
+        anchor: 'bottom',   // popup s'affiche AU-DESSUS du point, marker ne bouge pas
+        maxWidth: '220px',
+      })
+        .setLngLat([r.lng, r.lat])  // ancré sur les coordonnées GPS, PAS sur le marker
+        .setHTML(html)
+        .addTo(map);
+    });
+
+    // Créer le marker SANS setPopup() — c'est ça qui causait le saut
+    const marker = new maplibregl.Marker({
+      element: el,
+      anchor: 'center',
+      draggable: false,
+    })
       .setLngLat([r.lng, r.lat])
-      .setPopup(popup)
       .addTo(map);
+
     radarMarkers.push(marker);
+  });
+
+  // Fermer le popup radar si on clique ailleurs sur la carte
+  map.once('click', () => {
+    if(activeRadarPopup){ activeRadarPopup.remove(); activeRadarPopup = null; }
   });
 }
 
@@ -2091,6 +2174,241 @@ function playRadarBeep(distM){
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.18);
   } catch(e){}
+}
+
+// ════════════════════════════════════════════════════════════════
+//  SYSTÈME POI — Points d'Intérêt via Overpass
+// ════════════════════════════════════════════════════════════════
+let activePOIChip   = null;   // chip DOM actif
+let poiMarkers      = [];     // marqueurs carte
+let activePOIPopup  = null;   // popup courant
+
+// Config par catégorie OSM
+const POI_CONFIG = {
+  fast_food   : { emoji:'🍔', label:'Fast-food',    tag:'amenity', val:'fast_food',    color:'#e8a020' },
+  fuel        : { emoji:'⛽', label:'Carburant',     tag:'amenity', val:'fuel',         color:'#cc1a1f' },
+  cafe        : { emoji:'☕', label:'Café',          tag:'amenity', val:'cafe',         color:'#8b5e3c' },
+  supermarket : { emoji:'🛒', label:'Supermarché',  tag:'shop',    val:'supermarket',  color:'#1b9e57' },
+  hotel       : { emoji:'🏨', label:'Hôtel',        tag:'tourism', val:'hotel',        color:'#7c4bc2' },
+  hospital    : { emoji:'🏥', label:'Hôpital',      tag:'amenity', val:'hospital',     color:'#cc1a1f' },
+  parking     : { emoji:'🅿️', label:'Parking',      tag:'amenity', val:'parking',      color:'#1a7fd4' },
+  restaurant  : { emoji:'🍽️', label:'Restaurant',   tag:'amenity', val:'restaurant',   color:'#c97c10' },
+};
+
+// Point de référence : position GPS ou centre de la carte
+function getSearchCenter(){
+  if(lastGpsPos) return lastGpsPos;
+  const c = map.getCenter();
+  return [c.lng, c.lat];
+}
+
+// Distance formatée
+function fmtPoiDist(km){
+  if(km < 1) return Math.round(km * 1000) + ' m';
+  return km.toFixed(1) + ' km';
+}
+
+async function searchPOI(chip){
+  const poiKey = chip.dataset.poi;
+  const cfg    = POI_CONFIG[poiKey];
+  if(!cfg) return;
+
+  // Toggle : si déjà actif, fermer
+  if(activePOIChip === chip){
+    closePOI();
+    return;
+  }
+
+  // Désactiver l'ancien chip
+  document.querySelectorAll('.poi-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  activePOIChip = chip;
+
+  // Afficher panneau avec spinner
+  const panel = document.getElementById('poi-results');
+  panel.classList.add('show');
+  document.getElementById('poi-results-title').textContent = cfg.emoji + ' ' + cfg.label + ' à proximité';
+  document.getElementById('poi-list').innerHTML =
+    `<div id="poi-loading"><div class="poi-spin"></div>Recherche en cours…</div>`;
+
+  const [lng, lat] = getSearchCenter();
+
+  // Rayon de recherche : 5 km
+  const radius = 5000;
+
+  const query = `[out:json][timeout:12];
+(
+  node["${cfg.tag}"="${cfg.val}"](around:${radius},${lat},${lng});
+  way["${cfg.tag}"="${cfg.val}"](around:${radius},${lat},${lng});
+);
+out center body qt 30;`;
+
+  const mirrors = [
+    'https://overpass-api.de/api/interpreter',
+    'https://overpass.kumi.systems/api/interpreter',
+  ];
+
+  const fetchWithTimeout = (url, opts, ms=9000) => {
+    const ctrl = new AbortController();
+    const tid  = setTimeout(() => ctrl.abort(), ms);
+    return fetch(url, {...opts, signal: ctrl.signal}).finally(() => clearTimeout(tid));
+  };
+
+  let data = null;
+  for(const url of mirrors){
+    try {
+      const r = await fetchWithTimeout(url, {
+        method: 'POST',
+        headers: {'Content-Type':'application/x-www-form-urlencoded'},
+        body: 'data=' + encodeURIComponent(query)
+      });
+      if(!r.ok) continue;
+      data = await r.json();
+      break;
+    } catch(e){ console.warn('POI fetch failed:', e.message); }
+  }
+
+  if(!data || !data.elements || !data.elements.length){
+    document.getElementById('poi-list').innerHTML =
+      `<div style="padding:14px 22px;font-size:12px;color:var(--muted2)">Aucun résultat dans un rayon de 5 km.</div>`;
+    return;
+  }
+
+  // Trier par distance croissante
+  const items = data.elements.map(el => {
+    const elLat = el.lat ?? el.center?.lat;
+    const elLng = el.lon ?? el.center?.lon;
+    const dist  = hav([lng, lat], [elLng, elLat]);
+    const tags  = el.tags || {};
+    return {
+      id    : el.id,
+      name  : tags.name || tags['name:fr'] || cfg.label,
+      brand : tags.brand || tags.operator || '',
+      addr  : [tags['addr:housenumber'], tags['addr:street'], tags['addr:city']].filter(Boolean).join(' '),
+      phone : tags.phone || tags['contact:phone'] || '',
+      open  : tags['opening_hours'] || '',
+      lat   : elLat,
+      lng   : elLng,
+      dist,
+    };
+  }).sort((a,b) => a.dist - b.dist).slice(0, 20);
+
+  // Supprimer anciens marqueurs POI
+  clearPOIMarkers();
+
+  // Afficher la liste
+  document.getElementById('poi-list').innerHTML = items.map((p, i) =>
+    `<div class="poi-item" onclick="focusPOI(${i})">
+      <div class="poi-item-icon">${cfg.emoji}</div>
+      <div class="poi-item-info">
+        <div class="poi-item-name">${esc(p.name)}${p.brand && p.brand !== p.name ? `<span style="font-size:10px;color:var(--muted2);font-weight:400"> · ${esc(p.brand)}</span>` : ''}</div>
+        <div class="poi-item-addr">${esc(p.addr || '—')}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+        <span class="poi-item-dist">${fmtPoiDist(p.dist)}</span>
+        <button class="poi-item-set-dest" onclick="setPOIDest(event,${i})">→ DEST</button>
+      </div>
+    </div>`
+  ).join('');
+
+  // Ajouter marqueurs sur la carte
+  items.forEach((p, i) => {
+    const el = document.createElement('div');
+    el.style.cssText = [
+      'width:30px','height:30px','border-radius:50%',
+      'background:white',
+      `border:3px solid ${cfg.color}`,
+      'display:flex','align-items:center','justify-content:center',
+      'font-size:14px','cursor:pointer',
+      'box-shadow:0 2px 8px rgba(0,0,0,.2)',
+      'transition:transform .15s',
+    ].join(';');
+    el.textContent = cfg.emoji;
+    el.addEventListener('mouseenter', () => el.style.transform = 'scale(1.25)');
+    el.addEventListener('mouseleave', () => el.style.transform = 'scale(1)');
+    el.addEventListener('click', (e) => { e.stopPropagation(); focusPOIPopup(p, cfg); });
+
+    const marker = new maplibregl.Marker({element:el, anchor:'center'})
+      .setLngLat([p.lng, p.lat])
+      .addTo(map);
+    poiMarkers.push({ marker, data: p });
+  });
+
+  // Zoomer sur les résultats si on a des points
+  if(items.length > 0){
+    const bounds = items.reduce(
+      (b, p) => b.extend([p.lng, p.lat]),
+      new maplibregl.LngLatBounds([items[0].lng, items[0].lat], [items[0].lng, items[0].lat])
+    );
+    map.fitBounds(bounds, {padding:{top:80,bottom:80,left:420,right:60}, maxZoom:15, duration:800});
+  }
+
+  // Stocker pour focusPOI
+  window._poiItems = items;
+  window._poiCfg   = cfg;
+}
+
+function focusPOI(idx){
+  const p   = window._poiItems?.[idx];
+  const cfg = window._poiCfg;
+  if(!p || !cfg) return;
+  map.flyTo({center:[p.lng, p.lat], zoom:16, duration:700});
+  focusPOIPopup(p, cfg);
+}
+
+function focusPOIPopup(p, cfg){
+  if(activePOIPopup){ activePOIPopup.remove(); activePOIPopup = null; }
+  const html = `
+    <div style="line-height:1.9;min-width:190px">
+      <b style="font-size:14px">${cfg.emoji} ${esc(p.name)}</b>
+      ${p.brand && p.brand !== p.name ? `<br><span style="color:var(--muted2);font-size:11px">${esc(p.brand)}</span>` : ''}
+      ${p.addr  ? `<br><span style="color:var(--muted2)">📍 </span>${esc(p.addr)}` : ''}
+      ${p.phone ? `<br><span style="color:var(--muted2)">📞 </span>${esc(p.phone)}` : ''}
+      ${p.open  ? `<br><span style="color:var(--muted2)">🕐 </span><span style="font-size:11px">${esc(p.open)}</span>` : ''}
+      <br><span style="color:var(--blue);font-family:'Orbitron',monospace;font-size:11px">${fmtPoiDist(p.dist)}</span>
+      <br><button onclick="setPOIDestDirect(${p.lat},${p.lng},'${esc(p.name)}')"
+        style="margin-top:6px;width:100%;padding:7px;background:var(--blue);border:none;border-radius:7px;color:#fff;font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;cursor:pointer">
+        → DÉFINIR COMME DESTINATION
+      </button>
+    </div>`;
+  activePOIPopup = new maplibregl.Popup({offset:[0,-18], anchor:'bottom', closeButton:true, closeOnClick:true, maxWidth:'240px'})
+    .setLngLat([p.lng, p.lat])
+    .setHTML(html)
+    .addTo(map);
+}
+
+function setPOIDest(event, idx){
+  event.stopPropagation();
+  const p = window._poiItems?.[idx];
+  if(!p) return;
+  setPOIDestDirect(p.lat, p.lng, p.name);
+}
+
+function setPOIDestDirect(lat, lng, name){
+  coords.dest = [parseFloat(lng), parseFloat(lat)];
+  document.getElementById('input-dest').value = name;
+  if(destMarker) destMarker.remove();
+  destMarker = new maplibregl.Marker({color:'#cc1a1f'})
+    .setLngLat([lng, lat])
+    .setPopup(new maplibregl.Popup({offset:25}).setHTML(`<b>Destination</b><br>${esc(name)}`))
+    .addTo(map);
+  if(activePOIPopup){ activePOIPopup.remove(); activePOIPopup = null; }
+  showToastError(`✅ Destination : ${name}`);
+}
+
+function clearPOIMarkers(){
+  poiMarkers.forEach(({marker}) => marker.remove());
+  poiMarkers = [];
+  if(activePOIPopup){ activePOIPopup.remove(); activePOIPopup = null; }
+  window._poiItems = null;
+  window._poiCfg   = null;
+}
+
+function closePOI(){
+  document.querySelectorAll('.poi-chip').forEach(c => c.classList.remove('active'));
+  activePOIChip = null;
+  document.getElementById('poi-results').classList.remove('show');
+  clearPOIMarkers();
 }
 
 buildModelSelector();
