@@ -256,6 +256,33 @@
     @keyframes spin{to{transform:rotate(360deg);}}
     .loading-text{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:3px;color:var(--muted2);}
 
+    /* ─── GPS TRACKING ─── */
+    /* Flèche directionnelle SVG animée */
+    #gps-arrow-wrap{position:relative;width:36px;height:36px;flex-shrink:0;}
+    #gps-arrow{width:36px;height:36px;transition:transform .4s ease;filter:drop-shadow(0 2px 6px rgba(26,127,212,.45));}
+    /* Cercle de précision pulsant autour de la flèche */
+    #gps-accuracy-ring{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;border:2px solid rgba(26,127,212,.35);background:rgba(26,127,212,.08);pointer-events:none;transition:width .6s,height .6s;}
+
+    /* Bouton GPS live */
+    #gps-live-btn{position:absolute;bottom:72px;left:14px;z-index:200;width:40px;height:40px;background:rgba(250,249,247,.92);backdrop-filter:blur(12px);border:1px solid var(--border2);border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .2s;color:var(--blue);box-shadow:var(--shadow-card);}
+    #gps-live-btn:hover{border-color:var(--blue);}
+    #gps-live-btn.active{border-color:var(--blue);background:rgba(26,127,212,.12);animation:gps-pulse-btn 2s ease-in-out infinite;}
+    @keyframes gps-pulse-btn{0%,100%{box-shadow:0 0 0 0 rgba(26,127,212,.4);}50%{box-shadow:0 0 0 6px rgba(26,127,212,.0);}}
+
+    /* Badge "LIVE" dans la pill */
+    #pill-gps-badge{display:none;background:rgba(27,158,87,.15);border:1px solid rgba(27,158,87,.35);border-radius:20px;padding:2px 8px;font-family:'Orbitron',monospace;font-size:9px;color:var(--green);letter-spacing:1px;animation:live-blink 2s ease-in-out infinite;}
+    #pill-gps-badge.show{display:inline-flex;align-items:center;gap:4px;}
+    .live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:live-blink 1.2s ease-in-out infinite;}
+    @keyframes live-blink{0%,100%{opacity:1;}50%{opacity:.4;};}
+
+    /* Pill étendue quand GPS actif */
+    #pill-speed{display:none;}
+    #pill-speed.show{display:flex;}
+
+    /* Toast déviation */
+    #deviation-toast{position:absolute;top:70px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(250,249,247,.96);backdrop-filter:blur(16px);border:1px solid rgba(201,124,16,.4);border-radius:12px;padding:9px 18px;z-index:300;font-size:12px;color:var(--orange);font-weight:500;box-shadow:0 6px 24px rgba(0,0,0,.14);opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;white-space:nowrap;}
+    #deviation-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
     /* MapLibre overrides for light theme */
     .maplibregl-ctrl-attrib{background:rgba(250,249,247,.8)!important;color:#999!important;}
     .maplibregl-ctrl-attrib a{color:#bbb!important;}
@@ -435,13 +462,22 @@
       <div class="pill-item">🕐 <span class="pill-val" id="pill-time">—</span></div>
       <span class="pill-sep">|</span>
       <div class="pill-item">🔋 <span class="pill-val" id="pill-batt">78%</span></div>
+      <span class="pill-sep" id="pill-sep-speed" style="display:none">|</span>
+      <div class="pill-item pill-speed" id="pill-speed" style="display:none">🚀 <span class="pill-val" id="pill-spd">0</span> <span style="font-size:9px;color:var(--muted2)">km/h</span></div>
+      <span class="pill-sep" id="pill-sep-hdg" style="display:none">|</span>
+      <div class="pill-item" id="pill-hdg-wrap" style="display:none">🧭 <span class="pill-val" id="pill-hdg">N</span></div>
+      <span class="pill-sep" id="pill-sep-badge" style="display:none">|</span>
+      <span id="pill-gps-badge"><span class="live-dot"></span>LIVE</span>
     </div>
+
+    <div id="deviation-toast">⚠️ Déviation détectée — Recalcul en cours…</div>
 
     <button id="sc-toggle-btn" onclick="toggleScLayer()">
       <span class="dot-ind"></span>⚡ SUPERCHARGEURS
     </button>
 
     <button id="locate-btn" onclick="locateMe()">◎</button>
+    <button id="gps-live-btn" onclick="toggleGpsTracking()" title="Suivi GPS temps réel">⊕</button>
 
     <div id="style-toggle">
       <button class="map-btn active" id="btn-bright" onclick="setStyle('bright')">☀️</button>
@@ -1073,17 +1109,255 @@ async function toggleScLayer(){
   }
 }
 
+// ════════════════════════════════════════════════════════════════
+//  GPS TEMPS RÉEL
+// ════════════════════════════════════════════════════════════════
+let gpsWatchId = null;
+let gpsTracking = false;
+let gpsFollowMap = true;          // centrage automatique
+let lastGpsPos = null;
+let lastGpsHeading = null;
+let gpsMarkerEl = null;
+let gpsMarker = null;
+let gpsAccuracyEl = null;
+let deviationTimer = null;
+let lastRouteRecalc = 0;
+const DEVIATION_THRESHOLD_M = 300;  // recalcul si > 300 m de la route
+const RECALC_COOLDOWN_MS = 30000;   // cooldown 30 s entre recalculs
+
+// Crée la flèche SVG directionnelle
+function buildArrowMarker(){
+  const wrap = document.createElement('div');
+  wrap.id = 'gps-arrow-wrap';
+  wrap.style.cssText = 'position:relative;width:36px;height:36px;cursor:pointer;';
+
+  // Anneau de précision (derrière la flèche)
+  const ring = document.createElement('div');
+  ring.id = 'gps-accuracy-ring';
+  ring.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;border:2px solid rgba(26,127,212,.35);background:rgba(26,127,212,.08);pointer-events:none;width:36px;height:36px;transition:width .6s,height .6s;';
+  wrap.appendChild(ring);
+
+  // Flèche SVG
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('id','gps-arrow');
+  svg.setAttribute('viewBox','0 0 36 36');
+  svg.setAttribute('width','36');
+  svg.setAttribute('height','36');
+  svg.style.cssText = 'position:relative;z-index:1;transition:transform .4s ease;filter:drop-shadow(0 2px 6px rgba(26,127,212,.5));';
+  svg.innerHTML = `
+    <circle cx="18" cy="18" r="16" fill="white" stroke="#1a7fd4" stroke-width="2.5" opacity="0.95"/>
+    <polygon points="18,5 24,26 18,22 12,26" fill="#1a7fd4"/>
+    <circle cx="18" cy="18" r="3.5" fill="white"/>
+  `;
+  wrap.appendChild(svg);
+  wrap.addEventListener('click', () => { gpsFollowMap = true; });
+  return wrap;
+}
+
+// Met à jour la taille de l'anneau selon précision GPS
+function updateAccuracyRing(accuracyMeters, zoomLevel){
+  const ring = document.getElementById('gps-accuracy-ring');
+  if(!ring || !map) return;
+  // Convertir la précision (m) en pixels écran selon zoom
+  const metersPerPixel = 156543.03392 * Math.cos(lastGpsPos[1] * Math.PI / 180) / Math.pow(2, zoomLevel);
+  const px = Math.min(Math.max((accuracyMeters / metersPerPixel) * 2, 36), 200);
+  ring.style.width = px + 'px';
+  ring.style.height = px + 'px';
+}
+
+// Convertit un cap en degrés vers une lettre cardinale
+function headingToCardinal(deg){
+  const cards = ['N','NE','E','SE','S','SO','O','NO'];
+  return cards[Math.round(deg / 45) % 8];
+}
+
+// Démarre / arrête le tracking GPS
+function toggleGpsTracking(){
+  if(gpsTracking) stopGpsTracking();
+  else startGpsTracking();
+}
+
+function startGpsTracking(){
+  if(!navigator.geolocation){ alert('Géolocalisation non disponible sur cet appareil.'); return; }
+  gpsTracking = true;
+  gpsFollowMap = true;
+  document.getElementById('gps-live-btn').classList.add('active');
+  document.getElementById('gps-live-btn').textContent = '⊗';
+  document.getElementById('pill-gps-badge').classList.add('show');
+  document.getElementById('pill-sep-badge').style.display = '';
+
+  gpsWatchId = navigator.geolocation.watchPosition(
+    onGpsUpdate,
+    onGpsError,
+    { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
+  );
+}
+
+function stopGpsTracking(){
+  if(gpsWatchId !== null){ navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId = null; }
+  gpsTracking = false;
+  document.getElementById('gps-live-btn').classList.remove('active');
+  document.getElementById('gps-live-btn').textContent = '⊕';
+  document.getElementById('pill-gps-badge').classList.remove('show');
+  document.getElementById('pill-sep-badge').style.display = 'none';
+  // Masquer vitesse & cap
+  ['pill-sep-speed','pill-sep-hdg','pill-hdg-wrap'].forEach(id=>{ document.getElementById(id).style.display='none'; });
+  document.getElementById('pill-speed').style.display = 'none';
+  // Supprimer marqueur
+  if(gpsMarker){ gpsMarker.remove(); gpsMarker = null; gpsMarkerEl = null; }
+}
+
+function onGpsUpdate(pos){
+  const { longitude: lng, latitude: lat, accuracy, speed, heading } = pos.coords;
+  lastGpsPos = [lng, lat];
+
+  // ── Marqueur flèche ──
+  if(!gpsMarker){
+    gpsMarkerEl = buildArrowMarker();
+    gpsMarker = new maplibregl.Marker({ element: gpsMarkerEl, anchor: 'center' })
+      .setLngLat([lng, lat])
+      .addTo(map);
+  } else {
+    gpsMarker.setLngLat([lng, lat]);
+  }
+
+  // ── Rotation flèche selon cap ──
+  const hdg = (heading !== null && heading !== undefined) ? heading : lastGpsHeading;
+  if(hdg !== null && hdg !== undefined){
+    lastGpsHeading = hdg;
+    const svg = document.getElementById('gps-arrow');
+    if(svg) svg.style.transform = `rotate(${hdg}deg)`;
+    // Cap dans la pill
+    document.getElementById('pill-hdg').textContent = headingToCardinal(hdg) + ' ' + Math.round(hdg) + '°';
+    document.getElementById('pill-hdg-wrap').style.display = '';
+    document.getElementById('pill-sep-hdg').style.display = '';
+  }
+
+  // ── Vitesse dans la pill ──
+  if(speed !== null && speed !== undefined){
+    const kmh = Math.round(speed * 3.6);
+    document.getElementById('pill-spd').textContent = kmh;
+    document.getElementById('pill-speed').style.display = '';
+    document.getElementById('pill-sep-speed').style.display = '';
+  }
+
+  // ── Anneau de précision ──
+  updateAccuracyRing(accuracy || 20, map.getZoom());
+
+  // ── Centrage automatique ──
+  if(gpsFollowMap){
+    map.easeTo({ center: [lng, lat], zoom: Math.max(map.getZoom(), 14), duration: 800, bearing: hdg || 0 });
+  }
+
+  // Stopper le centrage auto si l'utilisateur bouge la carte manuellement
+  map.once('dragstart', () => { gpsFollowMap = false; });
+
+  // Mettre à jour l'origine du trajet avec la position GPS
+  coords.origin = [lng, lat];
+
+  // ── Détection de déviation ──
+  if(coords.dest && map.getSource('route')){
+    const routeData = map.getSource('route')._data;
+    if(routeData && routeData.geometry && routeData.geometry.coordinates.length > 1){
+      const rc = routeData.geometry.coordinates;
+      const distFromRoute = distanceToPolylineM(lastGpsPos, rc);
+      if(distFromRoute > DEVIATION_THRESHOLD_M){
+        const now = Date.now();
+        if(now - lastRouteRecalc > RECALC_COOLDOWN_MS){
+          lastRouteRecalc = now;
+          showDeviationToast();
+          recalcFromCurrentPosition();
+        }
+      }
+    }
+  }
+}
+
+function onGpsError(err){
+  console.warn('GPS error:', err.message);
+  if(err.code === 1) alert('Accès à la géolocalisation refusé. Vérifiez les permissions du navigateur.');
+}
+
+// Distance minimale (mètres) d'un point à une polyligne
+function distanceToPolylineM(pt, polyline){
+  let minD = Infinity;
+  for(let i = 1; i < polyline.length; i++){
+    const d = pointToSegmentDistKm(pt, polyline[i-1], polyline[i]);
+    if(d < minD) minD = d;
+  }
+  return minD * 1000;
+}
+
+function pointToSegmentDistKm(p, a, b){
+  const dx = b[0]-a[0], dy = b[1]-a[1];
+  if(dx===0 && dy===0) return hav(p, a);
+  const t = Math.max(0, Math.min(1, ((p[0]-a[0])*dx + (p[1]-a[1])*dy) / (dx*dx + dy*dy)));
+  return hav(p, [a[0]+t*dx, a[1]+t*dy]);
+}
+
+function showDeviationToast(){
+  const toast = document.getElementById('deviation-toast');
+  toast.classList.add('show');
+  clearTimeout(deviationTimer);
+  deviationTimer = setTimeout(() => toast.classList.remove('show'), 5000);
+}
+
+async function recalcFromCurrentPosition(){
+  if(!lastGpsPos || !coords.dest || !selectedVariant) return;
+  coords.origin = lastGpsPos;
+  // Mettre à jour le champ de départ
+  document.getElementById('input-origin').value = '📍 Position GPS';
+  try {
+    setLoading(true, 'RECALCUL DEPUIS POSITION GPS…');
+    if(!scLoaded) await loadSuperchargers();
+    const direct = await fetchRoute([coords.origin, coords.dest]);
+    const totalDistKm = direct.distance / 1000;
+    const rc = direct.geometry.coordinates;
+    const stops = await planStops(rc, totalDistKm);
+    let finalRoute = direct;
+    if(stops.length > 0){
+      try {
+        const wps = [coords.origin, ...stops.map(s=>[s.charger.gps.longitude, s.charger.gps.latitude]), coords.dest];
+        finalRoute = await fetchRoute(wps);
+      } catch(e){}
+    }
+    map.getSource('route').setData(finalRoute.geometry);
+    stopMarkers.forEach(m=>m.remove()); stopMarkers = [];
+    stops.forEach((stop, i) => {
+      const el = document.createElement('div');
+      el.style.cssText = 'width:30px;height:30px;background:#c97c10;border:2.5px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 12px rgba(201,124,16,.6);cursor:pointer;';
+      el.textContent = '⚡';
+      const popup = new maplibregl.Popup({offset:22}).setHTML(scStopPopupHTML(stop, i));
+      stopMarkers.push(new maplibregl.Marker({element:el}).setLngLat([stop.charger.gps.longitude, stop.charger.gps.latitude]).setPopup(popup).addTo(map));
+    });
+    const maxRange = selectedVariant.range;
+    let finalBattPct;
+    if(stops.length === 0){
+      finalBattPct = Math.round(((maxRange*battery/100) - totalDistKm) / maxRange * 100);
+    } else {
+      const last = stops[stops.length-1];
+      finalBattPct = Math.round(((maxRange*last.battAfter/100) - last.kmToDest) / maxRange * 100);
+    }
+    finalBattPct = Math.max(0, finalBattPct);
+    const totalDur = finalRoute.duration;
+    const totalChargeMins = stops.reduce((s,st)=>s+chargeMins(st), 0);
+    renderTimeline(stops, totalDistKm, totalDur, finalBattPct, totalChargeMins);
+    document.getElementById('s-dist').textContent = (finalRoute.distance/1000).toFixed(0)+' km';
+    const h=Math.floor(totalDur/3600), m_=Math.floor((totalDur%3600)/60);
+    document.getElementById('s-time').textContent = h>0?`${h}h${String(m_).padStart(2,'0')}`:`${m_} min`;
+    document.getElementById('s-stops').textContent = stops.length;
+    document.getElementById('s-batt').textContent = finalBattPct+'%';
+  } catch(e){ console.error('Recalc error:', e); }
+  finally{ setLoading(false); }
+}
+
 function locateMe(){
-  if(!navigator.geolocation)return;
-  navigator.geolocation.getCurrentPosition(pos=>{
-    const{longitude:lng,latitude:lat}=pos.coords;
-    map.flyTo({center:[lng,lat],zoom:13,duration:1000});
-    if(userMarker)userMarker.remove();
-    const el=document.createElement('div');
-    el.style.cssText='width:13px;height:13px;background:#1a7fd4;border:2px solid #fff;border-radius:50%;box-shadow:0 0 10px rgba(26,127,212,.6)';
-    userMarker=new maplibregl.Marker({element:el}).setLngLat([lng,lat]).setPopup(new maplibregl.Popup({offset:18}).setHTML('<b>Ma position</b>')).addTo(map);
-    if(!coords.origin){coords.origin=[lng,lat];document.getElementById('input-origin').value='Ma position';document.getElementById('pill-loc').textContent='Ma position';}
-  },()=>alert('Géolocalisation non disponible.'));
+  if(!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(pos => {
+    const { longitude: lng, latitude: lat } = pos.coords;
+    map.flyTo({ center: [lng, lat], zoom: 13, duration: 1000 });
+    if(!coords.origin){ coords.origin=[lng,lat]; document.getElementById('input-origin').value='Ma position'; document.getElementById('pill-loc').textContent='Ma position'; }
+  }, () => alert('Géolocalisation non disponible.'));
 }
 
 function setStyle(s){
