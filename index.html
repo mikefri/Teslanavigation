@@ -609,42 +609,87 @@ function coordAtKm(routeCoords,targetKm){
 }
 
 // ── Plan Supercharger stops ────────────────────────────────────────
+// Utilise les distances routières réelles (OSRM) pour tous les calculs
 async function planStops(originCoord, destCoord, routeCoords, totalDistKm){
   if(!document.getElementById('sc-auto').checked||!allChargers.length) return [];
+
   const maxRange = selectedVariant.range;
-  const availKm = Math.round(maxRange*battery/100);
-  if(totalDistKm <= availKm - MARGIN_KM) return [];
+  // Distance disponible avec batterie actuelle, moins la marge de sécurité
+  const availKm = maxRange * battery / 100;
+  const safeKm  = availKm - MARGIN_KM;
 
-  const stops=[], usedIds=new Set();
-  let currentCoord=originCoord, currentBattKm=availKm-MARGIN_KM, currentKm=0;
+  // Pas besoin de s'arrêter si le trajet est dans l'autonomie sûre
+  if(totalDistKm <= safeKm) return [];
 
-  for(let iter=0;iter<10;iter++){
-    const remainKm=haversine(currentCoord,destCoord);
-    if(remainKm<=currentBattKm) break;
+  const stops = [], usedIds = new Set();
+  // kmFromStart = distance parcourue depuis le départ (sur la route)
+  let kmFromStart  = 0;
+  let currentBattKm = safeKm;   // km restants dans la batterie depuis la position actuelle
+  let currentCoord  = originCoord;
 
-    const targetKm=currentKm+currentBattKm*0.82;
-    const idealPoint=coordAtKm(routeCoords,Math.min(targetKm,currentKm+remainKm*0.5));
-    const charger=findBestCharger(idealPoint,routeCoords,usedIds);
+  for(let iter = 0; iter < 12; iter++){
+    // Distance routière restante jusqu'à la destination
+    const kmToDest = totalDistKm - kmFromStart;
+
+    // On est à portée — pas besoin d'autre arrêt
+    if(kmToDest <= currentBattKm - MARGIN_KM) break;
+
+    // Point idéal sur la route : on pousse à 80% de l'autonomie sûre
+    const idealRouteKm = kmFromStart + Math.min(currentBattKm * 0.80, kmToDest * 0.55);
+    const idealPoint   = coordAtKm(routeCoords, idealRouteKm);
+
+    const charger = findBestCharger(idealPoint, routeCoords, usedIds);
     if(!charger) break;
 
-    const cp=[charger.gps.longitude,charger.gps.latitude];
-    const distToCharger=haversine(currentCoord,cp);
-    const battAtArrival=currentBattKm-distToCharger;
-    if(battAtArrival<maxRange*(MIN_ARR_PCT/100)){
-      usedIds.add(charger.id); continue;
+    const cp = [charger.gps.longitude, charger.gps.latitude];
+
+    // Distance routière estimée jusqu'au chargeur
+    // On trouve le point le plus proche sur la route puis on mesure la distance route
+    const routeKmToCharger = closestRouteKm(routeCoords, cp);
+    const legKm = routeKmToCharger - kmFromStart;
+
+    if(legKm <= 0){ usedIds.add(charger.id); continue; }
+
+    // Batterie à l'arrivée au chargeur
+    const battAtArrival = currentBattKm - legKm;
+
+    // Impossible d'atteindre ce chargeur — on le blackliste et on cherche plus proche
+    if(battAtArrival < maxRange * (MIN_ARR_PCT / 100)){
+      usedIds.add(charger.id);
+      continue;
     }
 
-    const chargeKm=Math.round(maxRange*chargeTargetPct/100);
+    const chargeKm = maxRange * chargeTargetPct / 100;
+
+    // Distance routière restante depuis le chargeur jusqu'à la destination
+    const kmChargerToDest = totalDistKm - routeKmToCharger;
+
     usedIds.add(charger.id);
     stops.push({
-      charger, distFromPrev:Math.round(distToCharger),
-      battOnArrival:Math.round((battAtArrival/maxRange)*100),
-      battAfterCharge:chargeTargetPct,
-      distToDest:Math.round(haversine(cp,destCoord))
+      charger,
+      distFromPrev    : Math.round(legKm),
+      battOnArrival   : Math.round((battAtArrival / maxRange) * 100),
+      battAfterCharge : chargeTargetPct,
+      distToDest      : Math.round(Math.max(0, kmChargerToDest))
     });
-    currentCoord=cp; currentBattKm=chargeKm-MARGIN_KM; currentKm+=distToCharger;
+
+    kmFromStart    = routeKmToCharger;
+    currentBattKm  = chargeKm - MARGIN_KM;
+    currentCoord   = cp;
   }
   return stops;
+}
+
+// Retourne la distance cumulée (km) sur la route jusqu'au point le plus proche du charger
+function closestRouteKm(routeCoords, cp){
+  let acc = 0, bestKm = 0, bestD = Infinity;
+  for(let i = 1; i < routeCoords.length; i++){
+    const segLen = haversine(routeCoords[i-1], routeCoords[i]);
+    const d = haversine(routeCoords[i], cp);
+    if(d < bestD){ bestD = d; bestKm = acc + segLen; }
+    acc += segLen;
+  }
+  return bestKm;
 }
 
 // ── CALC ROUTE ────────────────────────────────────────────────────
@@ -692,8 +737,8 @@ async function calcRoute(){
 
     const maxRange=selectedVariant.range;
     let finalBattPct;
-    if(stops.length===0){ finalBattPct=Math.round(battery-(totalDistKm/maxRange)*100); }
-    else { const last=stops[stops.length-1]; finalBattPct=Math.round(last.battAfterCharge-(last.distToDest/maxRange)*100); }
+    if(stops.length===0){ const sk=maxRange*battery/100; finalBattPct=Math.round(((sk-totalDistKm)/maxRange)*100); }
+    else { const last=stops[stops.length-1]; const sk=maxRange*last.battAfterCharge/100; finalBattPct=Math.round(((sk-last.distToDest)/maxRange)*100); }
     finalBattPct=Math.max(0,finalBattPct);
 
     const totalDist=finalRoute.distance/1000, totalDur=finalRoute.duration;
