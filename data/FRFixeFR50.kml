@@ -1,0 +1,1576 @@
+<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://earth.google.com/kml/2.0"><Document>
+<Placemark><name>Strazeele - Radar Fixe FR 50</name>
+			<Point><coordinates>2.63187,50.7144,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Paris - Radar Fixe FR 50</name>
+			<Point><coordinates>2.410169,48.847228,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Martin-de-Seignanx - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.376692,43.49728,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Gellainville - Radar Fixe FR 50</name>
+			<Point><coordinates>1.5322,48.41669,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Stains - Radar Fixe FR 50</name>
+			<Point><coordinates>2.38266,48.95749,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Meudon - Radar Fixe FR 50</name>
+			<Point><coordinates>2.22427,48.8155,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Paris - Radar Fixe FR 50</name>
+			<Point><coordinates>2.31,48.82354,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Cannes - Radar Fixe FR 50</name>
+			<Point><coordinates>6.990782,43.549102,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Bavilliers - Radar Fixe FR 50</name>
+			<Point><coordinates>6.843725,47.622663,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Tarbes - Radar Fixe FR 50</name>
+			<Point><coordinates>0.066389,43.220033,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Vinay - Radar Fixe FR 50</name>
+			<Point><coordinates>3.90393,49.00942,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Érize-la-Petite - Radar Fixe FR 50</name>
+			<Point><coordinates>5.24001,48.91771,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Le Bonhomme - Radar Fixe FR 50</name>
+			<Point><coordinates>7.10896,48.171432,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Seloncourt - Radar Fixe FR 50</name>
+			<Point><coordinates>6.854812,47.466448,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Villers-en-Cauchies - Radar Fixe FR 50</name>
+			<Point><coordinates>3.398192,50.224211,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Canapville - Radar Fixe FR 50</name>
+			<Point><coordinates>0.132228,49.319529,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Blaincourt-lès-Précy - Radar Fixe FR 50</name>
+			<Point><coordinates>2.348661,49.226953,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Normanville - Radar Fixe FR 50</name>
+			<Point><coordinates>1.17277,49.068152,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Brulange - Radar Fixe FR 50</name>
+			<Point><coordinates>6.550453,48.964843,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Boulogne-Billancourt - Radar Fixe FR 50</name>
+			<Point><coordinates>2.226788,48.845931,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>La Chapelle-Bouëxic - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.941918,47.930176,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Bondeval - Radar Fixe FR 50</name>
+			<Point><coordinates>6.849805,47.449339,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Toulouse - Radar Fixe FR 50</name>
+			<Point><coordinates>1.445424,43.6152,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Just - Radar Fixe FR 50</name>
+			<Point><coordinates>4.61325,44.30612,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Limoges - Radar Fixe FR 50</name>
+			<Point><coordinates>1.24388,45.82159,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Paris - Radar Fixe FR 50</name>
+			<Point><coordinates>2.26748,48.87363,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Fouquerolles - Radar Fixe FR 50</name>
+			<Point><coordinates>2.213246,49.457964,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Le Pian-Médoc - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.709277,44.958998,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Les Mureaux - Radar Fixe FR 50</name>
+			<Point><coordinates>1.93147,48.99572,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Mougins - Radar Fixe FR 50</name>
+			<Point><coordinates>7.01788,43.602316,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Lyon - Radar Fixe FR 50</name>
+			<Point><coordinates>4.832862,45.751973,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Pont-à-Marcq - Radar Fixe FR 50</name>
+			<Point><coordinates>3.11771,50.51658,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Ajaccio - Radar Fixe FR 50</name>
+			<Point><coordinates>8.715979,41.90876,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Clermont-Ferrand - Radar Fixe FR 50</name>
+			<Point><coordinates>3.137366,45.786357,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Auteuil - Radar Fixe FR 50</name>
+			<Point><coordinates>2.096667,49.342433,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Roquebrune-Cap-Martin - Radar Fixe FR 50</name>
+			<Point><coordinates>7.4662,43.75926,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Ris-Orangis - Radar Fixe FR 50</name>
+			<Point><coordinates>2.41836,48.64799,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Vercia - Radar Fixe FR 50</name>
+			<Point><coordinates>5.458811,46.597716,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Capesterre-Belle-Eau - Radar Fixe FR 50</name>
+			<Point><coordinates>-61.5631,16.0964,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Estrées-Saint-Denis - Radar Fixe FR 50</name>
+			<Point><coordinates>2.642597,49.43476,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Essert - Radar Fixe FR 50</name>
+			<Point><coordinates>6.80059,47.639696,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Montpellier - Radar Fixe FR 50</name>
+			<Point><coordinates>3.82242,43.63202,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Marseille - Radar Fixe FR 50</name>
+			<Point><coordinates>5.37576,43.25223,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Amilly - Radar Fixe FR 50</name>
+			<Point><coordinates>2.75456,47.98092,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Clermont-Ferrand - Radar Fixe FR 50</name>
+			<Point><coordinates>3.1261,45.76248,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Fuans - Radar Fixe FR 50</name>
+			<Point><coordinates>6.569155,47.129497,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Annay - Radar Fixe FR 50</name>
+			<Point><coordinates>2.89473,50.46177,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Just - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.939735,47.7614,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Sanguinet - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.069526,44.466972,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Lussac-les-Châteaux - Radar Fixe FR 50</name>
+			<Point><coordinates>0.712503,46.404759,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Toulouse - Radar Fixe FR 50</name>
+			<Point><coordinates>1.42153,43.55153,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Créteil - Radar Fixe FR 50</name>
+			<Point><coordinates>2.43932,48.7738,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Paris - Radar Fixe FR 50</name>
+			<Point><coordinates>2.39615,48.89016,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Cannes - Radar Fixe FR 50</name>
+			<Point><coordinates>7.052047,43.54758,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Denney - Radar Fixe FR 50</name>
+			<Point><coordinates>6.891812,47.651331,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Villeneuve-sur-Lot - Radar Fixe FR 50</name>
+			<Point><coordinates>0.72239,44.3986,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Audenge - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.95976,44.70303,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Haudainville - Radar Fixe FR 50</name>
+			<Point><coordinates>5.434235,49.136875,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Paris - Radar Fixe FR 50</name>
+			<Point><coordinates>2.33504,48.8371,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Sochaux - Radar Fixe FR 50</name>
+			<Point><coordinates>6.833469,47.519255,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Mios - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.862117,44.648968,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Pré-en-Pail-Saint-Samson - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.19695,48.46024,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Lachapelle-sous-Rougemont - Radar Fixe FR 50</name>
+			<Point><coordinates>7.023072,47.715942,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Besançon - Radar Fixe FR 50</name>
+			<Point><coordinates>6.00953,47.25104,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Thonon-les-Bains - Radar Fixe FR 50</name>
+			<Point><coordinates>6.45244,46.363,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Garges-lès-Gonesse - Radar Fixe FR 50</name>
+			<Point><coordinates>2.404954,48.969198,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>L&acute;Hôtellerie - Radar Fixe FR 50</name>
+			<Point><coordinates>0.41131,49.1422,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Duvy - Radar Fixe FR 50</name>
+			<Point><coordinates>2.856582,49.234961,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Toulouse - Radar Fixe FR 50</name>
+			<Point><coordinates>1.440167,43.6255006,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Jean-d´Heurs - Radar Fixe FR 50</name>
+			<Point><coordinates>3.440097,45.827533,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Panazol - Radar Fixe FR 50</name>
+			<Point><coordinates>1.28822,45.82515,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Buvilly - Radar Fixe FR 50</name>
+			<Point><coordinates>5.71633,46.86834,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Pierre-d&acute;Exideuil - Radar Fixe FR 50</name>
+			<Point><coordinates>0.266367,46.15033,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Sulpice-de-Faleyrens - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.16606,44.878755,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Félix-Lauragais - Radar Fixe FR 50</name>
+			<Point><coordinates>1.8809286,43.4513943,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Rolleboise - Radar Fixe FR 50</name>
+			<Point><coordinates>1.610821,49.019409,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Pont-sur-Vanne - Radar Fixe FR 50</name>
+			<Point><coordinates>3.440181,48.185053,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>La Chapelle-en-Serval - Radar Fixe FR 50</name>
+			<Point><coordinates>2.533139,49.122639,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Bastia - Radar Fixe FR 50</name>
+			<Point><coordinates>9.44655,42.684,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Génicourt-sur-Meuse - Radar Fixe FR 50</name>
+			<Point><coordinates>5.435276,49.033903,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Hérimoncourt - Radar Fixe FR 50</name>
+			<Point><coordinates>6.886195,47.435913,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Nice - Radar Fixe FR 50</name>
+			<Point><coordinates>7.28269,43.7067,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Dunière-sur-Eyrieux - Radar Fixe FR 50</name>
+			<Point><coordinates>4.66179,44.82335,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Chemin - Radar Fixe FR 50</name>
+			<Point><coordinates>5.31796,46.98052,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Nice - Radar Fixe FR 50</name>
+			<Point><coordinates>7.279573,43.707028,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Beausoleil - Radar Fixe FR 50</name>
+			<Point><coordinates>7.41241,43.73883,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Senlisse - Radar Fixe FR 50</name>
+			<Point><coordinates>1.966115,48.67923,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Ajaccio - Radar Fixe FR 50</name>
+			<Point><coordinates>8.74412,41.9334,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>La Chaussée-Saint-Victor - Radar Fixe FR 50</name>
+			<Point><coordinates>1.362741,47.614753,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Jasseron - Radar Fixe FR 50</name>
+			<Point><coordinates>5.318133,46.211802,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Lanton - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.93016,44.777264,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Quéven - Radar Fixe FR 50</name>
+			<Point><coordinates>-3.377425,47.771851,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Dourlers - Radar Fixe FR 50</name>
+			<Point><coordinates>3.95275,50.176833,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Le Mesnil-le-Roi - Radar Fixe FR 50</name>
+			<Point><coordinates>2.123951,48.942507,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Mios - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.9473,44.61378,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Boubiers - Radar Fixe FR 50</name>
+			<Point><coordinates>1.864838,49.20463,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Paris - Radar Fixe FR 50</name>
+			<Point><coordinates>2.3096,48.8965,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Moustey - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.761422,44.358578,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Mimizan - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.220122,44.194006,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Agen - Radar Fixe FR 50</name>
+			<Point><coordinates>0.64742,44.2117,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Ludes - Radar Fixe FR 50</name>
+			<Point><coordinates>4.095514,49.149598,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Paris - Radar Fixe FR 50</name>
+			<Point><coordinates>2.408139,48.847238,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Courcelles-lès-Montbéliard - Radar Fixe FR 50</name>
+			<Point><coordinates>6.776207,47.501303,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Laval - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.7529,48.06899,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Strazeele - Radar Fixe FR 50</name>
+			<Point><coordinates>2.631784,50.713083,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Germain-le-Châtelet - Radar Fixe FR 50</name>
+			<Point><coordinates>6.958927,47.695157,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Belfort - Radar Fixe FR 50</name>
+			<Point><coordinates>6.852399,47.641181,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Versailles - Radar Fixe FR 50</name>
+			<Point><coordinates>2.147929,48.809471,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Paris - Radar Fixe FR 50</name>
+			<Point><coordinates>2.299104,48.826,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Yrieix-sur-Charente - Radar Fixe FR 50</name>
+			<Point><coordinates>0.1182387,45.669015,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Toulouse - Radar Fixe FR 50</name>
+			<Point><coordinates>1.430225,43.613065,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Challuy - Radar Fixe FR 50</name>
+			<Point><coordinates>3.12125,46.9456,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Pradines - Radar Fixe FR 50</name>
+			<Point><coordinates>1.40153,44.4814,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Benoît - Radar Fixe FR 50</name>
+			<Point><coordinates>55.70468,-21.0689,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Montbéliard - Radar Fixe FR 50</name>
+			<Point><coordinates>6.796641,47.519264,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Vouharte - Radar Fixe FR 50</name>
+			<Point><coordinates>0.068613,45.817443,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Puteaux - Radar Fixe FR 50</name>
+			<Point><coordinates>2.2419,48.886988,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Nantua - Radar Fixe FR 50</name>
+			<Point><coordinates>5.599271,46.161157,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Lagny-le-Sec - Radar Fixe FR 50</name>
+			<Point><coordinates>2.753128,49.089373,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Ajaccio - Radar Fixe FR 50</name>
+			<Point><coordinates>8.756384,41.932187,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Paris - Radar Fixe FR 50</name>
+			<Point><coordinates>2.377677,48.837187,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Audincourt - Radar Fixe FR 50</name>
+			<Point><coordinates>6.830186,47.487794,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Bidart - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.56899,43.4498,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Callen - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.47795,44.29781,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Dijon - Radar Fixe FR 50</name>
+			<Point><coordinates>5.07176,47.31627,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Menton - Radar Fixe FR 50</name>
+			<Point><coordinates>7.51571,43.7837,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Poncin - Radar Fixe FR 50</name>
+			<Point><coordinates>5.427553,46.078017,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Pont-Sainte-Maxence - Radar Fixe FR 50</name>
+			<Point><coordinates>2.604729,49.293684,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Sarrola-Carcopino - Radar Fixe FR 50</name>
+			<Point><coordinates>8.80909,41.9618,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Bonnières - Radar Fixe FR 50</name>
+			<Point><coordinates>1.968745,49.511344,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Nanterre - Radar Fixe FR 50</name>
+			<Point><coordinates>2.210788,48.886326,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Rachecourt-Suzémont - Radar Fixe FR 50</name>
+			<Point><coordinates>4.96275,48.45504,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Fleurines - Radar Fixe FR 50</name>
+			<Point><coordinates>2.585892,49.266424,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Lachapelle-sous-Rougemont - Radar Fixe FR 50</name>
+			<Point><coordinates>7.015231,47.711734,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Pouilly-sous-Charlieu - Radar Fixe FR 50</name>
+			<Point><coordinates>4.10839,46.1386,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Mimizan - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.260653,44.21118,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Toulouse - Radar Fixe FR 50</name>
+			<Point><coordinates>1.424857,43.651484,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Chateauroux - Radar Fixe FR 50</name>
+			<Point><coordinates>1.69405,46.80375,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Caudrot - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.14978,44.57672,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Orléans - Radar Fixe FR 50</name>
+			<Point><coordinates>1.897277,47.905348,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Avignon - Radar Fixe FR 50</name>
+			<Point><coordinates>4.84225,43.92806,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Tourcoing - Radar Fixe FR 50</name>
+			<Point><coordinates>3.172576,50.744003,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Versailles - Radar Fixe FR 50</name>
+			<Point><coordinates>2.152759,48.798303,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Villers-Allerand - Radar Fixe FR 50</name>
+			<Point><coordinates>4.01147,49.1622,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>La Bâtie-Divisin - Radar Fixe FR 50</name>
+			<Point><coordinates>5.596202,45.508837,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Nommay - Radar Fixe FR 50</name>
+			<Point><coordinates>6.846759,47.537835,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Coutiches - Radar Fixe FR 50</name>
+			<Point><coordinates>3.206167,50.457548,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Ernée - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.91748,48.29675,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Blincourt - Radar Fixe FR 50</name>
+			<Point><coordinates>2.619375,49.381548,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Lanton - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.9365416,44.7881116,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Fontenay-sur-Eure - Radar Fixe FR 50</name>
+			<Point><coordinates>1.38874,48.40209,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Paris - Radar Fixe FR 50</name>
+			<Point><coordinates>2.36161,48.90082,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Pont-de-Roide-Vermondans - Radar Fixe FR 50</name>
+			<Point><coordinates>6.766558,47.401046,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Valdoie - Radar Fixe FR 50</name>
+			<Point><coordinates>6.847902,47.676611,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Amans - Radar Fixe FR 50</name>
+			<Point><coordinates>3.4507,44.6613,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Carcassonne - Radar Fixe FR 50</name>
+			<Point><coordinates>2.36331,43.2105,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Annemasse - Radar Fixe FR 50</name>
+			<Point><coordinates>6.24681,46.184206,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Valentigney - Radar Fixe FR 50</name>
+			<Point><coordinates>6.832514,47.463654,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Virelade - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.38443,44.6638,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Paris - Radar Fixe FR 50</name>
+			<Point><coordinates>2.37801,48.83682,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Méru - Radar Fixe FR 50</name>
+			<Point><coordinates>2.129464,49.242853,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Germain-le-Châtelet - Radar Fixe FR 50</name>
+			<Point><coordinates>6.959668,47.702261,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Audincourt - Radar Fixe FR 50</name>
+			<Point><coordinates>6.853657,47.477891,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Anglet - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.5341676,43.4899088,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Taller - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.06712,43.87221,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Troyes - Radar Fixe FR 50</name>
+			<Point><coordinates>4.08509,48.28951,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Avignon - Radar Fixe FR 50</name>
+			<Point><coordinates>4.8094,43.9221,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Roquebrune-Cap-Martin - Radar Fixe FR 50</name>
+			<Point><coordinates>7.44134,43.75458,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Toulouse - Radar Fixe FR 50</name>
+			<Point><coordinates>1.426563,43.63464,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>La Noue - Radar Fixe FR 50</name>
+			<Point><coordinates>3.61216,48.73181,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Rochefort-Montagne - Radar Fixe FR 50</name>
+			<Point><coordinates>2.800313,45.685194,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Chambly - Radar Fixe FR 50</name>
+			<Point><coordinates>2.226427,49.176546,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Denis - Radar Fixe FR 50</name>
+			<Point><coordinates>2.364076,48.942836,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Clairoix - Radar Fixe FR 50</name>
+			<Point><coordinates>2.83705,49.430823,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Valdoie - Radar Fixe FR 50</name>
+			<Point><coordinates>6.850933,47.662893,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Nevers - Radar Fixe FR 50</name>
+			<Point><coordinates>3.16688,46.99665,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Reims - Radar Fixe FR 50</name>
+			<Point><coordinates>4.004461,49.290247,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Mondicourt - Radar Fixe FR 50</name>
+			<Point><coordinates>2.456203,50.177005,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>La Chapelle-d'Angillon - Radar Fixe FR 50</name>
+			<Point><coordinates>2.43215,47.3667,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Belfort - Radar Fixe FR 50</name>
+			<Point><coordinates>6.8570942,47.6332749,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Beauvais - Radar Fixe FR 50</name>
+			<Point><coordinates>2.0668742,49.4140835,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Droux - Radar Fixe FR 50</name>
+			<Point><coordinates>1.14421,46.16704,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Clermont-Dessous - Radar Fixe FR 50</name>
+			<Point><coordinates>0.44565,44.23797,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Bar-le-Duc - Radar Fixe FR 50</name>
+			<Point><coordinates>5.152917,48.767418,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Paris - Radar Fixe FR 50</name>
+			<Point><coordinates>2.41431,48.84571,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Moliens - Radar Fixe FR 50</name>
+			<Point><coordinates>1.812831,49.665145,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Neuilly-sur-Seine - Radar Fixe FR 50</name>
+			<Point><coordinates>2.27174,48.88997,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Les Assions - Radar Fixe FR 50</name>
+			<Point><coordinates>4.189698,44.43247,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Vauciennes - Radar Fixe FR 50</name>
+			<Point><coordinates>3.031372,49.241203,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Montigny-lès-Cormeilles - Radar Fixe FR 50</name>
+			<Point><coordinates>2.201471,48.991271,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Paris - Radar Fixe FR 50</name>
+			<Point><coordinates>2.268774,48.866488,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Éragny-sur-Epte - Radar Fixe FR 50</name>
+			<Point><coordinates>1.774444,49.317403,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Sever - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.563487,43.773143,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Nevers - Radar Fixe FR 50</name>
+			<Point><coordinates>3.139437,46.976103,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Perpignan - Radar Fixe FR 50</name>
+			<Point><coordinates>2.889829,42.69421,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Fougerolles - Radar Fixe FR 50</name>
+			<Point><coordinates>6.394992,47.880014,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Beauvais - Radar Fixe FR 50</name>
+			<Point><coordinates>2.07331,49.436981,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Epinal - Radar Fixe FR 50</name>
+			<Point><coordinates>6.454474,48.164382,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Longeault-Pluvault - Radar Fixe FR 50</name>
+			<Point><coordinates>5.25682,47.21842,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Aubière - Radar Fixe FR 50</name>
+			<Point><coordinates>3.11921,45.7625,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Vaumoise - Radar Fixe FR 50</name>
+			<Point><coordinates>2.98768,49.23517,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Mouflaines - Radar Fixe FR 50</name>
+			<Point><coordinates>1.553152,49.248032,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Roppe - Radar Fixe FR 50</name>
+			<Point><coordinates>6.92383,47.67199,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Menton - Radar Fixe FR 50</name>
+			<Point><coordinates>7.516226,43.783811,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Hérimoncourt - Radar Fixe FR 50</name>
+			<Point><coordinates>6.875912,47.451977,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Auchy-au-Bois - Radar Fixe FR 50</name>
+			<Point><coordinates>2.37008,50.55816,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Milly-sur-Thérain - Radar Fixe FR 50</name>
+			<Point><coordinates>1.9912745450449,49.504265896157,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Chaumont - Radar Fixe FR 50</name>
+			<Point><coordinates>5.142355,48.105293,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Marseille - Radar Fixe FR 50</name>
+			<Point><coordinates>5.4385,43.28486,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Beausoleil - Radar Fixe FR 50</name>
+			<Point><coordinates>7.42107,43.743754,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Toulouse - Radar Fixe FR 50</name>
+			<Point><coordinates>1.469618,43.640383,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>La Noue - Radar Fixe FR 50</name>
+			<Point><coordinates>3.61256,48.73193,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Triel-sur-Seine - Radar Fixe FR 50</name>
+			<Point><coordinates>1.99019,48.99144,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Maisons-Alfort - Radar Fixe FR 50</name>
+			<Point><coordinates>2.427357,48.812928,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Pérouges - Radar Fixe FR 50</name>
+			<Point><coordinates>5.168781,45.884268,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Sochaux - Radar Fixe FR 50</name>
+			<Point><coordinates>6.826115,47.516273,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Veauche - Radar Fixe FR 50</name>
+			<Point><coordinates>4.285685,45.556991,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Étain - Radar Fixe FR 50</name>
+			<Point><coordinates>5.62562,49.21304,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Toulouse - Radar Fixe FR 50</name>
+			<Point><coordinates>1.4607825,43.6140484,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Challans - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.809912,46.859141,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Marolles - Radar Fixe FR 50</name>
+			<Point><coordinates>3.11095,49.15536,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Orléans - Radar Fixe FR 50</name>
+			<Point><coordinates>1.8955,47.8977,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Strasbourg - Radar Fixe FR 50</name>
+			<Point><coordinates>7.786938,48.571047,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Tarbes - Radar Fixe FR 50</name>
+			<Point><coordinates>0.07208,43.25697,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Fépin - Radar Fixe FR 50</name>
+			<Point><coordinates>4.725675,50.017767,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Paris - Radar Fixe FR 50</name>
+			<Point><coordinates>2.374929,48.900456,0</coordinates></Point>
+			</Placemark>
+<Placemark><name> Bavincourt - Radar Fixe FR 50</name>
+			<Point><coordinates>2.559394,50.21323,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Royat - Radar Fixe FR 50</name>
+			<Point><coordinates>3.039281,45.765861,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Toulouse - Radar Fixe FR 50</name>
+			<Point><coordinates>1.41281,43.56789,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Clermont-Ferrand - Radar Fixe FR 50</name>
+			<Point><coordinates>3.062322,45.793714,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Amilly - Radar Fixe FR 50</name>
+			<Point><coordinates>2.752956,47.981947,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Cannes - Radar Fixe FR 50</name>
+			<Point><coordinates>6.968282,43.559738,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Vierzon - Radar Fixe FR 50</name>
+			<Point><coordinates>2.101502,47.213921,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Civray - Radar Fixe FR 50</name>
+			<Point><coordinates>2.168975,46.993502,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Cyprien - Radar Fixe FR 50</name>
+			<Point><coordinates>3.03303,42.6378,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Froidmont-Cohartille - Radar Fixe FR 50</name>
+			<Point><coordinates>3.707621,49.685043,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Mandeure - Radar Fixe FR 50</name>
+			<Point><coordinates>6.795004,47.451337,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Luxeuil-les-Bains - Radar Fixe FR 50</name>
+			<Point><coordinates>6.37743,47.8274,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Bar-sur-Aube - Radar Fixe FR 50</name>
+			<Point><coordinates>4.69841,48.24006,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Lyon - Radar Fixe FR 50</name>
+			<Point><coordinates>4.81753,45.73319,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Ponchon - Radar Fixe FR 50</name>
+			<Point><coordinates>2.17671,49.35463,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Épinay-sur-Seine - Radar Fixe FR 50</name>
+			<Point><coordinates>2.33884,48.951687,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Montbéliard - Radar Fixe FR 50</name>
+			<Point><coordinates>6.80655,47.498,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Amilly - Radar Fixe FR 50</name>
+			<Point><coordinates>2.75641,47.96985,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Jouy-en-Josas - Radar Fixe FR 50</name>
+			<Point><coordinates>2.16444,48.76389,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Maizières-lès-Metz - Radar Fixe FR 50</name>
+			<Point><coordinates>6.160459,49.201685,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Fontaine-lès-Dijon - Radar Fixe FR 50</name>
+			<Point><coordinates>5.033707,47.337,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Nice - Radar Fixe FR 50</name>
+			<Point><coordinates>7.296046,43.700119,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Beausoleil - Radar Fixe FR 50</name>
+			<Point><coordinates>7.425021,43.748521,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Toulouse - Radar Fixe FR 50</name>
+			<Point><coordinates>1.476071,43.630069,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Mondescourt - Radar Fixe FR 50</name>
+			<Point><coordinates>3.112447,49.592152,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Yerres - Radar Fixe FR 50</name>
+			<Point><coordinates>2.500021,48.719815,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Grosmagny - Radar Fixe FR 50</name>
+			<Point><coordinates>6.87774,47.72261,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Goincourt - Radar Fixe FR 50</name>
+			<Point><coordinates>2.043968,49.432333,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Lanton - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.027583,44.710824,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Bourges - Radar Fixe FR 50</name>
+			<Point><coordinates>2.413947,47.109727,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Le Pont-de-Beauvoisin - Radar Fixe FR 50</name>
+			<Point><coordinates>5.67345,45.53136,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Rouvrois-sur-Othain - Radar Fixe FR 50</name>
+			<Point><coordinates>5.63007,49.38067,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Lyon - Radar Fixe FR 50</name>
+			<Point><coordinates>4.836024,45.772712,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Moulidars - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.034331,45.676524,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Boulogne-Billancourt - Radar Fixe FR 50</name>
+			<Point><coordinates>2.2239,48.8378,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Neufchelles - Radar Fixe FR 50</name>
+			<Point><coordinates>3.06445,49.1179,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Erstein - Radar Fixe FR 50</name>
+			<Point><coordinates>7.658839,48.427036,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Auch - Radar Fixe FR 50</name>
+			<Point><coordinates>0.5825,43.6331,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Beauvois-en-Cambrésis - Radar Fixe FR 50</name>
+			<Point><coordinates>3.373,50.143,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Paris - Radar Fixe FR 50</name>
+			<Point><coordinates>2.368908,48.81811,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Pont-de-Roide - Radar Fixe FR 50</name>
+			<Point><coordinates>6.778552,47.387937,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Épinay-sur-Seine - Radar Fixe FR 50</name>
+			<Point><coordinates>2.3016281,48.9594831,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Le Puy-en-Velay - Radar Fixe FR 50</name>
+			<Point><coordinates>3.88818,45.03924,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Toulouse - Radar Fixe FR 50</name>
+			<Point><coordinates>1.39588,43.5805,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Trosly-Breuil - Radar Fixe FR 50</name>
+			<Point><coordinates>2.970211,49.402452,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Aubervilliers - Radar Fixe FR 50</name>
+			<Point><coordinates>2.37509,48.905942,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Vault-de-Lugny - Radar Fixe FR 50</name>
+			<Point><coordinates>3.840215,47.512341,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Le Port-Marly - Radar Fixe FR 50</name>
+			<Point><coordinates>2.10657,48.87742,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Aureilhan - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.201182,44.213702,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Sever - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.604568,43.752516,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Nevers - Radar Fixe FR 50</name>
+			<Point><coordinates>3.132583,46.995302,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Montpellier - Radar Fixe FR 50</name>
+			<Point><coordinates>3.84153,43.60888,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Aragnouet - Radar Fixe FR 50</name>
+			<Point><coordinates>0.194782,42.732839,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Toulouse - Radar Fixe FR 50</name>
+			<Point><coordinates>1.4325,43.62631,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Aubin-des-Coudrais - Radar Fixe FR 50</name>
+			<Point><coordinates>0.57904,48.1701,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Rives-en-Seine - Radar Fixe FR 50</name>
+			<Point><coordinates>0.72044,49.52804,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Vergigny - Radar Fixe FR 50</name>
+			<Point><coordinates>3.732775,47.984495,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Creuzier-le-Neuf - Radar Fixe FR 50</name>
+			<Point><coordinates>3.45741,46.1701,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Ormoy-Villers - Radar Fixe FR 50</name>
+			<Point><coordinates>2.846482,49.198067,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Rosny-sous-Bois - Radar Fixe FR 50</name>
+			<Point><coordinates>2.487527,48.883983,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Colmar - Radar Fixe FR 50</name>
+			<Point><coordinates>7.32775,48.06849,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Orléans - Radar Fixe FR 50</name>
+			<Point><coordinates>1.88276,47.8978,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>L'Arbresle - Radar Fixe FR 50</name>
+			<Point><coordinates>4.610228,45.82975,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Vénissieux - Radar Fixe FR 50</name>
+			<Point><coordinates>4.86602,45.72586,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Feyzin - Radar Fixe FR 50</name>
+			<Point><coordinates>4.849389,45.679916,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Crêts-en-Belledonne - Radar Fixe FR 50</name>
+			<Point><coordinates>5.99766,45.358768,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Roquebrune-Cap-Martin - Radar Fixe FR 50</name>
+			<Point><coordinates>7.4753,43.76065,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Mandeure - Radar Fixe FR 50</name>
+			<Point><coordinates>6.820595,47.444972,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Versailles - Radar Fixe FR 50</name>
+			<Point><coordinates>2.138294,48.805481,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Lauvallières - Radar Fixe FR 50</name>
+			<Point><coordinates>6.2605172,49.1242947,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Champigny-sur-Marne - Radar Fixe FR 50</name>
+			<Point><coordinates>2.49818,48.81709,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Paris - Radar Fixe FR 50</name>
+			<Point><coordinates>2.280893,48.832337,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Mouzeil - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.297412,47.421864,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Tournon-sur-Rhône - Radar Fixe FR 50</name>
+			<Point><coordinates>4.84059,45.0582,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Lonny - Radar Fixe FR 50</name>
+			<Point><coordinates>4.58555,49.8175,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Marseille - Radar Fixe FR 50</name>
+			<Point><coordinates>5.364875,43.303343,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Biscarrosse - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.161305,44.400811,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Juziers - Radar Fixe FR 50</name>
+			<Point><coordinates>1.8462,48.9898,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Puteaux - Radar Fixe FR 50</name>
+			<Point><coordinates>2.238593,48.875387,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Bailleul-sur-Thérain - Radar Fixe FR 50</name>
+			<Point><coordinates>2.207751,49.392506,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Auvillers-les-Forges - Radar Fixe FR 50</name>
+			<Point><coordinates>4.377574,49.872645,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Bellac - Radar Fixe FR 50</name>
+			<Point><coordinates>1.063714,46.12271,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Couvrot - Radar Fixe FR 50</name>
+			<Point><coordinates>4.58538,48.76332,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Bourguignon - Radar Fixe FR 50</name>
+			<Point><coordinates>6.777662,47.415366,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Éloie - Radar Fixe FR 50</name>
+			<Point><coordinates>6.875139,47.637254,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Creuzier-le-Vieux - Radar Fixe FR 50</name>
+			<Point><coordinates>3.413383,46.155128,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Pinas - Radar Fixe FR 50</name>
+			<Point><coordinates>0.43068,43.11676,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Roquebrune-Cap-Martin - Radar Fixe FR 50</name>
+			<Point><coordinates>7.448982,43.757611,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Aubervilliers - Radar Fixe FR 50</name>
+			<Point><coordinates>2.386031,48.90989,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Priest - Radar Fixe FR 50</name>
+			<Point><coordinates>4.950732,45.684186,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Capbreton - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.410622,43.648179,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Montluçon - Radar Fixe FR 50</name>
+			<Point><coordinates>2.631963,46.342022,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Ons-en-Bray - Radar Fixe FR 50</name>
+			<Point><coordinates>1.94308,49.4183,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Aragnouet - Radar Fixe FR 50</name>
+			<Point><coordinates>0.191326,42.748081,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Gignac-la-Nerthe - Radar Fixe FR 50</name>
+			<Point><coordinates>5.225931,43.394533,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Suaux - Radar Fixe FR 50</name>
+			<Point><coordinates>0.503879,45.851158,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Gevingey - Radar Fixe FR 50</name>
+			<Point><coordinates>5.50108,46.64131,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Dieulouard - Radar Fixe FR 50</name>
+			<Point><coordinates>6.067444,48.829917,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Mornay-sur-Allier - Radar Fixe FR 50</name>
+			<Point><coordinates>3.027927,46.81887,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Roquebrune-Cap-Martin - Radar Fixe FR 50</name>
+			<Point><coordinates>7.47087,43.75806,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Lorp Sentaraille - Radar Fixe FR 50</name>
+			<Point><coordinates>1.1159529,43.0111894,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Groslay - Radar Fixe FR 50</name>
+			<Point><coordinates>2.362557,48.983037,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Clermont-Ferrand - Radar Fixe FR 50</name>
+			<Point><coordinates>3.131873,45.780787,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Maurice-lès-Charencey - Radar Fixe FR 50</name>
+			<Point><coordinates>0.76113,48.6523,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Cagnes-sur-Mer - Radar Fixe FR 50</name>
+			<Point><coordinates>7.16158,43.65574,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Sever - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.574925,43.772161,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Versailles - Radar Fixe FR 50</name>
+			<Point><coordinates>2.13347,48.80512,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Compiègne - Radar Fixe FR 50</name>
+			<Point><coordinates>2.84543,49.42202,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Boissy-Saint-Léger - Radar Fixe FR 50</name>
+			<Point><coordinates>2.50879,48.74899,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Paris - Radar Fixe FR 50</name>
+			<Point><coordinates>2.41392,48.86084,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Cannes - Radar Fixe FR 50</name>
+			<Point><coordinates>6.992013,43.550482,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Toulouse - Radar Fixe FR 50</name>
+			<Point><coordinates>1.459158,43.642925,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Warcq - Radar Fixe FR 50</name>
+			<Point><coordinates>4.68278,49.7842,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Courbevoie - Radar Fixe FR 50</name>
+			<Point><coordinates>2.263286,48.897874,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Nice - Radar Fixe FR 50</name>
+			<Point><coordinates>7.27158,43.71309,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Poissy - Radar Fixe FR 50</name>
+			<Point><coordinates>2.061252,48.94528,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Trumilly - Radar Fixe FR 50</name>
+			<Point><coordinates>2.76658,49.2261,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Magny-les-Hameaux - Radar Fixe FR 50</name>
+			<Point><coordinates>2.020978,48.745771,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Marmande - Radar Fixe FR 50</name>
+			<Point><coordinates>0.167517,44.502573,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Nancy - Radar Fixe FR 50</name>
+			<Point><coordinates>6.17647,48.67907,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Villemoisson-sur-Orge - Radar Fixe FR 50</name>
+			<Point><coordinates>2.33965,48.66607,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>issy les moulineaux - Radar Fixe FR 50</name>
+			<Point><coordinates>2.25916,48.826238,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Sainte-Suzanne - Radar Fixe FR 50</name>
+			<Point><coordinates>6.766427,47.508314,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Peyrehorade - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.117042,43.556291,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Aurillac - Radar Fixe FR 50</name>
+			<Point><coordinates>2.460707,44.94473,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Toulouse - Radar Fixe FR 50</name>
+			<Point><coordinates>1.41954,43.61,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Valence - Radar Fixe FR 50</name>
+			<Point><coordinates>4.881878,44.904912,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Denis-lès-Sens - Radar Fixe FR 50</name>
+			<Point><coordinates>3.26651,48.2279,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Hénonville - Radar Fixe FR 50</name>
+			<Point><coordinates>2.051847,49.2121271,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Suresnes - Radar Fixe FR 50</name>
+			<Point><coordinates>2.22475,48.86813,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Soorts-Hossegor - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.398847,43.660462,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Beaulieu-les-Fontaines - Radar Fixe FR 50</name>
+			<Point><coordinates>2.915001,49.667391,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Sermoise-sur-Loire - Radar Fixe FR 50</name>
+			<Point><coordinates>3.157,46.96559,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Marseille - Radar Fixe FR 50</name>
+			<Point><coordinates>5.35759,43.35786,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Noailles - Radar Fixe FR 50</name>
+			<Point><coordinates>2.19778,49.33508,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Sermoise-sur-Loire - Radar Fixe FR 50</name>
+			<Point><coordinates>3.158219,46.94608,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Mortefontaine - Radar Fixe FR 50</name>
+			<Point><coordinates>2.6048796,49.1110668,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Macouria - Radar Fixe FR 50</name>
+			<Point><coordinates>-52.47693,5.01545,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Tourcoing - Radar Fixe FR 50</name>
+			<Point><coordinates>3.17164,50.73631,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Béon - Radar Fixe FR 50</name>
+			<Point><coordinates>5.75284,45.85201,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Anglet - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.52416,43.49395,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Verberie - Radar Fixe FR 50</name>
+			<Point><coordinates>2.738296,49.315591,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Villemonble - Radar Fixe FR 50</name>
+			<Point><coordinates>2.505919,48.884976,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Niort - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.43121,46.317067,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Époye - Radar Fixe FR 50</name>
+			<Point><coordinates>4.233746,49.289187,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Amilly - Radar Fixe FR 50</name>
+			<Point><coordinates>2.75775,47.96834,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Parempuyre - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.608337,44.959947,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Belfort - Radar Fixe FR 50</name>
+			<Point><coordinates>6.84603,47.6363,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Angers - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.509592,47.488616,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Nanteuil - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.191813,46.418185,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Laneuveville-devant-Nancy - Radar Fixe FR 50</name>
+			<Point><coordinates>6.253773,48.640656,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Lachapelle-sous-Gerberoy - Radar Fixe FR 50</name>
+			<Point><coordinates>1.869697,49.535789,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Chaville - Radar Fixe FR 50</name>
+			<Point><coordinates>2.19866,48.808996,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Sornin-Leulac - Radar Fixe FR 50</name>
+			<Point><coordinates>1.2956518,46.1992286,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Clamart - Radar Fixe FR 50</name>
+			<Point><coordinates>2.258849,48.807824,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Paris - Radar Fixe FR 50</name>
+			<Point><coordinates>2.37964,48.82199,0</coordinates></Point>
+			</Placemark>
+<Placemark><name> Haute-Épine - Radar Fixe FR 50</name>
+			<Point><coordinates>2.004906,49.588286,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Toulouse - Radar Fixe FR 50</name>
+			<Point><coordinates>1.439348,43.586895,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saulce-sur-Rhône - Radar Fixe FR 50</name>
+			<Point><coordinates>4.800035,44.705319,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Quentin - Radar Fixe FR 50</name>
+			<Point><coordinates>3.301244,49.846079,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Montbéliard - Radar Fixe FR 50</name>
+			<Point><coordinates>6.80868,47.511335,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Pianottoli-Caldarello - Radar Fixe FR 50</name>
+			<Point><coordinates>9.06006,41.48918,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Germain-en-Laye - Radar Fixe FR 50</name>
+			<Point><coordinates>2.07401,48.9056,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Reims - Radar Fixe FR 50</name>
+			<Point><coordinates>4.075344,49.258783,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Granges-Aumontzey - Radar Fixe FR 50</name>
+			<Point><coordinates>6.776243,48.166634,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Valenton - Radar Fixe FR 50</name>
+			<Point><coordinates>2.447192,48.770399,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Issy les Moulineaux - Radar Fixe FR 50</name>
+			<Point><coordinates>2.253026,48.82256,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Iffendic - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.995661,48.093294,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Coutras - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.119688,45.047569,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Toulouse - Radar Fixe FR 50</name>
+			<Point><coordinates>1.431169,43.584571,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Budelière - Radar Fixe FR 50</name>
+			<Point><coordinates>2.46892,46.22152,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Limoges - Radar Fixe FR 50</name>
+			<Point><coordinates>1.253877,45.814614,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Paris - Radar Fixe FR 50</name>
+			<Point><coordinates>2.359415,48.816413,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Le Mont-Saint-Adrien - Radar Fixe FR 50</name>
+			<Point><coordinates>2.006005,49.457023,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Mayenne - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.6205,48.3075,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Denis - Radar Fixe FR 50</name>
+			<Point><coordinates>2.3879,48.93971,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Port-de-Lanne - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.181304,43.564659,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Bourges - Radar Fixe FR 50</name>
+			<Point><coordinates>2.39117,47.089317,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Bacouël - Radar Fixe FR 50</name>
+			<Point><coordinates>2.38706,49.62841,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Sérifontaine - Radar Fixe FR 50</name>
+			<Point><coordinates>1.76887,49.36058,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Lyon - Radar Fixe FR 50</name>
+			<Point><coordinates>4.815507,45.77441,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Valentigney - Radar Fixe FR 50</name>
+			<Point><coordinates>6.823085,47.458291,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Six-Fours-les-Plages - Radar Fixe FR 50</name>
+			<Point><coordinates>5.82369,43.10094,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Maizières-lès-Metz - Radar Fixe FR 50</name>
+			<Point><coordinates>6.16272,49.2197,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Prez-sous-Lafauche - Radar Fixe FR 50</name>
+			<Point><coordinates>5.487253,48.285147,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Étouvans - Radar Fixe FR 50</name>
+			<Point><coordinates>6.7025,47.465,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Jaulzy - Radar Fixe FR 50</name>
+			<Point><coordinates>3.06287,49.39702,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Meroux-Moval - Radar Fixe FR 50</name>
+			<Point><coordinates>6.881731,47.586951,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Jean-de-Thouars - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.2098883,46.963432,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Marseille - Radar Fixe FR 50</name>
+			<Point><coordinates>5.39285,43.24742,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Versailles - Radar Fixe FR 50</name>
+			<Point><coordinates>2.123305,48.817236,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>La Plagne-Tarentaise - Radar Fixe FR 50</name>
+			<Point><coordinates>6.7396,45.583,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Le Coudray-Macouard - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.1251,47.1966,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Martin-de-Seignanx - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.396985,43.555886,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Troissereux - Radar Fixe FR 50</name>
+			<Point><coordinates>2.045157,49.479723,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Orgères-en-Beauce - Radar Fixe FR 50</name>
+			<Point><coordinates>1.70927,48.14954,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Villemomble - Radar Fixe FR 50</name>
+			<Point><coordinates>2.51682,48.8827,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Le Pecq - Radar Fixe FR 50</name>
+			<Point><coordinates>2.0983,48.88666,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Paris - Radar Fixe FR 50</name>
+			<Point><coordinates>2.288,48.88573,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Beaurepaire - Radar Fixe FR 50</name>
+			<Point><coordinates>2.570429,49.293409,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Toulouse - Radar Fixe FR 50</name>
+			<Point><coordinates>1.393728,43.550478,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Chaniers - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.588524,45.728999,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Martin-de-Seignanx - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.40483,43.55066,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Cuise-la-Motte - Radar Fixe FR 50</name>
+			<Point><coordinates>3.010235,49.403,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Paris - Radar Fixe FR 50</name>
+			<Point><coordinates>2.413271,48.870161,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Cannes - Radar Fixe FR 50</name>
+			<Point><coordinates>7.035944,43.539224,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Chamant - Radar Fixe FR 50</name>
+			<Point><coordinates>2.611604,49.223198,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Belfort - Radar Fixe FR 50</name>
+			<Point><coordinates>6.8511,47.62875,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Forcé - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.70341,48.03263,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Chèvreville - Radar Fixe FR 50</name>
+			<Point><coordinates>2.85784,49.12149,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Cuts - Radar Fixe FR 50</name>
+			<Point><coordinates>3.106615,49.531139,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Strasbourg - Radar Fixe FR 50</name>
+			<Point><coordinates>7.78491,48.58579,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Maurepas - Radar Fixe FR 50</name>
+			<Point><coordinates>1.90615,48.76598,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Étréaupont - Radar Fixe FR 50</name>
+			<Point><coordinates>3.910765,49.893257,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Bondeval - Radar Fixe FR 50</name>
+			<Point><coordinates>6.847831,47.446633,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Toulouse - Radar Fixe FR 50</name>
+			<Point><coordinates>1.423023,43.618366,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Glénic - Radar Fixe FR 50</name>
+			<Point><coordinates>1.919214,46.221969,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Espère - Radar Fixe FR 50</name>
+			<Point><coordinates>1.370456,44.512033,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Gajoubert - Radar Fixe FR 50</name>
+			<Point><coordinates>0.837146,46.091588,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Seloncourt - Radar Fixe FR 50</name>
+			<Point><coordinates>6.8579243,47.463213,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Gouffern en Auge - Radar Fixe FR 50</name>
+			<Point><coordinates>0.06907,48.7565,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Bougival - Radar Fixe FR 50</name>
+			<Point><coordinates>2.137666,48.867519,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Lévignen - Radar Fixe FR 50</name>
+			<Point><coordinates>2.8952,49.18452,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Médard-la-Rochette - Radar Fixe FR 50</name>
+			<Point><coordinates>2.13444,46.0254,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Cambrai - Radar Fixe FR 50</name>
+			<Point><coordinates>3.25898,50.17861,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Julien-en-Genevois - Radar Fixe FR 50</name>
+			<Point><coordinates>6.096295,46.145305,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Coole - Radar Fixe FR 50</name>
+			<Point><coordinates>4.392822,48.740575,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Six-Fours-les-Plages - Radar Fixe FR 50</name>
+			<Point><coordinates>5.812469,43.110804,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Ambérieu-en-Bugey - Radar Fixe FR 50</name>
+			<Point><coordinates>5.33187,45.95492,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Le Robert - Radar Fixe FR 50</name>
+			<Point><coordinates>-60.93548,14.66063,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Leu-d'Esserent - Radar Fixe FR 50</name>
+			<Point><coordinates>2.42265,49.21698,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Meroux-Moval - Radar Fixe FR 50</name>
+			<Point><coordinates>6.885335,47.588051,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Halluin - Radar Fixe FR 50</name>
+			<Point><coordinates>3.10099,50.7773,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Le Pecq - Radar Fixe FR 50</name>
+			<Point><coordinates>2.10038,48.88705,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Lamothe-Montravel - Radar Fixe FR 50</name>
+			<Point><coordinates>0.02927,44.85173,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Nazaire - Radar Fixe FR 50</name>
+			<Point><coordinates>4.624585,44.196337,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Peyrens - Radar Fixe FR 50</name>
+			<Point><coordinates>1.9614673,43.356479,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Berry-au-Bac - Radar Fixe FR 50</name>
+			<Point><coordinates>3.9038801,49.3952105,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Herblain - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.64997,47.2187,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Ychoux - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.94065,44.32677,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Clermont - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.91564,43.65066,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Clermont-Ferrand - Radar Fixe FR 50</name>
+			<Point><coordinates>3.12644,45.76191,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Espaly-Saint-Marcel - Radar Fixe FR 50</name>
+			<Point><coordinates>3.86425,45.0554,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Cugnaux - Radar Fixe FR 50</name>
+			<Point><coordinates>1.33437,43.5575,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Compiègne - Radar Fixe FR 50</name>
+			<Point><coordinates>2.840989,49.404915,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Thonon-les-Bains - Radar Fixe FR 50</name>
+			<Point><coordinates>6.47137,46.35661,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Le Tillet - Radar Fixe FR 50</name>
+			<Point><coordinates>2.332450907962,49.258975330554,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Michel-sur-Savasse - Radar Fixe FR 50</name>
+			<Point><coordinates>5.123456,45.123456,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Sonneville - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.13496,45.801763,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Marseille - Radar Fixe FR 50</name>
+			<Point><coordinates>5.49088,43.28411,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Orville - Radar Fixe FR 50</name>
+			<Point><coordinates>5.21189,47.56281,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Argentan - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.018,48.749155,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Mulhouse - Radar Fixe FR 50</name>
+			<Point><coordinates>7.352292,47.757988,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Brulange - Radar Fixe FR 50</name>
+			<Point><coordinates>6.549291,48.966977,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Marseille - Radar Fixe FR 50</name>
+			<Point><coordinates>5.44098,43.24876,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Noisy-le-Grand - Radar Fixe FR 50</name>
+			<Point><coordinates>2.555886,48.85013,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Laurent-du-Var - Radar Fixe FR 50</name>
+			<Point><coordinates>7.18499,43.65794,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Denis - Radar Fixe FR 50</name>
+			<Point><coordinates>2.35147,48.9263,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Maubeuge - Radar Fixe FR 50</name>
+			<Point><coordinates>3.977249,50.305545,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Denis-de-Pile - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.2202952,44.9689311,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Lille - Radar Fixe FR 50</name>
+			<Point><coordinates>3.05958,50.62153,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Grémévillers - Radar Fixe FR 50</name>
+			<Point><coordinates>1.911279,49.56228,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Lille - Radar Fixe FR 50</name>
+			<Point><coordinates>3.03167,50.62756,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Laurent-du-Var - Radar Fixe FR 50</name>
+			<Point><coordinates>7.18405,43.65766,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Tremblay-en-France - Radar Fixe FR 50</name>
+			<Point><coordinates>2.51454,48.97682,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Merlande - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.14578,44.83674,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Mimizan - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.232013,44.217121,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Ychoux - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.94202,44.34114,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Margny-aux-Cerises - Radar Fixe FR 50</name>
+			<Point><coordinates>2.864208,49.662323,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Amand-Montrond - Radar Fixe FR 50</name>
+			<Point><coordinates>2.524075,46.734447,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>saulzet le chaud - Radar Fixe FR 50</name>
+			<Point><coordinates>3.070187,45.714604,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Feignies - Radar Fixe FR 50</name>
+			<Point><coordinates>3.92975,50.2807,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Pontenx-les-Forges - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.12012,44.2438,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Tarascon-sur-Ariège - Radar Fixe FR 50</name>
+			<Point><coordinates>1.60135,42.85708,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Mios - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.9379578,44.6015276,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Lanton - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.043263,44.728326,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>La Madeleine - Radar Fixe FR 50</name>
+			<Point><coordinates>3.06753,50.66198,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Linxe - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.23941,43.91488,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Aubencheul-au-Bac - Radar Fixe FR 50</name>
+			<Point><coordinates>3.162647,50.253267,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Rambouillet - Radar Fixe FR 50</name>
+			<Point><coordinates>1.85884,48.64277,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Pradons - Radar Fixe FR 50</name>
+			<Point><coordinates>4.35962,44.4748,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Fagnières - Radar Fixe FR 50</name>
+			<Point><coordinates>4.3232462,48.9580435,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Moissac - Radar Fixe FR 50</name>
+			<Point><coordinates>1.150844,44.124702,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Marmagne - Radar Fixe FR 50</name>
+			<Point><coordinates>4.3673873,46.8254476,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Poiseux - Radar Fixe FR 50</name>
+			<Point><coordinates>3.229783,47.118973,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Viefvillers - Radar Fixe FR 50</name>
+			<Point><coordinates>2.1328,49.61037,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Choisy le Roi - Radar Fixe FR 50</name>
+			<Point><coordinates>2.424025,48.769886,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Limoges - Radar Fixe FR 50</name>
+			<Point><coordinates>1.273195,45.8315,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Bonnet-de-Bellac - Radar Fixe FR 50</name>
+			<Point><coordinates>0.95375,46.16864,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Fontaine-Lavaganne - Radar Fixe FR 50</name>
+			<Point><coordinates>1.95514,49.59843,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Créon-d´Armagnac - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.102778,43.994466,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Pleurtuit - Radar Fixe FR 50</name>
+			<Point><coordinates>-2.10457,48.593802,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Herblain - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.6253261,47.1946473,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Annecy - Radar Fixe FR 50</name>
+			<Point><coordinates>6.11036,45.891976,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Audenge - Radar Fixe FR 50</name>
+			<Point><coordinates>-1.0017031,44.6742665,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Le Roux - Radar Fixe FR 50</name>
+			<Point><coordinates>4.13431,44.72031,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Bonneuil-sur-Marne - Radar Fixe FR 50</name>
+			<Point><coordinates>2.491484,48.76499,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Le Pont-de-Beauvoisin - Radar Fixe FR 50</name>
+			<Point><coordinates>5.66884,45.53154,0</coordinates></Point>
+			</Placemark>
+<Placemark><name>Saint-Pierre-du-Mont - Radar Fixe FR 50</name>
+			<Point><coordinates>-0.53742,43.87131,0</coordinates></Point>
+			</Placemark></Document></kml>
