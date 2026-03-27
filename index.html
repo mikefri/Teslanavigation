@@ -1456,6 +1456,7 @@ function showToastError(msg){
 // ════════════════════════════════════════════════════════════════
 let radarVisible=false,radarLoaded=false,allRadars=[],radarMarkers=[],lastAlertedRadarId=null,radarAlertTimer=null,lastRadarBeepTime=0;
 const RADAR_ALERT_DIST_M=400;
+const RADAR_ALERT_DIST_HIGHWAY_M=600;
 
 const RADAR_TYPES={
   'speed':{label:'Radar fixe',icon:'🚨',color:'#cc1a1f'},
@@ -1505,10 +1506,12 @@ async function toggleRadarLayer(){const btn=document.getElementById('radar-toggl
 function checkRadarProximity(userPos){
   if(!radarVisible||!allRadars.length)return;let closest=null,closestDist=Infinity;
   for(const r of allRadars){const d=hav(userPos,[r.lng,r.lat])*1000;if(d<closestDist){closestDist=d;closest=r;}}
-  if(!closest)return;if(closestDist<=RADAR_ALERT_DIST_M)showRadarAlert(closest,closestDist);else if(closestDist>RADAR_ALERT_DIST_M*2)hideRadarAlert();
+  if(!closest)return;
+  const alertDist=(closest.speed&&closest.speed>=110)?RADAR_ALERT_DIST_HIGHWAY_M:RADAR_ALERT_DIST_M;
+  if(closestDist<=alertDist)showRadarAlert(closest,closestDist,alertDist);else if(closestDist>alertDist*2)hideRadarAlert();
 }
 
-function showRadarAlert(radar,distM){
+function showRadarAlert(radar,distM,alertDist=RADAR_ALERT_DIST_M){
   const cfg=RADAR_TYPES[radar.type]||RADAR_TYPES['unknown'];const alert=document.getElementById('radar-alert');
   document.getElementById('ra-stripe').style.background=cfg.color;document.getElementById('ra-icon').textContent=cfg.icon;
   document.getElementById('ra-type').textContent=cfg.label;document.getElementById('ra-type').style.color=cfg.color;
@@ -1518,11 +1521,11 @@ function showRadarAlert(radar,distM){
   document.getElementById('ra-speed-val').textContent=radar.speed||'?';
   const d=distM>=1000?{val:(distM/1000).toFixed(1),unit:'km'}:{val:Math.round(distM/10)*10||Math.round(distM),unit:'m'};
   document.getElementById('ra-dist-val').textContent=d.val;document.getElementById('ra-dist-unit').textContent=d.unit;
-  document.getElementById('ra-prox-fill').style.width=Math.min(100,Math.max(0,100-(distM/RADAR_ALERT_DIST_M)*100))+'%';
+  document.getElementById('ra-prox-fill').style.width=Math.min(100,Math.max(0,100-(distM/alertDist)*100))+'%';
   alert.classList.add('show');
   const now=Date.now();const beepInterval=distM<100?300:distM<200?600:1400;
   if(now-lastRadarBeepTime>beepInterval){lastRadarBeepTime=now;playRadarBeep(distM);}
-  if(radar.id!==lastAlertedRadarId&&distM<350){lastAlertedRadarId=radar.id;speak(`Attention, ${cfg.label.toLowerCase()}${radar.speed?`, limite ${radar.speed} kilomètres heure`:''}, dans ${Math.round(distM)} mètres`);}
+  if(radar.id!==lastAlertedRadarId&&distM<alertDist*0.6){lastAlertedRadarId=radar.id;speak(`Attention, ${cfg.label.toLowerCase()}${radar.speed?`, limite ${radar.speed} kilomètres heure`:''}, dans ${Math.round(distM)} mètres`);}
   clearTimeout(radarAlertTimer);radarAlertTimer=setTimeout(()=>{if(lastAlertedRadarId===radar.id)hideRadarAlert();},7000);
 }
 
