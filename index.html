@@ -22,7 +22,49 @@
     #app{display:flex;height:100vh;}
 
     /* ─── SIDEBAR ─── */
-    #sidebar{width:380px;min-width:380px;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:10;overflow:hidden;box-shadow:2px 0 16px rgba(0,0,0,.06);}
+    #sidebar{
+      width:380px;min-width:380px;background:var(--s1);border-right:1px solid var(--border);
+      display:flex;flex-direction:column;z-index:10;overflow:hidden;box-shadow:2px 0 16px rgba(0,0,0,.06);
+      /* MASQUÉ — glisse hors écran */
+      transform:translateX(-100%);
+      position:absolute;left:0;top:0;bottom:0;
+      transition:transform .4s cubic-bezier(.4,0,.2,1);
+      pointer-events:none;
+      opacity:0;
+    }
+    #sidebar.open{
+      transform:translateX(0);
+      pointer-events:all;
+      opacity:1;
+    }
+
+    /* Bouton pour ouvrir/fermer le sidebar */
+    #sidebar-toggle{
+      position:absolute;top:14px;left:14px;z-index:300;
+      width:44px;height:44px;
+      background:rgba(250,249,247,.95);backdrop-filter:blur(14px);
+      border:1px solid var(--border2);border-radius:11px;
+      cursor:pointer;display:flex;align-items:center;justify-content:center;
+      font-size:20px;color:var(--text);
+      box-shadow:var(--shadow-card);
+      transition:all .25s;
+    }
+    #sidebar-toggle:hover{border-color:var(--red);color:var(--red);box-shadow:0 0 12px var(--red-glow);}
+    #sidebar-toggle .bar{
+      width:18px;height:2px;background:currentColor;border-radius:2px;
+      position:relative;transition:all .3s;
+    }
+    #sidebar-toggle .bar::before,
+    #sidebar-toggle .bar::after{
+      content:'';position:absolute;left:0;width:18px;height:2px;
+      background:currentColor;border-radius:2px;transition:all .3s;
+    }
+    #sidebar-toggle .bar::before{top:-6px;}
+    #sidebar-toggle .bar::after{top:6px;}
+    /* Quand ouvert → X */
+    #sidebar-toggle.open .bar{background:transparent;}
+    #sidebar-toggle.open .bar::before{top:0;transform:rotate(45deg);}
+    #sidebar-toggle.open .bar::after{top:0;transform:rotate(-45deg);}
 
     #header{padding:16px 22px 12px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--s2);}
     .logo-row{display:flex;align-items:center;gap:11px;}
@@ -271,7 +313,6 @@
     #guidance-bar.slide-in{animation:gb-in .38s cubic-bezier(.4,0,.2,1) forwards;}
     @keyframes gb-in{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
 
-    /* Zone manœuvre gauche */
     #gb-maneuver{
       width:100px;min-width:100px;
       display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -283,13 +324,11 @@
     #gb-dist-big{font-family:'Orbitron',monospace;font-size:18px;font-weight:700;color:#fff;margin-top:6px;line-height:1;}
     #gb-dist-unit{font-size:10px;color:rgba(255,255,255,.65);letter-spacing:1px;margin-top:2px;}
 
-    /* Zone instruction centre */
     #gb-instruction{flex:1;padding:14px 18px;display:flex;flex-direction:column;justify-content:center;gap:4px;}
     #gb-step-txt{font-size:17px;font-weight:600;color:#fff;line-height:1.3;letter-spacing:-.2px;}
     #gb-road-name{font-size:12px;color:rgba(255,255,255,.7);margin-top:2px;font-style:italic;}
     #gb-step-sub{font-size:11px;color:rgba(255,255,255,.55);margin-top:4px;display:flex;align-items:center;gap:10px;}
 
-    /* Zone ETA droite */
     #gb-eta{
       width:110px;min-width:110px;
       padding:14px 14px 14px 10px;
@@ -300,53 +339,42 @@
     #gb-eta-label{font-size:9px;color:rgba(255,255,255,.55);letter-spacing:1px;text-transform:uppercase;}
     #gb-rem-dist{font-size:11px;color:rgba(255,255,255,.7);margin-top:4px;}
 
-    /* Barre de progression en bas du bandeau */
     #gb-progress{position:absolute;bottom:0;left:0;height:3px;background:rgba(255,255,255,.5);border-radius:0 3px 3px 0;transition:width .8s ease;}
 
-    /* Bouton stop guidage */
     #gb-stop{position:absolute;top:6px;right:6px;background:rgba(255,255,255,.18);border:none;border-radius:6px;color:#fff;font-size:10px;padding:3px 8px;cursor:pointer;font-family:'Orbitron',monospace;letter-spacing:1px;transition:background .2s;}
     #gb-stop:hover{background:rgba(255,255,255,.3);}
 
-    /* top-pill descend quand bandeau actif */
     #top-pill{transition:top .35s cubic-bezier(.4,0,.2,1);}
     #top-pill.pushed{top:calc(14px + 88px);}
 
     /* ─── GPS TRACKING ─── */
-    /* Flèche directionnelle SVG animée */
     #gps-arrow-wrap{position:relative;width:36px;height:36px;flex-shrink:0;}
     #gps-arrow{width:36px;height:36px;transition:transform .4s ease;filter:drop-shadow(0 2px 6px rgba(26,127,212,.45));}
-    /* Cercle de précision pulsant autour de la flèche */
     #gps-accuracy-ring{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;border:2px solid rgba(26,127,212,.35);background:rgba(26,127,212,.08);pointer-events:none;transition:width .6s,height .6s;}
 
-    /* Bouton GPS live */
     #gps-live-btn{position:absolute;bottom:72px;left:14px;z-index:200;width:40px;height:40px;background:rgba(250,249,247,.92);backdrop-filter:blur(12px);border:1px solid var(--border2);border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .2s;color:var(--blue);box-shadow:var(--shadow-card);}
     #gps-live-btn:hover{border-color:var(--blue);}
     #gps-live-btn.active{border-color:var(--blue);background:rgba(26,127,212,.12);animation:gps-pulse-btn 2s ease-in-out infinite;}
     @keyframes gps-pulse-btn{0%,100%{box-shadow:0 0 0 0 rgba(26,127,212,.4);}50%{box-shadow:0 0 0 6px rgba(26,127,212,.0);}}
 
-    /* Badge "LIVE" dans la pill */
     #pill-gps-badge{display:none;background:rgba(27,158,87,.15);border:1px solid rgba(27,158,87,.35);border-radius:20px;padding:2px 8px;font-family:'Orbitron',monospace;font-size:9px;color:var(--green);letter-spacing:1px;animation:live-blink 2s ease-in-out infinite;}
     #pill-gps-badge.show{display:inline-flex;align-items:center;gap:4px;}
     .live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:live-blink 1.2s ease-in-out infinite;}
-    @keyframes live-blink{0%,100%{opacity:1;}50%{opacity:.4;};}
+    @keyframes live-blink{0%,100%{opacity:1;}50%{opacity:.4;}}
 
-    /* Pill étendue quand GPS actif */
     #pill-speed{display:none;}
     #pill-speed.show{display:flex;}
 
-    /* Toast déviation */
     #deviation-toast{position:absolute;top:70px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(250,249,247,.96);backdrop-filter:blur(16px);border:1px solid rgba(201,124,16,.4);border-radius:12px;padding:9px 18px;z-index:300;font-size:12px;color:var(--orange);font-weight:500;box-shadow:0 6px 24px rgba(0,0,0,.14);opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;white-space:nowrap;}
     #deviation-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
     /* ─── RADARS ─── */
-    /* Bouton toggle radars */
     #radar-toggle-btn{position:absolute;top:58px;right:14px;z-index:200;background:rgba(250,249,247,.92);backdrop-filter:blur(12px);border:1px solid var(--border2);border-radius:9px;padding:7px 12px;cursor:pointer;font-size:10px;font-family:'Orbitron',monospace;letter-spacing:1px;color:var(--muted2);transition:all .2s;display:flex;align-items:center;gap:7px;box-shadow:var(--shadow-card);}
     #radar-toggle-btn:hover{border-color:var(--orange);color:var(--orange);}
     #radar-toggle-btn.active{border-color:var(--orange);color:var(--orange);background:rgba(201,124,16,.10);}
     #radar-toggle-btn .dot-ind-r{width:7px;height:7px;border-radius:50%;background:var(--muted);transition:background .2s;flex-shrink:0;}
     #radar-toggle-btn.active .dot-ind-r{background:var(--orange);box-shadow:0 0 6px rgba(201,124,16,.9);}
 
-    /* Bandeau alerte radar — apparaît sous le guidage */
     #radar-alert{
       position:absolute;left:14px;right:14px;z-index:240;
       bottom:80px;
@@ -363,32 +391,23 @@
       opacity:0;
     }
     #radar-alert.show{display:flex;opacity:1;transform:translateY(0);}
-    /* Bande colorée gauche selon type */
     #ra-stripe{width:6px;min-width:6px;background:var(--orange);}
     #ra-body{flex:1;display:flex;align-items:center;gap:14px;padding:12px 16px;}
-    /* Icône grosse */
     #ra-icon{font-size:32px;flex-shrink:0;line-height:1;}
     #ra-info{flex:1;}
     #ra-type{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;color:var(--orange);letter-spacing:1px;text-transform:uppercase;}
     #ra-name{font-size:13px;font-weight:600;color:var(--text);margin-top:2px;}
     #ra-sub{font-size:11px;color:var(--muted2);margin-top:2px;}
-    /* Vitesse limite */
     #ra-speed-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;}
     #ra-speed-circle{width:56px;height:56px;border-radius:50%;border:3px solid var(--red);background:white;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(204,26,31,.2);}
     #ra-speed-val{font-family:'Orbitron',monospace;font-size:18px;font-weight:800;color:var(--red);line-height:1;}
     #ra-speed-unit{font-size:8px;color:var(--red);font-weight:600;letter-spacing:1px;}
-    /* Distance */
     #ra-dist-wrap{display:flex;flex-direction:column;align-items:center;flex-shrink:0;min-width:54px;}
     #ra-dist-val{font-family:'Orbitron',monospace;font-size:20px;font-weight:700;color:var(--text);line-height:1;}
     #ra-dist-unit{font-size:9px;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
-    /* Barre de proximité */
     #ra-prox-bar{height:4px;background:var(--s3);margin:0 16px 12px;}
     #ra-prox-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--green),var(--orange),var(--red));transition:width .5s ease;}
 
-    /* Marqueurs radar sur la carte — rendu via canvas MapLibre */
-    /* (styles appliqués via JS aux éléments DOM des markers) */
-
-    /* MapLibre overrides for light theme */
     .maplibregl-ctrl-attrib{background:rgba(250,249,247,.8)!important;color:#999!important;}
     .maplibregl-ctrl-attrib a{color:#bbb!important;}
     .maplibregl-popup-content{background:var(--s2)!important;color:var(--text)!important;border:1px solid var(--border2)!important;border-radius:12px!important;font-family:'DM Sans',sans-serif!important;font-size:13px!important;padding:13px 15px!important;box-shadow:0 8px 30px rgba(0,0,0,.15)!important;min-width:185px;}
@@ -399,6 +418,11 @@
 </head>
 <body>
 <div id="app">
+
+  <!-- ══ BOUTON HAMBURGER ══ -->
+  <button id="sidebar-toggle" onclick="toggleSidebar()">
+    <span class="bar"></span>
+  </button>
 
   <!-- ══ SIDEBAR ══ -->
   <div id="sidebar">
@@ -509,7 +533,7 @@
         </div>
       </div>
 
-    </div><!-- /panel-nav -->
+    </div>
 
     <!-- ── SUPERCHARGER PANEL ── -->
     <div class="panel" id="panel-chargers">
@@ -554,9 +578,9 @@
       <div id="sc-loading"><div class="sc-loader-ring"></div><div class="sc-loader-txt">CHARGEMENT…</div></div>
       <div id="sc-list-wrap" style="display:none"><div id="sc-list"></div></div>
 
-    </div><!-- /panel-chargers -->
+    </div>
 
-  </div><!-- /sidebar -->
+  </div>
 
   <!-- ══ MAP ══ -->
   <div id="map-area">
@@ -650,6 +674,16 @@
 <div id="loading"><div class="spinner"></div><div class="loading-text" id="loading-text">CALCUL EN COURS…</div></div>
 
 <script>
+// ── Sidebar toggle ──
+let sidebarOpen = false;
+function toggleSidebar(){
+  sidebarOpen = !sidebarOpen;
+  document.getElementById('sidebar').classList.toggle('open', sidebarOpen);
+  document.getElementById('sidebar-toggle').classList.toggle('open', sidebarOpen);
+  // Redimensionner la carte après l'animation
+  setTimeout(() => map.resize(), 420);
+}
+
 const MODELS = [
   { family:'Model 3', id:'m3', variants:[
     { id:'m3-prop',   name:'Propulsion (Highland)',          tag:'PROP',  tc:'vtag-prop',  range:513, kwh:57,  desc:'LFP · 513 km WLTP' },
@@ -754,6 +788,8 @@ function switchTab(t){
   document.getElementById('panel-nav').classList.toggle('active',t==='nav');
   document.getElementById('panel-chargers').classList.toggle('active',t==='chargers');
   if(t==='chargers'&&!scLoaded) loadSuperchargers();
+  // Ouvrir le sidebar si fermé
+  if(!sidebarOpen) toggleSidebar();
 }
 
 let modelSelectorOpen = true;
@@ -1006,7 +1042,6 @@ async function calcRoute(){
     document.getElementById('reset-btn').classList.add('show');
     document.getElementById('guidance-btn').style.display='block';
     renderTimeline(stops,totalDistKm,totalDur,finalBattPct,totalChargeMins);
-    // Store route for guidance
     activeRouteCoords = finalRoute.geometry.coordinates;
     activeRouteTotalDist = finalRoute.distance / 1000;
     activeRouteTotalDur = finalRoute.duration;
@@ -1291,7 +1326,6 @@ let lastSpokenStep = -1;
 let ttsEnabled = true;
 const synth = window.speechSynthesis;
 
-// Mapping type OSRM → SVG path + label FR
 const MANEUVER_MAP = {
   'turn-left':        { path:'M30 38 L30 22 L18 22 M24 16 L18 22 L24 28', label:'Tournez à gauche' },
   'turn-right':       { path:'M22 38 L22 22 L34 22 M28 16 L34 22 L28 28', label:'Tournez à droite' },
@@ -1314,26 +1348,24 @@ const MANEUVER_MAP = {
 
 function getManeuver(step){
   if(!step) return MANEUVER_MAP['default'];
-  const t = step.maneuver?.type || '';
-  const m = step.maneuver?.modifier || '';
+  const t = step.maneuver?.type || step.type || '';
+  const m = step.maneuver?.modifier || step.modifier || '';
   const key = m ? `${t}-${m}`.replace(/ /g,'-') : t;
-  // Try exact key, then type only, then default
   return MANEUVER_MAP[key] || MANEUVER_MAP[t] || MANEUVER_MAP['default'];
 }
 
-// Parse OSRM legs → flat step list
 function parseSteps(legs){
   const steps = [];
   for(const leg of legs){
     for(const step of (leg.steps||[])){
-      const loc = step.maneuver?.location; // [lng, lat]
+      const loc = step.maneuver?.location;
       steps.push({
         instruction: step.maneuver?.instruction || step.name || '',
         name: step.name || '',
         type: step.maneuver?.type || 'straight',
         modifier: step.maneuver?.modifier || '',
-        distance: step.distance || 0,    // metres
-        duration: step.duration || 0,    // seconds
+        distance: step.distance || 0,
+        duration: step.duration || 0,
         location: loc ? [loc[0], loc[1]] : null,
       });
     }
@@ -1341,7 +1373,6 @@ function parseSteps(legs){
   return steps;
 }
 
-// Génère un texte d'instruction lisible en français
 function buildInstructionText(step){
   const man = getManeuver(step);
   const road = step.name ? ` sur ${step.name}` : '';
@@ -1350,22 +1381,18 @@ function buildInstructionText(step){
   return `${man.label}${road}`;
 }
 
-// Formatte une distance en m ou km
 function fmtDist(m){
   if(m >= 1000) return { val: (m/1000).toFixed(1), unit: 'km' };
   return { val: Math.round(m/10)*10 || m, unit: 'm' };
 }
 
-// Formatte une durée restante en h/min
 function fmtEta(secs){
-  const totalSec = secs;
-  const h = Math.floor(totalSec/3600);
-  const min = Math.floor((totalSec%3600)/60);
+  const h = Math.floor(secs/3600);
+  const min = Math.floor((secs%3600)/60);
   if(h > 0) return `${h}h${String(min).padStart(2,'0')}`;
   return `${min} min`;
 }
 
-// Parole TTS
 function speak(text){
   if(!ttsEnabled || !synth) return;
   synth.cancel();
@@ -1373,19 +1400,16 @@ function speak(text){
   utt.lang = 'fr-FR';
   utt.rate = 1.05;
   utt.pitch = 1;
-  // Préférer une voix française si disponible
   const voices = synth.getVoices();
   const frVoice = voices.find(v => v.lang.startsWith('fr'));
   if(frVoice) utt.voice = frVoice;
   synth.speak(utt);
 }
 
-// Lance le guidage (récupère les steps depuis OSRM)
 async function startGuidance(){
   if(!coords.origin || !coords.dest){ alert('Calculez d\'abord un itinéraire.'); return; }
   setLoading(true, 'CHARGEMENT DU GUIDAGE…');
   try{
-    // Refetch avec steps=true
     const wps = [coords.origin, coords.dest];
     const routeWithSteps = await fetchRoute(wps, true);
     guidanceSteps = parseSteps(routeWithSteps.legs || []);
@@ -1395,13 +1419,11 @@ async function startGuidance(){
     guidanceDistTravelled = 0;
     guidanceActive = true;
 
-    // Afficher le bandeau
     const bar = document.getElementById('guidance-bar');
     bar.style.display = 'flex';
     bar.classList.add('show','slide-in');
     document.getElementById('top-pill').classList.add('pushed');
 
-    // Démarrer GPS si pas encore actif
     if(!gpsTracking) startGpsTracking();
 
     updateGuidanceBanner();
@@ -1422,26 +1444,21 @@ function stopGuidance(){
   synth && synth.cancel();
 }
 
-// Met à jour le bandeau avec l'étape courante
 function updateGuidanceBanner(){
   if(!guidanceActive || guidanceStepIdx >= guidanceSteps.length) return;
   const step = guidanceSteps[guidanceStepIdx];
   const nextStep = guidanceSteps[guidanceStepIdx + 1];
   const man = getManeuver(step);
 
-  // Flèche SVG
   document.getElementById('gb-arrow-path').setAttribute('d', man.path);
 
-  // Distance jusqu'au prochain virage
   const d = fmtDist(step.distance);
   document.getElementById('gb-dist-big').textContent = d.val;
   document.getElementById('gb-dist-unit').textContent = d.unit;
 
-  // Instruction
   document.getElementById('gb-step-txt').textContent = buildInstructionText(step);
   document.getElementById('gb-road-name').textContent = step.name || '';
 
-  // Aperçu étape suivante
   if(nextStep){
     const nm = getManeuver(nextStep);
     document.getElementById('gb-next-preview').textContent =
@@ -1450,48 +1467,41 @@ function updateGuidanceBanner(){
     document.getElementById('gb-next-preview').textContent = '';
   }
 
-  // ETA
   const remDist = guidanceSteps.slice(guidanceStepIdx).reduce((s,st)=>s+st.distance,0);
   const remDur  = guidanceSteps.slice(guidanceStepIdx).reduce((s,st)=>s+st.duration,0);
   document.getElementById('gb-eta-time').textContent = fmtEta(remDur);
   const rd = fmtDist(remDist);
   document.getElementById('gb-rem-dist').textContent = rd.val + ' ' + rd.unit + ' restants';
 
-  // Barre de progression
   const totalDist = guidanceSteps.reduce((s,st)=>s+st.distance,0);
   const pct = totalDist > 0 ? Math.min(100, (guidanceDistTravelled / totalDist) * 100) : 0;
   document.getElementById('gb-progress').style.width = pct + '%';
 }
 
-// Appelée à chaque update GPS — avance les étapes si nécessaire
 function advanceGuidance(pos){
   if(!guidanceActive || !guidanceSteps.length) return;
   const userPt = [pos.coords.longitude, pos.coords.latitude];
 
-  // Trouver l'étape courante : chercher le step le plus proche devant nous
   let closestDist = Infinity;
   let closestIdx = guidanceStepIdx;
 
   for(let i = guidanceStepIdx; i < Math.min(guidanceStepIdx + 5, guidanceSteps.length); i++){
     const step = guidanceSteps[i];
     if(!step.location) continue;
-    const d = hav(userPt, step.location) * 1000; // en mètres
+    const d = hav(userPt, step.location) * 1000;
     if(d < closestDist){ closestDist = d; closestIdx = i; }
   }
 
-  // Si on passe à moins de 40 m d'un waypoint de step → avancer
   if(closestIdx > guidanceStepIdx && closestDist < 40){
     guidanceDistTravelled += guidanceSteps.slice(guidanceStepIdx, closestIdx).reduce((s,st)=>s+st.distance,0);
     guidanceStepIdx = closestIdx;
     updateGuidanceBanner();
-    // TTS annonce nouvelle instruction
     if(guidanceStepIdx !== lastSpokenStep){
       lastSpokenStep = guidanceStepIdx;
       speak(buildInstructionText(guidanceSteps[guidanceStepIdx]));
     }
   }
 
-  // Annonce préventive : parler à 200 m du prochain virage
   const curStep = guidanceSteps[guidanceStepIdx];
   if(curStep && curStep.location && guidanceStepIdx !== lastSpokenStep){
     const distToNext = hav(userPt, curStep.location) * 1000;
@@ -1502,10 +1512,8 @@ function advanceGuidance(pos){
     }
   }
 
-  // Mise à jour distance restante affichée en temps réel
   if(guidanceActive) updateGuidanceBanner();
 
-  // Arrivée
   if(guidanceStepIdx >= guidanceSteps.length - 1){
     const last = guidanceSteps[guidanceSteps.length - 1];
     if(last && last.location){
@@ -1534,19 +1542,16 @@ let lastRouteRecalc = 0;
 const DEVIATION_THRESHOLD_M = 300;
 const RECALC_COOLDOWN_MS = 30000;
 
-// Crée la flèche SVG directionnelle
 function buildArrowMarker(){
   const wrap = document.createElement('div');
   wrap.id = 'gps-arrow-wrap';
   wrap.style.cssText = 'position:relative;width:36px;height:36px;cursor:pointer;';
 
-  // Anneau de précision (derrière la flèche)
   const ring = document.createElement('div');
   ring.id = 'gps-accuracy-ring';
   ring.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;border:2px solid rgba(26,127,212,.35);background:rgba(26,127,212,.08);pointer-events:none;width:36px;height:36px;transition:width .6s,height .6s;';
   wrap.appendChild(ring);
 
-  // Flèche SVG
   const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
   svg.setAttribute('id','gps-arrow');
   svg.setAttribute('viewBox','0 0 36 36');
@@ -1563,24 +1568,20 @@ function buildArrowMarker(){
   return wrap;
 }
 
-// Met à jour la taille de l'anneau selon précision GPS
 function updateAccuracyRing(accuracyMeters, zoomLevel){
   const ring = document.getElementById('gps-accuracy-ring');
   if(!ring || !map) return;
-  // Convertir la précision (m) en pixels écran selon zoom
   const metersPerPixel = 156543.03392 * Math.cos(lastGpsPos[1] * Math.PI / 180) / Math.pow(2, zoomLevel);
   const px = Math.min(Math.max((accuracyMeters / metersPerPixel) * 2, 36), 200);
   ring.style.width = px + 'px';
   ring.style.height = px + 'px';
 }
 
-// Convertit un cap en degrés vers une lettre cardinale
 function headingToCardinal(deg){
   const cards = ['N','NE','E','SE','S','SO','O','NO'];
   return cards[Math.round(deg / 45) % 8];
 }
 
-// Démarre / arrête le tracking GPS
 function toggleGpsTracking(){
   if(gpsTracking) stopGpsTracking();
   else startGpsTracking();
@@ -1609,10 +1610,8 @@ function stopGpsTracking(){
   document.getElementById('gps-live-btn').textContent = '⊕';
   document.getElementById('pill-gps-badge').classList.remove('show');
   document.getElementById('pill-sep-badge').style.display = 'none';
-  // Masquer vitesse & cap
   ['pill-sep-speed','pill-sep-hdg','pill-hdg-wrap'].forEach(id=>{ document.getElementById(id).style.display='none'; });
   document.getElementById('pill-speed').style.display = 'none';
-  // Supprimer marqueur
   if(gpsMarker){ gpsMarker.remove(); gpsMarker = null; gpsMarkerEl = null; }
 }
 
@@ -1620,7 +1619,6 @@ function onGpsUpdate(pos){
   const { longitude: lng, latitude: lat, accuracy, speed, heading } = pos.coords;
   lastGpsPos = [lng, lat];
 
-  // ── Marqueur flèche ──
   if(!gpsMarker){
     gpsMarkerEl = buildArrowMarker();
     gpsMarker = new maplibregl.Marker({ element: gpsMarkerEl, anchor: 'center' })
@@ -1630,19 +1628,16 @@ function onGpsUpdate(pos){
     gpsMarker.setLngLat([lng, lat]);
   }
 
-  // ── Rotation flèche selon cap ──
   const hdg = (heading !== null && heading !== undefined) ? heading : lastGpsHeading;
   if(hdg !== null && hdg !== undefined){
     lastGpsHeading = hdg;
     const svg = document.getElementById('gps-arrow');
     if(svg) svg.style.transform = `rotate(${hdg}deg)`;
-    // Cap dans la pill
     document.getElementById('pill-hdg').textContent = headingToCardinal(hdg) + ' ' + Math.round(hdg) + '°';
     document.getElementById('pill-hdg-wrap').style.display = '';
     document.getElementById('pill-sep-hdg').style.display = '';
   }
 
-  // ── Vitesse dans la pill ──
   if(speed !== null && speed !== undefined){
     const kmh = Math.round(speed * 3.6);
     document.getElementById('pill-spd').textContent = kmh;
@@ -1650,21 +1645,16 @@ function onGpsUpdate(pos){
     document.getElementById('pill-sep-speed').style.display = '';
   }
 
-  // ── Anneau de précision ──
   updateAccuracyRing(accuracy || 20, map.getZoom());
 
-  // ── Centrage automatique ──
   if(gpsFollowMap){
     map.easeTo({ center: [lng, lat], zoom: Math.max(map.getZoom(), 14), duration: 800, bearing: hdg || 0 });
   }
 
-  // Stopper le centrage auto si l'utilisateur bouge la carte manuellement
   map.once('dragstart', () => { gpsFollowMap = false; });
 
-  // Mettre à jour l'origine du trajet avec la position GPS
   coords.origin = [lng, lat];
 
-  // ── Détection de déviation ──
   if(coords.dest && map.getSource('route')){
     const routeData = map.getSource('route')._data;
     if(routeData && routeData.geometry && routeData.geometry.coordinates.length > 1){
@@ -1681,10 +1671,8 @@ function onGpsUpdate(pos){
     }
   }
 
-  // ── Avancement guidage ──
   if(guidanceActive) advanceGuidance(pos);
 
-  // ── Vérification proximité radars ──
   if(radarVisible) checkRadarProximity(lastGpsPos);
 }
 
@@ -1693,7 +1681,6 @@ function onGpsError(err){
   if(err.code === 1) alert('Accès à la géolocalisation refusé. Vérifiez les permissions du navigateur.');
 }
 
-// Distance minimale (mètres) d'un point à une polyligne
 function distanceToPolylineM(pt, polyline){
   let minD = Infinity;
   for(let i = 1; i < polyline.length; i++){
@@ -1720,7 +1707,6 @@ function showDeviationToast(){
 async function recalcFromCurrentPosition(){
   if(!lastGpsPos || !coords.dest || !selectedVariant) return;
   coords.origin = lastGpsPos;
-  // Mettre à jour le champ de départ
   document.getElementById('input-origin').value = '📍 Position GPS';
   try {
     setLoading(true, 'RECALCUL DEPUIS POSITION GPS…');
@@ -1796,7 +1782,6 @@ function setLoading(on,txt='CALCUL EN COURS…'){
 }
 
 function showToastError(msg){
-  // Toast discret en bas — ne bloque pas l'UI
   let t = document.getElementById('_err-toast');
   if(!t){
     t = document.createElement('div');
@@ -1811,7 +1796,7 @@ function showToastError(msg){
 }
 
 // ════════════════════════════════════════════════════════════════
-//  SYSTÈME RADARS — OpenStreetMap Overpass API
+//  SYSTÈME RADARS
 // ════════════════════════════════════════════════════════════════
 let radarVisible  = false;
 let radarLoaded   = false;
@@ -1840,11 +1825,9 @@ function getRadarType(tags){
   return 'unknown';
 }
 
-// Charge les radars dans la bbox visible de la carte
 async function loadRadars(){
   radarLoaded = true;
 
-  // Indicateur léger NON-bloquant (pas le spinner global)
   const btn = document.getElementById('radar-toggle-btn');
   const origHTML = btn.innerHTML;
   btn.innerHTML = '<span style="font-size:11px;letter-spacing:1px;font-family:Orbitron,monospace">⏳ …</span>';
@@ -1853,14 +1836,11 @@ async function loadRadars(){
   const restore = () => {
     btn.innerHTML = origHTML;
     btn.style.pointerEvents = '';
-    // Ré-appliquer l'état actif si besoin
     btn.classList.toggle('active', radarVisible);
-    // Restaurer le dot
     const dot = btn.querySelector('.dot-ind-r');
     if(dot) dot.style.background = radarVisible ? 'var(--orange)' : 'var(--muted)';
   };
 
-  // Helper : fetch avec timeout strict de 8 s
   const fetchWithTimeout = (url, options, ms=8000) => {
     const ctrl = new AbortController();
     const tid = setTimeout(() => ctrl.abort(), ms);
@@ -1868,14 +1848,12 @@ async function loadRadars(){
       .finally(() => clearTimeout(tid));
   };
 
-  // Bbox visible + marge raisonnable (0.3°)
   const bounds = map.getBounds();
   const s = Math.max(-90,  bounds.getSouth() - 0.3).toFixed(4);
   const w = Math.max(-180, bounds.getWest()  - 0.3).toFixed(4);
   const n = Math.min( 90,  bounds.getNorth() + 0.3).toFixed(4);
   const e = Math.min( 180, bounds.getEast()  + 0.3).toFixed(4);
 
-  // Requête Overpass — uniquement highway=speed_camera (tag universel, léger)
   const query = `[out:json][timeout:10];node["highway"="speed_camera"](${s},${w},${n},${e});out body qt;`;
 
   const mirrors = [
@@ -1894,7 +1872,6 @@ async function loadRadars(){
       }, 9000);
       if(!resp.ok) continue;
       data = await resp.json();
-      console.log(`✅ Radars: ${data.elements?.length} points depuis ${url}`);
       break;
     } catch(err) {
       console.warn(`❌ ${url} : ${err.message}`);
@@ -1904,7 +1881,6 @@ async function loadRadars(){
   restore();
 
   if(!data || !data.elements || data.elements.length === 0){
-    // Pas de blocage — juste un toast discret
     showToastError('Radars : aucun résultat pour cette zone (OSM)');
     radarLoaded = false;
     return;
@@ -1922,11 +1898,9 @@ async function loadRadars(){
     };
   });
 
-  console.log(`📷 ${allRadars.length} radars chargés`);
   renderRadarMarkers();
 }
 
-// Recharge si on se déplace beaucoup (nouvelle zone) — anti-concurrent
 let lastRadarBbox = null;
 let radarReloading = false;
 async function reloadRadarsIfNeeded(){
@@ -1940,13 +1914,10 @@ async function reloadRadarsIfNeeded(){
   try { await loadRadars(); } finally { radarReloading = false; }
 }
 
-// Crée les marqueurs DOM
 function renderRadarMarkers(){
   radarMarkers.forEach(m => m.remove());
   radarMarkers = [];
   if(!radarVisible) return;
-
-  console.log(`🗺 Rendu de ${allRadars.length} marqueurs radar`);
 
   allRadars.forEach(r => {
     const cfg = RADAR_TYPES[r.type] || RADAR_TYPES['unknown'];
@@ -1982,7 +1953,6 @@ function renderRadarMarkers(){
   });
 }
 
-// Toggle bouton
 async function toggleRadarLayer(){
   const btn = document.getElementById('radar-toggle-btn');
   radarVisible = !radarVisible;
@@ -1990,7 +1960,6 @@ async function toggleRadarLayer(){
 
   if(radarVisible){
     await loadRadars();
-    // Recharger quand la carte est déplacée
     map.on('moveend', reloadRadarsIfNeeded);
   } else {
     map.off('moveend', reloadRadarsIfNeeded);
@@ -2000,7 +1969,6 @@ async function toggleRadarLayer(){
   }
 }
 
-// ── Alerte proximité radar ──────────────────────────────────────
 function checkRadarProximity(userPos){
   if(!radarVisible || !allRadars.length) return;
 
@@ -2044,7 +2012,6 @@ function showRadarAlert(radar, distM){
 
   alert.classList.add('show');
 
-  // Bip progressif
   const now = Date.now();
   const beepInterval = distM < 100 ? 300 : distM < 200 ? 600 : 1400;
   if(now - lastRadarBeepTime > beepInterval){
@@ -2052,7 +2019,6 @@ function showRadarAlert(radar, distM){
     playRadarBeep(distM);
   }
 
-  // TTS une fois par radar
   if(radar.id !== lastAlertedRadarId && distM < 350){
     lastAlertedRadarId = radar.id;
     const msg = `Attention, ${cfg.label.toLowerCase()}${radar.speed ? `, limite ${radar.speed} kilomètres heure` : ''}, dans ${Math.round(distM)} mètres`;
