@@ -1,58 +1,61 @@
 import os
 import json
-import re
+import csv
 
-def extract_kml_data(folder_path):
+def compile_csv_to_geojson(folder_path):
     all_features = []
+    
     if not os.path.exists(folder_path):
+        print(f"Dossier '{folder_path}' non trouvé.")
         return {"type": "FeatureCollection", "features": []}
 
     for filename in os.listdir(folder_path):
-        if filename.endswith(".kml"):
-            # On devine la vitesse depuis le nom du fichier
-            v_match = re.search(r'(\d+)', filename)
-            vitesse = v_match.group(1) if v_match else "Inconnu"
-            
+        if filename.endswith(".csv"):
             file_path = os.path.join(folder_path, filename)
+            print(f"Traitement de : {filename}")
+            
             try:
-                # 'errors=ignore' est crucial pour ne pas planter sur les accents
-                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                    content = f.read()
-
-                # On découpe chaque bloc radar manuellement
-                placemarks = re.findall(r'<Placemark>.*?</Placemark>', content, re.DOTALL)
-                
-                for pm in placemarks:
-                    # Extraction Nom
-                    name_search = re.search(r'<name>(.*?)</name>', pm)
-                    name = name_search.group(1) if name_search else "Radar"
-                    
-                    # Extraction Coordonnées
-                    coord_search = re.search(r'<coordinates>(.*?)</coordinates>', pm)
-                    if coord_search:
-                        c = coord_search.group(1).strip().split(',')
-                        if len(c) >= 2:
-                            all_features.append({
-                                "type": "Feature",
-                                "properties": {
-                                    "nom": name,
-                                    "vitesse": vitesse,
-                                    "type": filename.split('.')[0]
-                                },
-                                "geometry": {
-                                    "type": "Point",
-                                    "coordinates": [float(c[0]), float(c[1])]
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    # On utilise DictReader ou un simple reader selon la structure
+                    # Votre image montre : Longitude, Latitude, "Nom"
+                    reader = csv.reader(f)
+                    for row in reader:
+                        if len(row) >= 3:
+                            try:
+                                lon = float(row[0].strip())
+                                lat = float(row[1].strip())
+                                name = row[2].strip().replace('"', '')
+                                
+                                feature = {
+                                    "type": "Feature",
+                                    "properties": {
+                                        "nom": name,
+                                        "fichier_source": filename
+                                    },
+                                    "geometry": {
+                                        "type": "Point",
+                                        "coordinates": [lon, lat]
+                                    }
                                 }
-                            })
+                                all_features.append(feature)
+                            except ValueError:
+                                # Saute les lignes d'en-tête si elles existent
+                                continue
             except Exception as e:
-                print(f"Saut du fichier {filename} : {e}")
-                
-    return {"type": "FeatureCollection", "features": all_features}
+                print(f"Erreur sur le fichier {filename}: {e}")
+
+    return {
+        "type": "FeatureCollection",
+        "features": all_features
+    }
 
 if __name__ == "__main__":
-    folder = "data" # Vérifiez que vos KML sont bien dans ce dossier
+    folder = "data" 
     output_file = "radars_complet.json"
-    data = extract_kml_data(folder)
+    
+    geojson_data = compile_csv_to_geojson(folder)
+    
     with open(output_file, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False)
-    print(f"OK : {len(data['features'])} radars compilés.")
+        json.dump(geojson_data, f, ensure_ascii=False, indent=2)
+    
+    print(f"Succès ! {len(geojson_data['features'])} radars compilés dans {output_file}")
