@@ -818,100 +818,149 @@ async function recalcFromCurrentPosition() {
 }
 
 // ════════════════════════════════════════════════════════════════
-//  RADARS
+//  RADARS — VERSION CORRIGÉE
 // ════════════════════════════════════════════════════════════════
-let radarVisible=false, radarLoaded=false, allRadars=[], radarMarkers=[], lastAlertedRadarId=null, radarAlertTimer=null, lastRadarBeepTime=0;
-const RADAR_ALERT_DIST_M=400, RADAR_ALERT_DIST_HIGHWAY_M=600;
-const RADAR_CACHE_KEY='radar_mikefri_v1', RADAR_CACHE_TTL=24*60*60*1000;
-
-const RADAR_TYPES = {
-  'Radar fixe':        {label:'Radar fixe',        icon:'🚨',color:'#cc1a1f'},
-  'Radar feu rouge':   {label:'Radar feu rouge',   icon:'🚦',color:'#c97c10'},
-  'Radar de tronçon':  {label:'Radar de tronçon',  icon:'📏',color:'#7c4bc2'},
-  'Radar mobile':      {label:'Radar mobile',      icon:'🚐',color:'#1a7fd4'},
-  'Radar discriminant':{label:'Radar discriminant',icon:'🎯',color:'#1b9e57'},
-  'unknown':           {label:'Contrôle vitesse',  icon:'📷',color:'#888'},
-};
-
-function nomToType(nom) {
-  if (!nom) return 'unknown';
-  const n = nom.toLowerCase();
-  if (n.includes('tronçon') || n.includes('troncon')) return 'Radar de tronçon';
-  if (n.includes('feu'))                               return 'Radar feu rouge';
-  if (n.includes('mobile'))                            return 'Radar mobile';
-  if (n.includes('discriminant'))                      return 'Radar discriminant';
-  if (n.includes('fixe'))                              return 'Radar fixe';
-  return 'Radar fixe';
-}
 
 async function loadRadarsMikefri() {
   const URL = 'https://raw.githubusercontent.com/mikefri/Teslanavigation/main/radars_complet.json';
+
+  // 1) Vérifier le cache session
   try {
     const cached = sessionStorage.getItem(RADAR_CACHE_KEY);
     if (cached) {
       const { ts, data } = JSON.parse(cached);
-      if (Date.now() - ts < RADAR_CACHE_TTL) { allRadars = data; return true; }
+      if (Date.now() - ts < RADAR_CACHE_TTL && data.length > 0) {
+        allRadars = data;
+        console.log(`[Radars] ${allRadars.length} radars chargés depuis le cache`);
+        return true;
+      }
     }
-  } catch(e) {}
+  } catch(e) {
+    console.warn('[Radars] Erreur cache:', e);
+  }
+
+  // 2) Fetch distant
   try {
     const resp = await fetch(URL);
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const geojson = await resp.json();
-    allRadars = geojson.features.map((f, i) => ({
-      id: 'mf_' + i,
-      type: nomToType(f.properties.nom),
-      lat: f.geometry.coordinates[1],
-      lng: f.geometry.coordinates[0],
-      speed: parseInt(f.properties.vitesse) || null,
-      name: f.properties.nom || '',
-      route: '',
-      direction: '',
-      source: 'mikefri/Teslanavigation'
-    }));
-    try { sessionStorage.setItem(RADAR_CACHE_KEY, JSON.stringify({ ts: Date.now(), data: allRadars })); } catch(e) {}
+
+    // 3) Valider la structure GeoJSON
+    if (!geojson || !geojson.features || !Array.isArray(geojson.features)) {
+      throw new Error('Format GeoJSON invalide — pas de tableau "features"');
+    }
+
+    if (geojson.features.length === 0) {
+      throw new Error('Fichier GeoJSON vide (0 features)');
+    }
+
+    allRadars = geojson.features
+      .filter(f =>
+        f.geometry &&
+        f.geometry.coordinates &&
+        f.geometry.coordinates.length >= 2 &&
+        isFinite(f.geometry.coordinates[0]) &&
+        isFinite(f.geometry.coordinates[1])
+      )
+      .map((f, i) => ({
+        id: 'mf_' + i,
+        type: nomToType(f.properties?.nom),
+        lat: f.geometry.coordinates[1],
+        lng: f.geometry.coordinates[0],
+        speed: parseInt(f.properties?.vitesse) || null,
+        name: f.properties?.nom || '',
+        route: '',
+        direction: '',
+        source: 'mikefri/Teslanavigation'
+      }));
+
+    console.log(`[Radars] ${allRadars.length} radars chargés depuis GitHub`);
+
+    if (allRadars.length === 0) {
+      throw new Error('Aucun radar valide après parsing');
+    }
+
+    // 4) Mettre en cache
+    try {
+      sessionStorage.setItem(RADAR_CACHE_KEY, JSON.stringify({
+        ts: Date.now(),
+        data: allRadars
+      }));
+    } catch(e) {
+      console.warn('[Radars] Impossible de mettre en cache:', e);
+    }
+
     return true;
+
   } catch(err) {
-    console.warn('Radar mikefri failed:', err.message);
+    console.error('[Radars] Échec chargement:', err.message);
+    showToastError('Radars : ' + err.message);
     return false;
   }
 }
 
-function radarInBounds(r, bounds) {
-  return r.lat >= bounds.getSouth() && r.lat <= bounds.getNorth()
-      && r.lng >= bounds.getWest() && r.lng <= bounds.getEast();
-}
-
 async function loadRadars() {
   radarLoaded = true;
-  const btn = document.getElementById('radar-toggle-btn'), origHTML = btn.innerHTML;
+  const btn = document.getElementById('radar-toggle-btn');
+  const origHTML = btn.innerHTML;
+
   btn.innerHTML = '<span style="font-size:11px;letter-spacing:1px;font-family:Orbitron,monospace">⏳ …</span>';
   btn.style.pointerEvents = 'none';
-  const restore = () => { btn.innerHTML = origHTML; btn.style.pointerEvents = ''; btn.classList.toggle('active', radarVisible); };
-  const ok = await loadRadarsMikefri();
-  restore();
-  if (!ok) { showToastError('Impossible de charger les radars.'); return; }
-  renderRadarMarkers();
-}
 
-let lastRadarBbox = null, radarReloading = false;
-async function reloadRadarsIfNeeded() {
-  if (!radarVisible || radarReloading) return;
-  const bounds = map.getBounds(), bbox = `${bounds.getSouth().toFixed(1)},${bounds.getWest().toFixed(1)},${bounds.getNorth().toFixed(1)},${bounds.getEast().toFixed(1)}`;
-  if (bbox === lastRadarBbox) return;
-  lastRadarBbox = bbox;
+  const ok = await loadRadarsMikefri();
+
+  // Restaurer le bouton
+  btn.innerHTML = origHTML;
+  btn.style.pointerEvents = '';
+  btn.classList.toggle('active', radarVisible);
+
+  if (!ok || allRadars.length === 0) {
+    showToastError(`Impossible de charger les radars (${allRadars.length} trouvés)`);
+    radarVisible = false;
+    btn.classList.remove('active');
+    return;
+  }
+
+  // ← C'EST ICI LE FIX PRINCIPAL : forcer le rendu
+  showToastOk(`${allRadars.length} radars chargés ✓`);
   renderRadarMarkers();
 }
 
 function renderRadarMarkers() {
-  radarMarkers.forEach(m => m.remove()); radarMarkers = []; if (!radarVisible) return;
-  const visible = allRadars.filter(r => radarInBounds(r, map.getBounds().pad(0.1)));
-  visible.forEach(r => {
+  // Nettoyer les anciens
+  radarMarkers.forEach(m => m.remove());
+  radarMarkers = [];
+
+  if (!radarVisible || !allRadars.length) {
+    console.log('[Radars] Rendu ignoré:', { radarVisible, count: allRadars.length });
+    return;
+  }
+
+  const bounds = map.getBounds().pad(0.15); // un peu plus large
+  const visible = allRadars.filter(r => radarInBounds(r, bounds));
+
+  console.log(`[Radars] ${visible.length}/${allRadars.length} radars dans le viewport`);
+
+  // Limiter à 500 pour les performances
+  const toRender = visible.slice(0, 500);
+
+  toRender.forEach(r => {
     const cfg = RADAR_TYPES[r.type] || RADAR_TYPES['unknown'];
+
     const el = document.createElement('div');
-    el.style.cssText = `width:32px;height:32px;border-radius:50%;background:white;border:3px solid ${cfg.color};display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.22);transition:transform .15s;user-select:none;`;
+    el.style.cssText = `
+      width:32px;height:32px;border-radius:50%;
+      background:white;border:3px solid ${cfg.color};
+      display:flex;align-items:center;justify-content:center;
+      font-size:15px;cursor:pointer;
+      box-shadow:0 2px 10px rgba(0,0,0,.22);
+      transition:transform .15s;user-select:none;
+      z-index:10;
+    `;
     el.textContent = cfg.icon;
     el.addEventListener('mouseenter', () => el.style.transform = 'scale(1.3)');
     el.addEventListener('mouseleave', () => el.style.transform = 'scale(1)');
+
     const popup = new maplibregl.Popup({offset:20}).setHTML(
       `<div style="line-height:1.9">
         <b style="font-size:14px">${cfg.icon} ${cfg.label}</b>
@@ -920,79 +969,58 @@ function renderRadarMarkers() {
         <br><span style="font-size:10px;color:var(--muted)">🇫🇷 mikefri/Teslanavigation</span>
       </div>`
     );
-    radarMarkers.push(new maplibregl.Marker({element:el, anchor:'center'}).setLngLat([r.lng, r.lat]).setPopup(popup).addTo(map));
+
+    const marker = new maplibregl.Marker({element: el, anchor: 'center'})
+      .setLngLat([r.lng, r.lat])
+      .setPopup(popup)
+      .addTo(map);
+
+    radarMarkers.push(marker);
   });
+
+  console.log(`[Radars] ${radarMarkers.length} marqueurs affichés sur la carte`);
 }
 
 async function toggleRadarLayer() {
   const btn = document.getElementById('radar-toggle-btn');
   radarVisible = !radarVisible;
   btn.classList.toggle('active', radarVisible);
+
   if (radarVisible) {
-    if (!radarLoaded) await loadRadars();
-    else renderRadarMarkers();
+    if (!radarLoaded || allRadars.length === 0) {
+      await loadRadars();
+    } else {
+      renderRadarMarkers();
+    }
+    // Recharger quand on bouge la carte
     map.on('moveend', reloadRadarsIfNeeded);
   } else {
     map.off('moveend', reloadRadarsIfNeeded);
-    radarMarkers.forEach(m => m.remove()); radarMarkers = [];
+    radarMarkers.forEach(m => m.remove());
+    radarMarkers = [];
     hideRadarAlert();
   }
 }
 
-function checkRadarProximity(userPos) {
-  if (!radarVisible || !allRadars.length) return;
-  let closest = null, closestDist = Infinity;
-  for (const r of allRadars) {
-    const d = hav(userPos, [r.lng, r.lat]) * 1000;
-    if (d < closestDist) { closestDist = d; closest = r; }
+// Fonction utilitaire pour toast de succès (ajoutez-la)
+function showToastOk(msg) {
+  let t = document.getElementById('_ok-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = '_ok-toast';
+    t.style.cssText = `
+      position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+      background:rgba(27,158,87,.92);color:#fff;font-size:12px;
+      padding:9px 18px;border-radius:20px;z-index:9999;
+      pointer-events:none;transition:opacity .4s;white-space:nowrap;
+      box-shadow:0 4px 16px rgba(0,0,0,.3)
+    `;
+    document.body.appendChild(t);
   }
-  if (!closest) return;
-  const alertDist = (closest.speed && closest.speed >= 110) ? RADAR_ALERT_DIST_HIGHWAY_M : RADAR_ALERT_DIST_M;
-  if (closestDist <= alertDist) showRadarAlert(closest, closestDist, alertDist);
-  else if (closestDist > alertDist * 2) hideRadarAlert();
-}
-
-function showRadarAlert(radar, distM, alertDist=RADAR_ALERT_DIST_M) {
-  const cfg = RADAR_TYPES[radar.type] || RADAR_TYPES['unknown'];
-  document.getElementById('ra-stripe').style.background = cfg.color;
-  document.getElementById('ra-icon').textContent = cfg.icon;
-  document.getElementById('ra-type').textContent = cfg.label;
-  document.getElementById('ra-type').style.color = cfg.color;
-  document.getElementById('ra-name').textContent = radar.name || 'Contrôle de vitesse';
-  document.getElementById('ra-sub').textContent = radar.speed ? `Limite : ${radar.speed} km/h` : 'Vitesse limite non renseignée';
-  document.getElementById('ra-speed-circle').style.borderColor = cfg.color;
-  document.getElementById('ra-speed-val').style.color = cfg.color;
-  document.getElementById('ra-speed-val').textContent = radar.speed || '?';
-  const d = distM >= 1000 ? {val:(distM/1000).toFixed(1),unit:'km'} : {val:Math.round(distM/10)*10||Math.round(distM),unit:'m'};
-  document.getElementById('ra-dist-val').textContent = d.val;
-  document.getElementById('ra-dist-unit').textContent = d.unit;
-  document.getElementById('ra-prox-fill').style.width = Math.min(100, Math.max(0, 100-(distM/alertDist)*100)) + '%';
-  document.getElementById('radar-alert').classList.add('show');
-  const now = Date.now(), beepInterval = distM<100?300:distM<200?600:1400;
-  if (now-lastRadarBeepTime > beepInterval) { lastRadarBeepTime=now; playRadarBeep(distM); }
-  if (radar.id !== lastAlertedRadarId && distM < alertDist*0.6) {
-    lastAlertedRadarId = radar.id;
-    speak(`Attention, ${cfg.label.toLowerCase()}${radar.speed?`, limite ${radar.speed} kilomètres heure`:''}, dans ${Math.round(distM)} mètres`);
-  }
-  clearTimeout(radarAlertTimer);
-  radarAlertTimer = setTimeout(() => { if(lastAlertedRadarId===radar.id) hideRadarAlert(); }, 7000);
-}
-
-function hideRadarAlert() {
-  const alert = document.getElementById('radar-alert');
-  alert.style.opacity = '0'; alert.style.transform = 'translateY(20px)';
-  setTimeout(() => { alert.classList.remove('show'); alert.style.opacity=''; alert.style.transform=''; }, 300);
-  lastAlertedRadarId = null;
-}
-
-function playRadarBeep(distM) {
-  try {
-    const ctx=new(window.AudioContext||window.webkitAudioContext)(), osc=ctx.createOscillator(), gain=ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.frequency.value=distM<100?1200:distM<200?900:660; osc.type='sine';
-    gain.gain.setValueAtTime(0.18,ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.18);
-    osc.start(ctx.currentTime); osc.stop(ctx.currentTime+0.18);
-  } catch(e){}
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => t.style.opacity = '0', 3500);
 }
 
 // ════════════════════════════════════════════════════════════════
