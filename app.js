@@ -1,0 +1,965 @@
+// ════════════════════════════════════════════════════════════════
+//  DONNÉES MODÈLES
+// ════════════════════════════════════════════════════════════════
+const MODELS = [
+  { family:'Model 3', id:'m3', variants:[
+    { id:'m3-prop',   name:'Propulsion (Highland)',           tag:'PROP',  tc:'vtag-prop',  range:513, kwh:57,  desc:'LFP · 513 km WLTP' },
+    { id:'m3-ga-awd', name:'Grande Autonomie AWD (Highland)', tag:'GA AWD',tc:'vtag-ga',   range:629, kwh:79,  desc:'NMC · 629 km WLTP (19")' },
+    { id:'m3-ga-rwd', name:'Grande Autonomie RWD (Highland)', tag:'GA RWD',tc:'vtag-ga',   range:702, kwh:85,  desc:'NMC · 702 km WLTP (18")' },
+    { id:'m3-perf',   name:'Performance Ludicrous (Highland)',tag:'PERF',  tc:'vtag-perf', range:528, kwh:79,  desc:'NMC · 528 km WLTP' },
+  ]},
+  { family:'Model Y', id:'my', variants:[
+    { id:'my-prop',   name:'Propulsion (Juniper)',            tag:'PROP',  tc:'vtag-prop',  range:455, kwh:57,  desc:'LFP · 455 km WLTP' },
+    { id:'my-ga-rwd', name:'Grande Autonomie Propulsion',     tag:'GA RWD',tc:'vtag-ga',   range:600, kwh:79,  desc:'NMC · 600 km WLTP (19")' },
+    { id:'my-ga-awd', name:'Grande Autonomie AWD',            tag:'GA AWD',tc:'vtag-ga',   range:533, kwh:79,  desc:'NMC · 533 km WLTP' },
+    { id:'my-perf',   name:'Performance (Juniper)',            tag:'PERF', tc:'vtag-perf', range:510, kwh:80,  desc:'NMC · 510 km WLTP' },
+  ]},
+  { family:'Model S', id:'ms', variants:[
+    { id:'ms-awd',    name:'Dual Motor AWD',                  tag:'AWD',   tc:'vtag-ga',   range:744, kwh:100, desc:'NMC · 744 km WLTP' },
+    { id:'ms-plaid',  name:'Plaid (3 moteurs)',               tag:'PLAID', tc:'vtag-plaid',range:611, kwh:100, desc:'NMC · 611 km WLTP' },
+  ]},
+  { family:'Model X', id:'mx', variants:[
+    { id:'mx-awd',    name:'Dual Motor AWD',                  tag:'AWD',   tc:'vtag-ga',   range:649, kwh:100, desc:'NMC · 649 km WLTP' },
+    { id:'mx-plaid',  name:'Plaid (3 moteurs)',               tag:'PLAID', tc:'vtag-plaid',range:609, kwh:100, desc:'NMC · 609 km WLTP' },
+  ]},
+  { family:'Cybertruck', id:'ct', variants:[
+    { id:'ct-rwd',    name:'Propulsion RWD',                  tag:'PROP',  tc:'vtag-prop', range:402, kwh:123, desc:'NMC · ~402 km WLTP' },
+    { id:'ct-awd',    name:'Dual Motor AWD',                  tag:'AWD',   tc:'vtag-ga',   range:547, kwh:123, desc:'NMC · ~547 km WLTP' },
+    { id:'ct-beast',  name:'Cyberbeast (3 moteurs)',          tag:'BEAST', tc:'vtag-plaid',range:483, kwh:123, desc:'NMC · ~483 km WLTP' },
+  ]},
+  { family:'Roadster', id:'road', variants:[
+    { id:'road',      name:'Roadster',                        tag:'BASE',  tc:'vtag-ga',   range:1000,kwh:200, desc:'~1000 km annoncés' },
+  ]},
+];
+const ALL_VARIANTS = MODELS.flatMap(m => m.variants);
+
+const MAP_STYLES = {
+  dark:  'https://tiles.openfreemap.org/styles/dark',
+  bright:'https://tiles.openfreemap.org/styles/bright',
+  topo:  'https://tiles.openfreemap.org/styles/liberty'
+};
+const MARGIN_KM = 30, MIN_ARR_PCT = 15;
+
+// ── État global ──
+let map, coords = { origin: null, dest: null };
+let battery = 78, chargeTargetPct = 80;
+let selectedVariant = null, activeFamilyId = 'm3';
+let allChargers = [], scStatusFilter = new Set(['OPEN']), scSortKey = 'name';
+let scVisible = false, scLoaded = false;
+let scActiveCountry = 'ALL';
+let originMarker = null, destMarker = null, stopMarkers = [];
+let scPopup = null;
+let sidebarOpen = false, modelSelectorOpen = true;
+
+// ════════════════════════════════════════════════════════════════
+//  WAKE LOCK
+// ════════════════════════════════════════════════════════════════
+let wakeLock = null;
+
+async function requestWakeLock() {
+  if (!('wakeLock' in navigator)) return false;
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    document.getElementById('wakelock-badge').classList.add('show');
+    wakeLock.addEventListener('release', () => document.getElementById('wakelock-badge').classList.remove('show'));
+    return true;
+  } catch (err) { return false; }
+}
+async function releaseWakeLock() {
+  if (wakeLock) { try { await wakeLock.release(); } catch(e){} wakeLock = null; }
+  document.getElementById('wakelock-badge').classList.remove('show');
+}
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState === 'visible' && gpsTracking) await requestWakeLock();
+});
+
+// ════════════════════════════════════════════════════════════════
+//  UI GÉNÉRALE
+// ════════════════════════════════════════════════════════════════
+function toggleSidebar() {
+  sidebarOpen = !sidebarOpen;
+  document.getElementById('sidebar').classList.toggle('open', sidebarOpen);
+  document.getElementById('sidebar-toggle').classList.toggle('open', sidebarOpen);
+  setTimeout(() => map.resize(), 420);
+}
+
+function setLoading(on, txt = 'CALCUL EN COURS…') {
+  document.getElementById('loading').classList.toggle('show', on);
+  document.getElementById('loading-text').textContent = txt;
+}
+
+function showToastError(msg) {
+  let t = document.getElementById('_err-toast');
+  if (!t) {
+    t = document.createElement('div'); t.id = '_err-toast';
+    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(30,30,30,.92);color:#fff;font-size:12px;padding:9px 18px;border-radius:20px;z-index:9999;pointer-events:none;transition:opacity .4s;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.3)';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg; t.style.opacity = '1';
+  clearTimeout(t._tid); t._tid = setTimeout(() => t.style.opacity = '0', 3500);
+}
+
+function switchTab(t) {
+  document.querySelectorAll('.tab').forEach((el, i) => el.classList.toggle('active', (i===0&&t==='nav')||(i===1&&t==='chargers')));
+  document.getElementById('panel-nav').classList.toggle('active', t === 'nav');
+  document.getElementById('panel-chargers').classList.toggle('active', t === 'chargers');
+  if (t === 'chargers' && !scLoaded) loadSuperchargers();
+  if (!sidebarOpen) toggleSidebar();
+}
+
+function tick() { document.getElementById('pill-time').textContent = new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}); }
+tick(); setInterval(tick, 30000);
+
+// ════════════════════════════════════════════════════════════════
+//  SÉLECTEUR DE MODÈLE
+// ════════════════════════════════════════════════════════════════
+function buildModelSelector() {
+  document.getElementById('model-families').innerHTML = MODELS.map(m =>
+    `<div class="mfam${m.id===activeFamilyId?' active':''}" onclick="selectFamily('${m.id}')">${m.family}</div>`
+  ).join('');
+  renderVariants();
+}
+
+function selectFamily(fid) {
+  activeFamilyId = fid;
+  document.querySelectorAll('.mfam').forEach((el,i) => el.classList.toggle('active', MODELS[i].id === fid));
+  renderVariants();
+}
+
+function renderVariants() {
+  const fam = MODELS.find(m => m.id === activeFamilyId);
+  document.getElementById('variant-list').innerHTML = fam.variants.map(v => `
+    <div class="variant${selectedVariant&&selectedVariant.id===v.id?' active':''}" onclick="selectVariant('${v.id}')">
+      <div class="variant-info">
+        <div class="variant-name">${v.name}</div>
+        <div class="variant-desc">${v.desc}</div>
+      </div>
+      <span class="vtag ${v.tc}">${v.tag}</span>
+      <div class="variant-km">${v.range} <span>km</span></div>
+    </div>`).join('');
+}
+
+function selectVariant(vid, autoCollapse = true) {
+  selectedVariant = ALL_VARIANTS.find(v => v.id === vid);
+  renderVariants();
+  updateBattery(battery);
+  if (autoCollapse && modelSelectorOpen) collapseModelSelector();
+}
+
+function collapseModelSelector() {
+  modelSelectorOpen = false;
+  if (selectedVariant) {
+    document.getElementById('mc-name').textContent = selectedVariant.name;
+    document.getElementById('mc-desc').textContent = selectedVariant.desc;
+    document.getElementById('mc-km').textContent = selectedVariant.range + ' km';
+  }
+  document.getElementById('model-collapsed').style.display = 'block';
+  document.getElementById('model-expanded').classList.add('hidden');
+}
+
+function expandModelSelector() {
+  modelSelectorOpen = true;
+  document.getElementById('model-collapsed').style.display = 'none';
+  document.getElementById('model-expanded').classList.remove('hidden');
+}
+
+function toggleModelSelector() {
+  if (modelSelectorOpen) collapseModelSelector(); else expandModelSelector();
+}
+
+function updateBattery(val) {
+  battery = parseInt(val);
+  const range = selectedVariant ? selectedVariant.range : 0;
+  const km = range ? Math.round(range * battery / 100) : 0;
+  document.getElementById('bat-pct').textContent = battery + '%';
+  document.getElementById('bat-km').textContent = range ? (km + ' km') : '—';
+  document.getElementById('bat-fill').style.width = battery + '%';
+  document.getElementById('pill-batt').textContent = battery + '%';
+  const fill = document.getElementById('bat-fill');
+  fill.style.background = battery > 50 ? 'linear-gradient(90deg,#1b9e57,#27ae60)' : battery > 20 ? 'linear-gradient(90deg,#c97c10,#e8a020)' : 'linear-gradient(90deg,#a31519,#cc1a1f)';
+  document.getElementById('bat-pct').style.color = battery > 50 ? 'var(--green)' : battery > 20 ? 'var(--orange)' : 'var(--red)';
+}
+
+function updateChargeTarget(v) {
+  chargeTargetPct = parseInt(v);
+  document.getElementById('charge-target-val').textContent = v + '%';
+}
+
+// ════════════════════════════════════════════════════════════════
+//  CARTE
+// ════════════════════════════════════════════════════════════════
+map = new maplibregl.Map({ container: 'map', style: MAP_STYLES.bright, center: [2.35, 46.8], zoom: 5, pitch: 30 });
+map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
+map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-right');
+map.on('load', initMapLayers);
+
+function emptyGeo() { return { type: 'FeatureCollection', features: [] }; }
+
+function initMapLayers() {
+  if (!map.getSource('route')) {
+    map.addSource('route', { type: 'geojson', data: emptyGeo() });
+    map.addLayer({ id:'route-glow', type:'line', source:'route', paint:{'line-color':'#cc1a1f','line-width':16,'line-opacity':0.10,'line-blur':10} });
+    map.addLayer({ id:'route-line', type:'line', source:'route', paint:{'line-color':'#cc1a1f','line-width':4,'line-opacity':0.88}, layout:{'line-cap':'round','line-join':'round'} });
+  }
+  if (!map.getSource('sc')) {
+    map.addSource('sc', { type:'geojson', data:emptyGeo(), cluster:true, clusterMaxZoom:11, clusterRadius:50 });
+    map.addLayer({ id:'sc-clusters', type:'circle', source:'sc', filter:['has','point_count'],
+      paint:{'circle-color':['step',['get','point_count'],'#cc1a1f',10,'#a31519',50,'#7a0f11'],'circle-radius':['step',['get','point_count'],18,10,24,50,30],'circle-opacity':0.85,'circle-stroke-width':2,'circle-stroke-color':'rgba(255,255,255,0.5)'} });
+    map.addLayer({ id:'sc-cluster-count', type:'symbol', source:'sc', filter:['has','point_count'],
+      layout:{'text-field':['get','point_count_abbreviated'],'text-font':['Open Sans Bold','Arial Unicode MS Bold'],'text-size':13}, paint:{'text-color':'#fff'} });
+    map.addLayer({ id:'sc-pts', type:'circle', source:'sc', filter:['!',['has','point_count']],
+      paint:{'circle-color':['match',['get','status'],'OPEN','#1b9e57','CONSTRUCTION','#c97c10','#cc1a1f'],'circle-radius':8,'circle-stroke-width':2,'circle-stroke-color':'rgba(255,255,255,0.7)','circle-opacity':0.92} });
+    map.addLayer({ id:'sc-labels', type:'symbol', source:'sc', filter:['!',['has','point_count']], minzoom:12,
+      layout:{'text-field':['get','name'],'text-font':['Open Sans Regular','Arial Unicode MS Regular'],'text-size':11,'text-offset':[0,1.2],'text-anchor':'top'},
+      paint:{'text-color':'#333','text-halo-color':'rgba(255,255,255,0.9)','text-halo-width':1.5} });
+    ['sc-clusters','sc-cluster-count','sc-pts','sc-labels'].forEach(l => map.setLayoutProperty(l, 'visibility', 'none'));
+    map.on('click','sc-clusters', e => {
+      const f = map.queryRenderedFeatures(e.point,{layers:['sc-clusters']})[0];
+      map.getSource('sc').getClusterExpansionZoom(f.properties.cluster_id, (err,zoom) => { if(!err) map.flyTo({center:f.geometry.coordinates,zoom,duration:600}); });
+    });
+    map.on('click','sc-pts', e => {
+      const p = e.features[0].properties, [lng,lat] = e.features[0].geometry.coordinates;
+      showScPopup(lng, lat, p.name, p.status, p.stalls, p.kw, p.city);
+    });
+    ['sc-clusters','sc-pts'].forEach(l => {
+      map.on('mouseenter', l, () => map.getCanvas().style.cursor = 'pointer');
+      map.on('mouseleave', l, () => map.getCanvas().style.cursor = '');
+    });
+  }
+}
+
+function setStyle(s) {
+  document.querySelectorAll('.map-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + s).classList.add('active');
+  map.setStyle(MAP_STYLES[s]);
+  map.once('styledata', () => {
+    initMapLayers();
+    if (scVisible && scLoaded) {
+      if (map.getSource('sc')) map.getSource('sc').setData(buildScGeoJSON(allChargers));
+      ['sc-clusters','sc-cluster-count','sc-pts','sc-labels'].forEach(l => { if(map.getLayer(l)) map.setLayoutProperty(l,'visibility','visible'); });
+    }
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
+//  GEOCODING / RECHERCHE
+// ════════════════════════════════════════════════════════════════
+let deb = {};
+async function onInput(el, f) {
+  clearTimeout(deb[f]);
+  const q = el.value.trim();
+  if (q.length < 3) { closeSug(f); return; }
+  deb[f] = setTimeout(async () => {
+    try {
+      const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=6&accept-language=fr`);
+      renderSug(f, await r.json());
+    } catch(e) {}
+  }, 300);
+}
+
+function renderSug(f, items) {
+  const box = document.getElementById('sug-' + f);
+  if (!items.length) { box.classList.remove('open'); return; }
+  box.innerHTML = items.map(it => {
+    const p = it.display_name.split(',');
+    return `<div class="sug-item" onclick="pickSug('${f}',${it.lon},${it.lat},this)"><div class="sug-name">${p[0]}</div><div class="sug-sub">${p.slice(1,3).join(',').trim()}</div></div>`;
+  }).join('');
+  box.classList.add('open');
+}
+
+function pickSug(f, lon, lat, el) {
+  coords[f] = [parseFloat(lon), parseFloat(lat)];
+  const name = el.querySelector('.sug-name').textContent;
+  document.getElementById('input-' + f).value = name;
+  closeSug(f);
+  if (f === 'origin') {
+    if (originMarker) originMarker.remove();
+    originMarker = new maplibregl.Marker({color:'#1a7fd4'}).setLngLat(coords[f]).setPopup(new maplibregl.Popup({offset:25}).setHTML(`<b>Départ</b><br>${name}`)).addTo(map);
+    document.getElementById('pill-loc').textContent = name;
+    map.flyTo({ center: coords[f], zoom: 11, duration: 800 });
+  } else {
+    if (destMarker) destMarker.remove();
+    destMarker = new maplibregl.Marker({color:'#cc1a1f'}).setLngLat(coords[f]).setPopup(new maplibregl.Popup({offset:25}).setHTML(`<b>Destination</b><br>${name}`)).addTo(map);
+  }
+}
+
+function showSug(f) { const b = document.getElementById('sug-' + f); if (b.innerHTML) b.classList.add('open'); }
+function closeSug(f) { document.getElementById('sug-' + f).classList.remove('open'); }
+document.addEventListener('click', e => { if (!e.target.closest('.input-wrap')) { closeSug('origin'); closeSug('dest'); } });
+
+function locateMe() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(pos => {
+    const { longitude: lng, latitude: lat } = pos.coords;
+    map.flyTo({ center: [lng, lat], zoom: 13, duration: 1000 });
+    if (!coords.origin) {
+      coords.origin = [lng, lat];
+      document.getElementById('input-origin').value = 'Ma position';
+      document.getElementById('pill-loc').textContent = 'Ma position';
+    }
+  }, () => alert('Géolocalisation non disponible.'));
+}
+
+// ════════════════════════════════════════════════════════════════
+//  ROUTAGE
+// ════════════════════════════════════════════════════════════════
+async function fetchRoute(wps, withSteps = false) {
+  const c = wps.map(w => w.join(',')).join(';');
+  const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${c}?overview=full&geometries=geojson&steps=${withSteps}&annotations=false`);
+  const d = await r.json();
+  if (d.code !== 'Ok') throw new Error('No route');
+  return d.routes[0];
+}
+
+function hav([lon1,lat1],[lon2,lat2]) {
+  const R=6371, dLat=(lat2-lat1)*Math.PI/180, dLon=(lon2-lon1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function coordAtKm(rc, targetKm) {
+  let acc = 0;
+  for (let i=1; i<rc.length; i++) {
+    const d = hav(rc[i-1], rc[i]);
+    if (acc+d >= targetKm) { const f=(targetKm-acc)/d; return [rc[i-1][0]+(rc[i][0]-rc[i-1][0])*f, rc[i-1][1]+(rc[i][1]-rc[i-1][1])*f]; }
+    acc += d;
+  }
+  return rc[rc.length-1];
+}
+
+function routeKmTo(rc, cp) {
+  let acc=0, bestKm=0, bestD=Infinity;
+  for (let i=1; i<rc.length; i++) {
+    acc += hav(rc[i-1], rc[i]);
+    const d = hav(rc[i], cp);
+    if (d < bestD) { bestD = d; bestKm = acc; }
+  }
+  return bestKm;
+}
+
+function findBestCharger(idealPt, rc, usedIds) {
+  const step = Math.max(1, Math.floor(rc.length/200));
+  let best = null, bestScore = Infinity;
+  for (const c of allChargers) {
+    if (c.status !== 'OPEN' || usedIds.has(c.id)) continue;
+    const cp = [c.gps.longitude, c.gps.latitude];
+    const dp = hav(idealPt, cp); if (dp > 130) continue;
+    let minD = Infinity;
+    for (let i=0; i<rc.length; i+=step) { const d=hav(rc[i],cp); if(d<minD) minD=d; }
+    if (minD > 50) continue;
+    const score = dp*0.6 + minD*0.4;
+    if (score < bestScore) { bestScore = score; best = c; }
+  }
+  return best;
+}
+
+async function planStops(rc, totalDistKm) {
+  if (!document.getElementById('sc-auto').checked || !allChargers.length) return [];
+  const maxRange = selectedVariant.range;
+  const safeKm = maxRange*battery/100 - MARGIN_KM;
+  if (totalDistKm <= safeKm) return [];
+  const stops = [], usedIds = new Set();
+  let kmFromStart = 0, battKm = safeKm;
+  for (let iter=0; iter<12; iter++) {
+    const kmToDest = totalDistKm - kmFromStart;
+    if (kmToDest <= battKm - MARGIN_KM) break;
+    const idealKm = kmFromStart + Math.min(battKm*0.80, kmToDest*0.55);
+    const charger = findBestCharger(coordAtKm(rc,idealKm), rc, usedIds);
+    if (!charger) break;
+    const cp = [charger.gps.longitude, charger.gps.latitude];
+    const cKm = routeKmTo(rc, cp);
+    const legKm = cKm - kmFromStart;
+    if (legKm <= 0) { usedIds.add(charger.id); continue; }
+    const battArr = battKm - legKm;
+    if (battArr < maxRange*(MIN_ARR_PCT/100)) { usedIds.add(charger.id); continue; }
+    usedIds.add(charger.id);
+    stops.push({ charger, legKm:Math.round(legKm), battOnArr:Math.round((battArr/maxRange)*100), battAfter:chargeTargetPct, kmToDest:Math.round(Math.max(0,totalDistKm-cKm)) });
+    kmFromStart = cKm; battKm = maxRange*chargeTargetPct/100 - MARGIN_KM;
+  }
+  return stops;
+}
+
+function chargeMins(stop) {
+  const kw = stop.charger.powerKilowatt || 150;
+  const kwToAdd = (stop.battAfter-stop.battOnArr)/100 * (selectedVariant.kwh||75);
+  return Math.round(Math.max(5, (kwToAdd/kw)*60));
+}
+
+async function calcRoute() {
+  if (!selectedVariant) { alert('Veuillez sélectionner votre modèle Tesla.'); return; }
+  if (!coords.origin || !coords.dest) { alert('Sélectionnez départ et destination.'); return; }
+  setLoading(true, 'CHARGEMENT DES DONNÉES…');
+  if (!scLoaded) await loadSuperchargers();
+  setLoading(true, 'CALCUL DE L\'ITINÉRAIRE…');
+  try {
+    const direct = await fetchRoute([coords.origin, coords.dest]);
+    const totalDistKm = direct.distance / 1000;
+    const rc = direct.geometry.coordinates;
+    setLoading(true, 'OPTIMISATION DES ARRÊTS…');
+    const stops = await planStops(rc, totalDistKm);
+    let finalRoute = direct;
+    if (stops.length > 0) {
+      try { const wps=[coords.origin,...stops.map(s=>[s.charger.gps.longitude,s.charger.gps.latitude]),coords.dest]; finalRoute=await fetchRoute(wps); } catch(e){}
+    }
+    map.getSource('route').setData(finalRoute.geometry);
+    const cs = finalRoute.geometry.coordinates;
+    const bounds = cs.reduce((b,c) => b.extend(c), new maplibregl.LngLatBounds(cs[0],cs[0]));
+    map.fitBounds(bounds, { padding:{top:60,bottom:80,left:60,right:60}, duration:1000 });
+    stopMarkers.forEach(m => m.remove()); stopMarkers = [];
+    stops.forEach((stop,i) => {
+      const el = document.createElement('div');
+      el.style.cssText = 'width:30px;height:30px;background:#c97c10;border:2.5px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 12px rgba(201,124,16,.6);cursor:pointer;';
+      el.textContent = '⚡';
+      stopMarkers.push(new maplibregl.Marker({element:el}).setLngLat([stop.charger.gps.longitude,stop.charger.gps.latitude]).setPopup(new maplibregl.Popup({offset:22}).setHTML(scStopPopupHTML(stop,i))).addTo(map));
+    });
+    const maxRange = selectedVariant.range;
+    let finalBattPct;
+    if (stops.length === 0) finalBattPct = Math.round(((maxRange*battery/100)-totalDistKm)/maxRange*100);
+    else { const last=stops[stops.length-1]; finalBattPct=Math.round(((maxRange*last.battAfter/100)-last.kmToDest)/maxRange*100); }
+    finalBattPct = Math.max(0, finalBattPct);
+    const totalDist = finalRoute.distance/1000, totalDur = finalRoute.duration;
+    const totalChargeMins = stops.reduce((s,st) => s+chargeMins(st), 0);
+    const h=Math.floor(totalDur/3600), m_=Math.floor((totalDur%3600)/60);
+    document.getElementById('s-dist').textContent = totalDist.toFixed(0)+' km';
+    document.getElementById('s-time').textContent = h>0?`${h}h${String(m_).padStart(2,'0')}`:`${m_} min`;
+    document.getElementById('s-stops').textContent = stops.length;
+    document.getElementById('s-batt').textContent = finalBattPct+'%';
+    document.getElementById('s-batt').className = 'scard-val '+(finalBattPct<0?'bad':finalBattPct<20?'warn':'ok');
+    renderSummaryDetail(stops, totalDist, totalDur, totalChargeMins, finalBattPct);
+    document.getElementById('route-summary').classList.add('show');
+    document.getElementById('reset-btn').classList.add('show');
+    document.getElementById('guidance-btn').style.display = 'block';
+    renderTimeline(stops, totalDistKm, totalDur, finalBattPct, totalChargeMins);
+  } catch(e) { console.error(e); alert('Impossible de calculer l\'itinéraire.'); }
+  finally { setLoading(false); }
+}
+
+function scStopPopupHTML(stop, i) {
+  return `<div style="line-height:1.9"><b style="font-size:14px">⚡ Arrêt ${i+1} — ${stop.charger.name}</b><br>
+    <span style="color:var(--muted2)">Arrivée : </span><b style="color:var(--orange)">${stop.battOnArr}%</b><br>
+    <span style="color:var(--muted2)">Départ : </span><b style="color:var(--green)">${stop.battAfter}%</b><br>
+    <span style="color:var(--muted2)">Recharge estimée : </span><b>~${chargeMins(stop)} min</b><br>
+    <span style="color:var(--muted2)">Bornes : </span><b>${stop.charger.stallCount||'?'}</b>
+    ${stop.charger.powerKilowatt?`<br><span style="color:var(--muted2)">Puissance : </span><b style="color:var(--blue)">${stop.charger.powerKilowatt} kW</b>`:''}
+  </div>`;
+}
+
+function renderSummaryDetail(stops, totalDistKm, totalDurSec, totalChargeMins, finalBattPct) {
+  const maxRange = selectedVariant.range;
+  const totalTimeMin = Math.round(totalDurSec/60)+totalChargeMins;
+  const totalH=Math.floor(totalTimeMin/60), totalM=totalTimeMin%60;
+  const energyKwh = Math.round((totalDistKm/maxRange)*selectedVariant.kwh);
+  const chargeCost = stops.reduce((sum,s) => sum+(s.battAfter-s.battOnArr)/100*selectedVariant.kwh*0.38, 0).toFixed(1);
+  const battBadge = finalBattPct>=30?`<span class="badge-ok">✓ ${finalBattPct}%</span>`:finalBattPct>=15?`<span class="badge-warn">⚠ ${finalBattPct}%</span>`:`<span class="badge-bad">⚠ ${finalBattPct}%</span>`;
+  document.getElementById('sum-detail').innerHTML = `
+    <div class="sum-row"><span>🚗 Durée totale (route + recharge)</span><b>${totalH}h${String(totalM).padStart(2,'0')}</b></div>
+    <div class="sum-row"><span>⚡ Arrêts Superchargeur</span><b>${stops.length>0?stops.length+' arrêt'+(stops.length>1?'s':'')+' (~'+totalChargeMins+' min)':'Aucun nécessaire'}</b></div>
+    <div class="sum-row"><span>🔋 Batterie à l'arrivée</span>${battBadge}</div>
+    <div class="sum-row"><span>⚙️ Énergie consommée</span><b>~${energyKwh} kWh</b></div>
+    ${stops.length>0?`<div class="sum-row"><span>💶 Coût recharge estimé</span><b>~${chargeCost} €</b></div>`:''}
+    <div class="sum-row"><span>🏎 Modèle</span><b>${selectedVariant.name}</b></div>`;
+}
+
+function renderTimeline(stops, totalDistKm, totalDurSec, finalBattPct, totalChargeMins) {
+  document.getElementById('hint').style.display = 'none';
+  document.getElementById('tl-content').style.display = 'block';
+  const origin = document.getElementById('input-origin').value;
+  const dest = document.getElementById('input-dest').value;
+  const maxRange = selectedVariant.range;
+  const h=Math.floor(totalDurSec/3600), m_=Math.floor((totalDurSec%3600)/60);
+  document.getElementById('tl-title').textContent = `${stops.length} arrêt${stops.length!==1?'s':''} SC · `+(h>0?`${h}h${String(m_).padStart(2,'0')}`:`${m_} min`)+' de route'+(totalChargeMins>0?` · ~${totalChargeMins} min recharge`:'');
+  let html = `<div class="seg-row"><div class="seg-dot origin"></div><div><div class="seg-place">📍 ${origin}</div><div class="seg-meta">${selectedVariant.name} · <b style="color:var(--green)">${battery}%</b> · ${Math.round(maxRange*battery/100)} km disponibles</div></div></div>`;
+  stops.forEach((stop,i) => {
+    const bl=Math.round((stop.legKm/maxRange)*100), cm=chargeMins(stop);
+    html += `<div class="drive-block"><div class="vbar-col"><div class="vbar"></div></div><div class="drive-pills"><div class="dpill">🛣 <b>${stop.legKm} km</b></div><div class="dpill" style="color:var(--orange)">-${bl}%</div></div></div>
+    <div class="sc-stop"><div class="sc-stop-hdr"><div style="font-size:18px;flex-shrink:0">⚡</div><div class="sc-stop-name"><div class="name">${stop.charger.name}</div><div class="meta">${stop.charger.address?.city||''} · ${stop.charger.stallCount||'?'} bornes${stop.charger.powerKilowatt?' · '+stop.charger.powerKilowatt+' kW':''}</div></div><span class="sc-stop-badge">ARRÊT ${i+1}</span></div>
+    <div class="sc-stop-grid"><div class="sc-stat"><div class="sc-stat-val" style="color:var(--orange)">${stop.battOnArr}%</div><div class="sc-stat-lbl">Arrivée</div></div><div class="sc-stat"><div class="sc-stat-val" style="color:var(--green)">${stop.battAfter}%</div><div class="sc-stat-lbl">Départ</div></div><div class="sc-stat"><div class="sc-stat-val">~${cm} min</div><div class="sc-stat-lbl">Recharge</div></div></div></div>`;
+  });
+  const lastDist = stops.length>0?stops[stops.length-1].kmToDest:totalDistKm;
+  const lastBl = Math.round((lastDist/maxRange)*100);
+  html += `<div class="drive-block"><div class="vbar-col"><div class="vbar"></div></div><div class="drive-pills"><div class="dpill">🛣 <b>${Math.round(lastDist)} km</b></div><div class="dpill" style="color:var(--orange)">-${lastBl}%</div></div></div>
+  <div class="seg-row"><div class="seg-dot dest"></div><div><div class="seg-place">🏁 ${dest}</div><div class="seg-meta">Batterie à l'arrivée : <b style="color:${finalBattPct<20?'var(--orange)':'var(--green)'}">${finalBattPct}%</b>${finalBattPct<15?' ⚠️ Recharge recommandée':''}</div></div></div>`;
+  document.getElementById('tl-list').innerHTML = html;
+}
+
+function resetRoute() {
+  coords = { origin: null, dest: null };
+  ['input-origin','input-dest'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('route-summary').classList.remove('show');
+  document.getElementById('reset-btn').classList.remove('show');
+  document.getElementById('guidance-btn').style.display = 'none';
+  document.getElementById('tl-content').style.display = 'none';
+  document.getElementById('hint').style.display = 'block';
+  if (guidanceActive) stopGuidance();
+  if (map.getSource('route')) map.getSource('route').setData(emptyGeo());
+  if (originMarker) { originMarker.remove(); originMarker = null; }
+  if (destMarker) { destMarker.remove(); destMarker = null; }
+  stopMarkers.forEach(m => m.remove()); stopMarkers = [];
+  hideRadarAlert();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  SUPERCHARGEURS
+// ════════════════════════════════════════════════════════════════
+async function loadSuperchargers() {
+  scLoaded = true;
+  try {
+    const r = await fetch('https://supercharge.info/service/supercharge/allSites');
+    allChargers = await r.json();
+    updateScKPIs(); renderScList();
+    if (map.getSource('sc')) map.getSource('sc').setData(buildScGeoJSON(allChargers));
+    document.getElementById('sc-loading').style.display = 'none';
+    document.getElementById('sc-list-wrap').style.display = 'block';
+  } catch(e) { document.getElementById('sc-loading').innerHTML='<div class="sc-loader-txt" style="color:#f88">Erreur de chargement</div>'; }
+}
+
+function updateScKPIs() {
+  const open = allChargers.filter(c => c.status === 'OPEN');
+  document.getElementById('kpi-total').textContent = allChargers.length.toLocaleString('fr');
+  document.getElementById('kpi-open').textContent = open.length.toLocaleString('fr');
+  document.getElementById('kpi-stalls').textContent = open.reduce((s,c) => s+(c.stallCount||0), 0).toLocaleString('fr');
+}
+
+function scCountry(el) { document.querySelectorAll('.cc-chip').forEach(c=>c.classList.remove('on')); el.classList.add('on'); scActiveCountry=el.dataset.cc; renderScList(); }
+function scToggleSt(el) { const s=el.dataset.st; el.classList.toggle('on'); if(scStatusFilter.has(s)) scStatusFilter.delete(s); else scStatusFilter.add(s); renderScList(); if(scVisible) refreshScMapData(); }
+function scFilter() { renderScList(); }
+function scSort(key, btn) { scSortKey=key; document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderScList(); }
+
+function getScFiltered() {
+  const q = (document.getElementById('sc-search').value||'').trim().toLowerCase();
+  let items = allChargers.filter(c => {
+    if (!scStatusFilter.has(c.status)) return false;
+    if (scActiveCountry !== 'ALL') {
+      const country = (c.address?.country||'').toUpperCase();
+      const cc = (c.address?.countryId||c.address?.state||'').toUpperCase();
+      if (!country.includes(scActiveCountry) && !cc.includes(scActiveCountry)) {
+        const names = {FR:'FRANCE',DE:'GERMANY|ALLEMAGNE',ES:'SPAIN|ESPAGNE',IT:'ITALY|ITALIE',BE:'BELGIUM|BELGIQUE',NL:'NETHERLANDS|PAYS-BAS',CH:'SWITZERLAND|SUISSE',GB:'UNITED KINGDOM|UK',US:'UNITED STATES|USA'};
+        const pattern = names[scActiveCountry]||scActiveCountry;
+        if (!pattern.split('|').some(p => country.includes(p))) return false;
+      }
+    }
+    if (q && !c.name.toLowerCase().includes(q) && !(c.address?.city||'').toLowerCase().includes(q) && !(c.address?.country||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+  if (scSortKey==='stalls') items=items.sort((a,b)=>(b.stallCount||0)-(a.stallCount||0));
+  else if (scSortKey==='kw') items=items.sort((a,b)=>(b.powerKilowatt||0)-(a.powerKilowatt||0));
+  else items=items.sort((a,b)=>a.name.localeCompare(b.name));
+  return items;
+}
+
+function esc(s) { return (s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+
+function renderScList() {
+  if (!allChargers.length) return;
+  const items = getScFiltered(), shown = items.slice(0,300);
+  const dc = s => s==='OPEN'?'open':s==='CONSTRUCTION'?'constr':'closed';
+  document.getElementById('sc-count-label').textContent = items.length.toLocaleString('fr')+' stations';
+  document.getElementById('sc-list').innerHTML = shown.map(c => `
+    <div class="sc-item" onclick="flyToSc(${c.gps.latitude},${c.gps.longitude},'${esc(c.name)}','${c.status}',${c.stallCount||0},${c.powerKilowatt||0},'${esc(c.address?.city||'')}')">
+      <div class="sc-status-dot ${dc(c.status)}"></div>
+      <div style="flex:1;min-width:0"><div class="sc-item-name">${esc(c.name)}</div><div class="sc-item-meta">${c.address?.city||''}, ${c.address?.country||''}</div></div>
+      <div class="sc-item-right"><div class="sc-item-stalls">${c.stallCount||'?'} <span style="font-size:9px;color:var(--muted2)">bornes</span></div>${c.powerKilowatt?`<div class="sc-item-kw">${c.powerKilowatt} kW</div>`:''}</div>
+    </div>`).join('') + (items.length>300?`<div style="padding:10px 22px;font-size:11px;color:var(--muted);text-align:center">${items.length-300} autres</div>`:'');
+}
+
+function flyToSc(lat, lng, name, status, stalls, kw, city) { switchTab('nav'); map.flyTo({center:[lng,lat],zoom:14,duration:1000}); showScPopup(lng,lat,name,status,stalls,kw,city); if(!scVisible) toggleScLayer(); }
+
+function showScPopup(lng, lat, name, status, stalls, kw, city) {
+  if (scPopup) scPopup.remove();
+  const sl = status==='OPEN'?`<span style="color:var(--green)">● Ouvert</span>`:status==='CONSTRUCTION'?`<span style="color:var(--orange)">● En construction</span>`:`<span style="color:var(--red)">● Fermé</span>`;
+  scPopup = new maplibregl.Popup({offset:18}).setLngLat([lng,lat]).setHTML(`<div style="line-height:1.9"><b style="font-size:14px">⚡ ${name}</b><br>${sl}${city?`<br><span style="color:var(--muted2)">${city}</span>`:''}<br><span style="color:var(--muted2)">Bornes : </span><b>${stalls||'?'}</b>${kw?`<br><span style="color:var(--muted2)">Puissance : </span><b style="color:var(--blue)">${kw} kW</b>`:''}</div>`).addTo(map);
+}
+
+function buildScGeoJSON(list) { return {type:'FeatureCollection',features:list.map(c=>({type:'Feature',geometry:{type:'Point',coordinates:[c.gps.longitude,c.gps.latitude]},properties:{name:c.name,status:c.status,stalls:c.stallCount||0,kw:c.powerKilowatt||0,city:c.address?.city||''}}))}; }
+function refreshScMapData() { if(!map.getSource('sc')) return; map.getSource('sc').setData(buildScGeoJSON(getScFiltered())); }
+
+async function toggleScLayer() {
+  const btn = document.getElementById('sc-toggle-btn'); scVisible=!scVisible; btn.classList.toggle('active',scVisible);
+  if (scVisible) {
+    if (!scLoaded) { setLoading(true,'CHARGEMENT SUPERCHARGEURS…'); await loadSuperchargers(); setLoading(false); }
+    if (!map.getLayer('sc-pts')) initMapLayers();
+    if (map.getSource('sc')) map.getSource('sc').setData(buildScGeoJSON(allChargers));
+    ['sc-clusters','sc-cluster-count','sc-pts','sc-labels'].forEach(l => { if(map.getLayer(l)) map.setLayoutProperty(l,'visibility','visible'); });
+  } else {
+    ['sc-clusters','sc-cluster-count','sc-pts','sc-labels'].forEach(l => { if(map.getLayer(l)) map.setLayoutProperty(l,'visibility','none'); });
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+//  GUIDAGE VOCAL
+// ════════════════════════════════════════════════════════════════
+let guidanceActive=false, guidanceSteps=[], guidanceStepIdx=0, guidanceDistTravelled=0, lastSpokenStep=-1;
+const synth = window.speechSynthesis;
+
+const MANEUVER_MAP = {
+  'turn-left':        {path:'M30 38 L30 22 L18 22 M24 16 L18 22 L24 28',         label:'Tournez à gauche'},
+  'turn-right':       {path:'M22 38 L22 22 L34 22 M28 16 L34 22 L28 28',         label:'Tournez à droite'},
+  'turn-sharp-left':  {path:'M32 38 L32 28 L16 18 M16 26 L16 18 L24 18',         label:'Virage serré à gauche'},
+  'turn-sharp-right': {path:'M20 38 L20 28 L36 18 M28 18 L36 18 L36 26',         label:'Virage serré à droite'},
+  'turn-slight-left': {path:'M30 38 L26 20 M18 22 L26 20 L28 28',                label:'Légèrement à gauche'},
+  'turn-slight-right':{path:'M22 38 L26 20 M34 22 L26 20 L24 28',                label:'Légèrement à droite'},
+  'straight':         {path:'M26 38 L26 16 M18 24 L26 16 L34 24',                label:'Continuez tout droit'},
+  'roundabout':       {path:'M26 14 A12 12 0 1 1 14 26 M14 20 L14 26 L20 26',   label:'Prenez le rond-point'},
+  'merge':            {path:'M26 38 L26 16 M18 30 L26 20 M34 30 L26 20',         label:'Rejoignez la voie'},
+  'on-ramp':          {path:'M26 38 L26 22 M34 14 L26 22 L34 30',                label:'Prenez la bretelle'},
+  'off-ramp':         {path:'M26 38 L26 22 M26 22 L36 14 M36 14 L36 22',         label:'Quittez la voie rapide'},
+  'fork-left':        {path:'M26 38 L26 26 M26 26 L18 16 M26 26 L30 18',         label:'Bifurcation à gauche'},
+  'fork-right':       {path:'M26 38 L26 26 M26 26 L34 16 M26 26 L22 18',         label:'Bifurcation à droite'},
+  'arrive':           {path:'M26 16 L26 32 M20 32 L26 38 L32 32',                label:'Vous êtes arrivé·e !'},
+  'depart':           {path:'M26 38 L26 16 M18 24 L26 16 L34 24',                label:'Démarrez'},
+  'default':          {path:'M26 38 L26 16 M18 24 L26 16 L34 24',                label:'Continuez'},
+};
+
+function getManeuver(step) { if(!step) return MANEUVER_MAP['default']; const t=step.type||'',m=step.modifier||'',key=m?`${t}-${m}`.replace(/ /g,'-'):t; return MANEUVER_MAP[key]||MANEUVER_MAP[t]||MANEUVER_MAP['default']; }
+function parseSteps(legs) { const steps=[]; for(const leg of legs){ for(const step of(leg.steps||[])){ const loc=step.maneuver?.location; steps.push({instruction:step.maneuver?.instruction||step.name||'',name:step.name||'',type:step.maneuver?.type||'straight',modifier:step.maneuver?.modifier||'',distance:step.distance||0,duration:step.duration||0,location:loc?[loc[0],loc[1]]:null}); }} return steps; }
+function buildInstructionText(step) { const man=getManeuver(step),road=step.name?` sur ${step.name}`:''; if(step.type==='arrive') return'Vous êtes arrivé·e à destination !'; if(step.type==='depart') return`Démarrez${road}`; return`${man.label}${road}`; }
+function fmtDist(m) { if(m>=1000) return{val:(m/1000).toFixed(1),unit:'km'}; return{val:Math.round(m/10)*10||m,unit:'m'}; }
+function fmtEta(secs) { const h=Math.floor(secs/3600),min=Math.floor((secs%3600)/60); return h>0?`${h}h${String(min).padStart(2,'0')}`:`${min} min`; }
+
+function speak(text) {
+  if (!synth) return; synth.cancel();
+  const utt = new SpeechSynthesisUtterance(text); utt.lang='fr-FR'; utt.rate=1.05;
+  const frVoice = synth.getVoices().find(v => v.lang.startsWith('fr'));
+  if (frVoice) utt.voice = frVoice;
+  synth.speak(utt);
+}
+
+async function startGuidance() {
+  if (!coords.origin || !coords.dest) { alert('Calculez d\'abord un itinéraire.'); return; }
+  setLoading(true, 'CHARGEMENT DU GUIDAGE…');
+  try {
+    const routeWithSteps = await fetchRoute([coords.origin,coords.dest], true);
+    guidanceSteps = parseSteps(routeWithSteps.legs||[]);
+    if (!guidanceSteps.length) { alert('Aucune étape disponible.'); return; }
+    guidanceStepIdx=0; lastSpokenStep=-1; guidanceDistTravelled=0; guidanceActive=true;
+    const bar = document.getElementById('guidance-bar');
+    bar.style.display='flex'; bar.classList.add('show','slide-in');
+    document.getElementById('top-pill').classList.add('pushed');
+    if (!gpsTracking) startGpsTracking();
+    updateGuidanceBanner();
+    speak('Guidage démarré. '+buildInstructionText(guidanceSteps[0]));
+  } catch(e) { console.error(e); alert('Impossible de charger le guidage.'); }
+  finally { setLoading(false); }
+}
+
+function stopGuidance() {
+  guidanceActive=false; guidanceSteps=[]; guidanceStepIdx=0;
+  const bar = document.getElementById('guidance-bar'); bar.classList.remove('show');
+  setTimeout(() => { bar.style.display='none'; }, 350);
+  document.getElementById('top-pill').classList.remove('pushed');
+  document.getElementById('gb-progress').style.width='0%';
+  synth && synth.cancel();
+}
+
+function updateGuidanceBanner() {
+  if (!guidanceActive || guidanceStepIdx >= guidanceSteps.length) return;
+  const step=guidanceSteps[guidanceStepIdx], nextStep=guidanceSteps[guidanceStepIdx+1], man=getManeuver(step);
+  document.getElementById('gb-arrow-path').setAttribute('d', man.path);
+  const d=fmtDist(step.distance); document.getElementById('gb-dist-big').textContent=d.val; document.getElementById('gb-dist-unit').textContent=d.unit;
+  document.getElementById('gb-step-txt').textContent = buildInstructionText(step);
+  document.getElementById('gb-road-name').textContent = step.name||'';
+  document.getElementById('gb-next-preview').textContent = nextStep ? `Ensuite : ${getManeuver(nextStep).label}${nextStep.name?' sur '+nextStep.name:''}` : '';
+  const remDist=guidanceSteps.slice(guidanceStepIdx).reduce((s,st)=>s+st.distance,0);
+  const remDur=guidanceSteps.slice(guidanceStepIdx).reduce((s,st)=>s+st.duration,0);
+  document.getElementById('gb-eta-time').textContent = fmtEta(remDur);
+  const rd=fmtDist(remDist); document.getElementById('gb-rem-dist').textContent=rd.val+' '+rd.unit+' restants';
+  const totalDist=guidanceSteps.reduce((s,st)=>s+st.distance,0);
+  document.getElementById('gb-progress').style.width=totalDist>0?Math.min(100,(guidanceDistTravelled/totalDist)*100)+'%':'0%';
+}
+
+function advanceGuidance(pos) {
+  if (!guidanceActive || !guidanceSteps.length) return;
+  const userPt=[pos.coords.longitude, pos.coords.latitude];
+  let closestDist=Infinity, closestIdx=guidanceStepIdx;
+  for (let i=guidanceStepIdx; i<Math.min(guidanceStepIdx+5,guidanceSteps.length); i++) {
+    const step=guidanceSteps[i]; if(!step.location) continue;
+    const d=hav(userPt,step.location)*1000; if(d<closestDist){closestDist=d;closestIdx=i;}
+  }
+  if (closestIdx>guidanceStepIdx && closestDist<40) {
+    guidanceDistTravelled+=guidanceSteps.slice(guidanceStepIdx,closestIdx).reduce((s,st)=>s+st.distance,0);
+    guidanceStepIdx=closestIdx; updateGuidanceBanner();
+    if (guidanceStepIdx!==lastSpokenStep){lastSpokenStep=guidanceStepIdx;speak(buildInstructionText(guidanceSteps[guidanceStepIdx]));}
+  }
+  const curStep=guidanceSteps[guidanceStepIdx];
+  if (curStep&&curStep.location&&guidanceStepIdx!==lastSpokenStep) {
+    const distToNext=hav(userPt,curStep.location)*1000;
+    if(distToNext<200&&distToNext>0){lastSpokenStep=guidanceStepIdx;const d=fmtDist(distToNext);speak(`Dans ${d.val} ${d.unit}, ${getManeuver(curStep).label}`);}
+  }
+  if(guidanceActive) updateGuidanceBanner();
+  if(guidanceStepIdx>=guidanceSteps.length-1){
+    const last=guidanceSteps[guidanceSteps.length-1];
+    if(last&&last.location){const da=hav(userPt,last.location)*1000;if(da<30){speak('Vous êtes arrivé à destination !');setTimeout(stopGuidance,3000);}}
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+//  GPS TEMPS RÉEL
+// ════════════════════════════════════════════════════════════════
+let gpsWatchId=null, gpsTracking=false, gpsFollowMap=true, lastGpsPos=null, lastGpsHeading=null, gpsMarker=null;
+let deviationTimer=null, lastRouteRecalc=0;
+const DEVIATION_THRESHOLD_M=300, RECALC_COOLDOWN_MS=30000;
+
+function buildArrowMarker() {
+  const wrap=document.createElement('div'); wrap.style.cssText='position:relative;width:48px;height:48px;cursor:pointer;';
+  const ring=document.createElement('div'); ring.id='gps-accuracy-ring';
+  ring.style.cssText='position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;border:2px solid rgba(204,26,31,.30);background:rgba(204,26,31,.07);pointer-events:none;width:48px;height:48px;transition:width .6s,height .6s;';
+  wrap.appendChild(ring);
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('id','gps-arrow'); svg.setAttribute('viewBox','0 0 48 48'); svg.setAttribute('width','48'); svg.setAttribute('height','48');
+  svg.style.cssText='position:relative;z-index:1;transition:transform .4s ease;filter:drop-shadow(0 3px 8px rgba(204,26,31,.55));';
+  svg.innerHTML=`<path d="M24 4 L30 16 L24 13 L18 16 Z" fill="rgba(204,26,31,0.25)"/><g transform="translate(24,26) scale(0.88)"><path d="M-7,-18 Q0,-22 7,-18 L8,-10 Q0,-12 -8,-10 Z" fill="#cc1a1f"/><rect x="-9" y="-10" width="18" height="14" rx="3" fill="#cc1a1f"/><path d="M-7,-10 Q0,-13 7,-10 L6,-5 Q0,-7 -6,-5 Z" fill="rgba(255,255,255,0.22)"/><path d="M-8,4 L8,4 L7,12 Q0,14 -7,12 Z" fill="#cc1a1f"/><line x1="-8" y1="4" x2="8" y2="4" stroke="rgba(0,0,0,0.18)" stroke-width="0.8"/><rect x="-12" y="-14" width="5" height="8" rx="2" fill="#1a1a1a"/><rect x="7" y="-14" width="5" height="8" rx="2" fill="#1a1a1a"/><rect x="-12" y="6" width="5" height="8" rx="2" fill="#1a1a1a"/><rect x="7" y="6" width="5" height="8" rx="2" fill="#1a1a1a"/><g fill="white" opacity="0.92"><rect x="-5" y="-8" width="10" height="1.5" rx="0.75"/><rect x="-1" y="-8" width="2" height="9" rx="1"/></g></g>`;
+  wrap.appendChild(svg); wrap.addEventListener('click',()=>{gpsFollowMap=true;}); return wrap;
+}
+
+function updateAccuracyRing(acc, zoom) {
+  const ring=document.getElementById('gps-accuracy-ring'); if(!ring||!map) return;
+  const mpp=156543.03392*Math.cos(lastGpsPos[1]*Math.PI/180)/Math.pow(2,zoom);
+  const px=Math.min(Math.max((acc/mpp)*2,36),200); ring.style.width=px+'px'; ring.style.height=px+'px';
+}
+
+function headingToCardinal(deg) { return ['N','NE','E','SE','S','SO','O','NO'][Math.round(deg/45)%8]; }
+function toggleGpsTracking() { if(gpsTracking) stopGpsTracking(); else startGpsTracking(); }
+
+async function startGpsTracking() {
+  if (!navigator.geolocation) { alert('Géolocalisation non disponible.'); return; }
+  gpsTracking=true; gpsFollowMap=true;
+  document.getElementById('gps-live-btn').classList.add('active');
+  document.getElementById('gps-live-btn').textContent='⊗';
+  document.getElementById('pill-gps-badge').classList.add('show');
+  document.getElementById('pill-sep-badge').style.display='';
+  await requestWakeLock();
+  gpsWatchId=navigator.geolocation.watchPosition(onGpsUpdate, onGpsError, {enableHighAccuracy:true,maximumAge:1000,timeout:10000});
+}
+
+async function stopGpsTracking() {
+  if (gpsWatchId!==null) { navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId=null; }
+  gpsTracking=false;
+  document.getElementById('gps-live-btn').classList.remove('active');
+  document.getElementById('gps-live-btn').textContent='⊕';
+  document.getElementById('pill-gps-badge').classList.remove('show');
+  document.getElementById('pill-sep-badge').style.display='none';
+  ['pill-sep-speed','pill-sep-hdg','pill-hdg-wrap'].forEach(id => document.getElementById(id).style.display='none');
+  document.getElementById('pill-speed').style.display='none';
+  if (gpsMarker) { gpsMarker.remove(); gpsMarker=null; }
+  await releaseWakeLock();
+}
+
+function onGpsUpdate(pos) {
+  const {longitude:lng,latitude:lat,accuracy,speed,heading}=pos.coords;
+  lastGpsPos=[lng,lat];
+  if (!gpsMarker) gpsMarker=new maplibregl.Marker({element:buildArrowMarker(),anchor:'center'}).setLngLat([lng,lat]).addTo(map);
+  else gpsMarker.setLngLat([lng,lat]);
+  const hdg=(heading!==null&&heading!==undefined)?heading:lastGpsHeading;
+  if (hdg!==null&&hdg!==undefined) {
+    lastGpsHeading=hdg; const svg=document.getElementById('gps-arrow'); if(svg) svg.style.transform=`rotate(${hdg}deg)`;
+    document.getElementById('pill-hdg').textContent=headingToCardinal(hdg)+' '+Math.round(hdg)+'°';
+    document.getElementById('pill-hdg-wrap').style.display=''; document.getElementById('pill-sep-hdg').style.display='';
+  }
+  if (speed!==null&&speed!==undefined) {
+    document.getElementById('pill-spd').textContent=Math.round(speed*3.6);
+    document.getElementById('pill-speed').style.display=''; document.getElementById('pill-sep-speed').style.display='';
+  }
+  updateAccuracyRing(accuracy||20, map.getZoom());
+  if (gpsFollowMap) map.easeTo({center:[lng,lat],zoom:Math.max(map.getZoom(),14),duration:800,bearing:hdg||0});
+  map.once('dragstart',()=>{gpsFollowMap=false;});
+  coords.origin=[lng,lat];
+  if (coords.dest&&map.getSource('route')) {
+    const routeData=map.getSource('route')._data;
+    if (routeData&&routeData.geometry&&routeData.geometry.coordinates.length>1) {
+      const distFromRoute=distanceToPolylineM(lastGpsPos,routeData.geometry.coordinates);
+      if (distFromRoute>DEVIATION_THRESHOLD_M) { const now=Date.now(); if(now-lastRouteRecalc>RECALC_COOLDOWN_MS){lastRouteRecalc=now;showDeviationToast();recalcFromCurrentPosition();} }
+    }
+  }
+  if (guidanceActive) advanceGuidance(pos);
+  if (radarVisible) checkRadarProximity(lastGpsPos);
+}
+
+function onGpsError(err) { console.warn('GPS error:',err.message); if(err.code===1) alert('Accès à la géolocalisation refusé.'); }
+function distanceToPolylineM(pt,polyline) { let minD=Infinity; for(let i=1;i<polyline.length;i++){const d=pointToSegmentDistKm(pt,polyline[i-1],polyline[i]);if(d<minD)minD=d;} return minD*1000; }
+function pointToSegmentDistKm(p,a,b) { const dx=b[0]-a[0],dy=b[1]-a[1]; if(dx===0&&dy===0) return hav(p,a); const t=Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/(dx*dx+dy*dy))); return hav(p,[a[0]+t*dx,a[1]+t*dy]); }
+function showDeviationToast() { const toast=document.getElementById('deviation-toast'); toast.classList.add('show'); clearTimeout(deviationTimer); deviationTimer=setTimeout(()=>toast.classList.remove('show'),5000); }
+
+async function recalcFromCurrentPosition() {
+  if (!lastGpsPos||!coords.dest||!selectedVariant) return;
+  coords.origin=lastGpsPos; document.getElementById('input-origin').value='📍 Position GPS';
+  try {
+    setLoading(true,'RECALCUL DEPUIS POSITION GPS…');
+    if (!scLoaded) await loadSuperchargers();
+    const direct=await fetchRoute([coords.origin,coords.dest]);
+    const totalDistKm=direct.distance/1000, rc=direct.geometry.coordinates;
+    const stops=await planStops(rc,totalDistKm); let finalRoute=direct;
+    if(stops.length>0){try{const wps=[coords.origin,...stops.map(s=>[s.charger.gps.longitude,s.charger.gps.latitude]),coords.dest];finalRoute=await fetchRoute(wps);}catch(e){}}
+    map.getSource('route').setData(finalRoute.geometry);
+    stopMarkers.forEach(m=>m.remove()); stopMarkers=[];
+    stops.forEach((stop,i)=>{const el=document.createElement('div');el.style.cssText='width:30px;height:30px;background:#c97c10;border:2.5px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 12px rgba(201,124,16,.6);cursor:pointer;';el.textContent='⚡';stopMarkers.push(new maplibregl.Marker({element:el}).setLngLat([stop.charger.gps.longitude,stop.charger.gps.latitude]).setPopup(new maplibregl.Popup({offset:22}).setHTML(scStopPopupHTML(stop,i))).addTo(map));});
+    const maxRange=selectedVariant.range; let finalBattPct;
+    if(stops.length===0)finalBattPct=Math.round(((maxRange*battery/100)-totalDistKm)/maxRange*100);
+    else{const last=stops[stops.length-1];finalBattPct=Math.round(((maxRange*last.battAfter/100)-last.kmToDest)/maxRange*100);}
+    finalBattPct=Math.max(0,finalBattPct);
+    const totalDur=finalRoute.duration, totalChargeMins=stops.reduce((s,st)=>s+chargeMins(st),0);
+    renderTimeline(stops,totalDistKm,totalDur,finalBattPct,totalChargeMins);
+    document.getElementById('s-dist').textContent=(finalRoute.distance/1000).toFixed(0)+' km';
+    const h=Math.floor(totalDur/3600),m_=Math.floor((totalDur%3600)/60);
+    document.getElementById('s-time').textContent=h>0?`${h}h${String(m_).padStart(2,'0')}`:`${m_} min`;
+    document.getElementById('s-stops').textContent=stops.length; document.getElementById('s-batt').textContent=finalBattPct+'%';
+  } catch(e){console.error('Recalc error:',e);}
+  finally{setLoading(false);}
+}
+
+// ════════════════════════════════════════════════════════════════
+//  RADARS
+// ════════════════════════════════════════════════════════════════
+let radarVisible=false, radarLoaded=false, allRadars=[], radarMarkers=[], lastAlertedRadarId=null, radarAlertTimer=null, lastRadarBeepTime=0;
+const RADAR_ALERT_DIST_M=400, RADAR_ALERT_DIST_HIGHWAY_M=600;
+const RADAR_CACHE_KEY='radar_datagouv_v1', RADAR_CACHE_TTL=24*60*60*1000;
+
+const RADAR_TYPES = {
+  'Radar fixe':        {label:'Radar fixe',        icon:'🚨',color:'#cc1a1f'},
+  'Radar feu rouge':   {label:'Radar feu rouge',   icon:'🚦',color:'#c97c10'},
+  'Radar de tronçon':  {label:'Radar de tronçon',  icon:'📏',color:'#7c4bc2'},
+  'Radar mobile':      {label:'Radar mobile',      icon:'🚐',color:'#1a7fd4'},
+  'Radar discriminant':{label:'Radar discriminant',icon:'🎯',color:'#1b9e57'},
+  'unknown':           {label:'Contrôle vitesse',  icon:'📷',color:'#888'},
+};
+
+function parseRadarCSV(csv) {
+  const lines=csv.trim().split('\n'), headers=lines[0].split(','), idx={};
+  headers.forEach((h,i)=>idx[h.trim()]=i);
+  return lines.slice(1).reduce((acc,line)=>{
+    const cols=line.split(','), lat=parseFloat(cols[idx['latitude']]), lng=parseFloat(cols[idx['longitude']]);
+    if(!isNaN(lat)&&!isNaN(lng)) acc.push({id:'dgf_'+acc.length,type:cols[idx['type']]?.trim()||'unknown',lat,lng,speed:parseInt(cols[idx['vitesse_vehicules_legers_kmh']])||null,name:cols[idx['emplacement']]?.trim()||'',route:cols[idx['route']]?.trim()||'',direction:cols[idx['direction']]?.trim()||'',source:'data.gouv.fr'});
+    return acc;
+  },[]);
+}
+
+function radarInBounds(r,bounds){return r.lat>=bounds.getSouth()&&r.lat<=bounds.getNorth()&&r.lng>=bounds.getWest()&&r.lng<=bounds.getEast();}
+
+async function loadRadarsDataGouv(restore) {
+  try { const cached=sessionStorage.getItem(RADAR_CACHE_KEY); if(cached){const{ts,data}=JSON.parse(cached);if(Date.now()-ts<RADAR_CACHE_TTL){allRadars=data;restore();renderRadarMarkers();return true;}} } catch(e){}
+  const CORS_PROXIES=['https://corsproxy.io/?url=','https://api.allorigins.win/raw?url='];
+  const CSV_URL='https://www.data.gouv.fr/api/1/datasets/r/8a22b5a8-4b65-41be-891a-7c0aead4ba51';
+  for (const proxy of CORS_PROXIES) {
+    try {
+      const ctrl=new AbortController(), tid=setTimeout(()=>ctrl.abort(),12000);
+      const resp=await fetch(proxy+encodeURIComponent(CSV_URL),{signal:ctrl.signal}); clearTimeout(tid);
+      if(!resp.ok) continue;
+      const csv=await resp.text(); if(!csv.includes('latitude')) continue;
+      const parsed=parseRadarCSV(csv); if(parsed.length<100) continue;
+      try{sessionStorage.setItem(RADAR_CACHE_KEY,JSON.stringify({ts:Date.now(),data:parsed}));}catch(e){}
+      allRadars=parsed; restore(); renderRadarMarkers(); return true;
+    } catch(err) { console.warn('data.gouv proxy failed:', err.message); }
+  }
+  return false;
+}
+
+async function loadRadarsOSM(restore) {
+  const bounds=map.getBounds();
+  const s=Math.max(-90,bounds.getSouth()-0.3).toFixed(4),w=Math.max(-180,bounds.getWest()-0.3).toFixed(4),n=Math.min(90,bounds.getNorth()+0.3).toFixed(4),e=Math.min(180,bounds.getEast()+0.3).toFixed(4);
+  const query=`[out:json][timeout:10];node["highway"="speed_camera"](${s},${w},${n},${e});out body qt;`;
+  const mirrors=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://overpass.openstreetmap.ru/api/interpreter'];
+  let data=null;
+  for (const url of mirrors) {
+    try {
+      const ctrl=new AbortController(),tid=setTimeout(()=>ctrl.abort(),9000);
+      const resp=await fetch(url,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'data='+encodeURIComponent(query),signal:ctrl.signal}); clearTimeout(tid);
+      if(!resp.ok) continue; data=await resp.json(); break;
+    } catch(err){console.warn('OSM mirror failed:',err.message);}
+  }
+  restore();
+  if (!data||!data.elements||data.elements.length===0) { showToastError('Radars : aucun résultat pour cette zone'); radarLoaded=false; return false; }
+  const getType=tags=>{const t=(tags['enforcement']||tags['camera:type']||'').toLowerCase();if(t.includes('average')||t.includes('section'))return'Radar de tronçon';if(t.includes('red_light'))return'Radar feu rouge';if(t.includes('mobile'))return'Radar mobile';if(t.includes('speed')||tags['maxspeed'])return'Radar fixe';return'unknown';};
+  allRadars=data.elements.map(el=>{const tags=el.tags||{};return{id:el.id,type:getType(tags),lat:el.lat,lng:el.lon,speed:parseInt(tags.maxspeed)||null,name:tags.name||tags['name:fr']||'',route:'',direction:'',source:'OpenStreetMap'};});
+  renderRadarMarkers(); return true;
+}
+
+async function loadRadars() {
+  radarLoaded=true;
+  const btn=document.getElementById('radar-toggle-btn'), origHTML=btn.innerHTML;
+  btn.innerHTML='<span style="font-size:11px;letter-spacing:1px;font-family:Orbitron,monospace">⏳ …</span>'; btn.style.pointerEvents='none';
+  const restore=()=>{btn.innerHTML=origHTML;btn.style.pointerEvents='';btn.classList.toggle('active',radarVisible);};
+  const ok=await loadRadarsDataGouv(restore);
+  if (!ok) { showToastError('data.gouv.fr indisponible — bascule sur OpenStreetMap'); await loadRadarsOSM(restore); }
+}
+
+let lastRadarBbox=null, radarReloading=false;
+async function reloadRadarsIfNeeded() {
+  if (!radarVisible||radarReloading) return;
+  const bounds=map.getBounds(), bbox=`${bounds.getSouth().toFixed(1)},${bounds.getWest().toFixed(1)},${bounds.getNorth().toFixed(1)},${bounds.getEast().toFixed(1)}`;
+  if (bbox===lastRadarBbox) return; lastRadarBbox=bbox;
+  if (allRadars.length>500) { renderRadarMarkers(); return; }
+  radarReloading=true; radarLoaded=false;
+  try { await loadRadars(); } finally { radarReloading=false; }
+}
+
+function renderRadarMarkers() {
+  radarMarkers.forEach(m=>m.remove()); radarMarkers=[]; if(!radarVisible) return;
+  const visible=allRadars.filter(r=>radarInBounds(r,map.getBounds().pad(0.1)));
+  visible.forEach(r=>{
+    const cfg=RADAR_TYPES[r.type]||RADAR_TYPES['unknown'];
+    const el=document.createElement('div');
+    el.style.cssText=`width:32px;height:32px;border-radius:50%;background:white;border:3px solid ${cfg.color};display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.22);transition:transform .15s;user-select:none;`;
+    el.textContent=cfg.icon; el.addEventListener('mouseenter',()=>el.style.transform='scale(1.3)'); el.addEventListener('mouseleave',()=>el.style.transform='scale(1)');
+    const srcBadge=r.source==='data.gouv.fr'?'🇫🇷 Ministère de l\'Intérieur':'🗺 OpenStreetMap';
+    const popup=new maplibregl.Popup({offset:20}).setHTML(`<div style="line-height:1.9"><b style="font-size:14px">${cfg.icon} ${cfg.label}</b>${r.speed?`<br><span style="color:var(--muted2)">Limite VL : </span><b style="color:#cc1a1f;font-family:'Orbitron',monospace">${r.speed} km/h</b>`:''}${r.route?`<br><span style="color:var(--muted2)">Route : </span><b>${r.route}</b>`:''}${r.direction?`<br><span style="color:var(--muted2)">Direction : </span>${r.direction}`:''}${r.name?`<br><span style="color:var(--muted2)">${r.name}</span>`:''}<br><span style="font-size:10px;color:var(--muted)">Source : ${srcBadge}</span></div>`);
+    radarMarkers.push(new maplibregl.Marker({element:el,anchor:'center'}).setLngLat([r.lng,r.lat]).setPopup(popup).addTo(map));
+  });
+}
+
+async function toggleRadarLayer() {
+  const btn=document.getElementById('radar-toggle-btn'); radarVisible=!radarVisible; btn.classList.toggle('active',radarVisible);
+  if (radarVisible) { await loadRadars(); map.on('moveend',reloadRadarsIfNeeded); }
+  else { map.off('moveend',reloadRadarsIfNeeded); radarMarkers.forEach(m=>m.remove()); radarMarkers=[]; hideRadarAlert(); }
+}
+
+function checkRadarProximity(userPos) {
+  if(!radarVisible||!allRadars.length) return;
+  let closest=null, closestDist=Infinity;
+  for(const r of allRadars){const d=hav(userPos,[r.lng,r.lat])*1000;if(d<closestDist){closestDist=d;closest=r;}}
+  if(!closest) return;
+  const alertDist=(closest.speed&&closest.speed>=110)?RADAR_ALERT_DIST_HIGHWAY_M:RADAR_ALERT_DIST_M;
+  if(closestDist<=alertDist) showRadarAlert(closest,closestDist,alertDist);
+  else if(closestDist>alertDist*2) hideRadarAlert();
+}
+
+function showRadarAlert(radar, distM, alertDist=RADAR_ALERT_DIST_M) {
+  const cfg=RADAR_TYPES[radar.type]||RADAR_TYPES['unknown'];
+  document.getElementById('ra-stripe').style.background=cfg.color;
+  document.getElementById('ra-icon').textContent=cfg.icon;
+  document.getElementById('ra-type').textContent=cfg.label; document.getElementById('ra-type').style.color=cfg.color;
+  document.getElementById('ra-name').textContent=radar.name||'Contrôle de vitesse';
+  document.getElementById('ra-sub').textContent=radar.speed?`Limite : ${radar.speed} km/h`:'Vitesse limite non renseignée';
+  document.getElementById('ra-speed-circle').style.borderColor=cfg.color; document.getElementById('ra-speed-val').style.color=cfg.color;
+  document.getElementById('ra-speed-val').textContent=radar.speed||'?';
+  const d=distM>=1000?{val:(distM/1000).toFixed(1),unit:'km'}:{val:Math.round(distM/10)*10||Math.round(distM),unit:'m'};
+  document.getElementById('ra-dist-val').textContent=d.val; document.getElementById('ra-dist-unit').textContent=d.unit;
+  document.getElementById('ra-prox-fill').style.width=Math.min(100,Math.max(0,100-(distM/alertDist)*100))+'%';
+  document.getElementById('radar-alert').classList.add('show');
+  const now=Date.now(), beepInterval=distM<100?300:distM<200?600:1400;
+  if(now-lastRadarBeepTime>beepInterval){lastRadarBeepTime=now;playRadarBeep(distM);}
+  if(radar.id!==lastAlertedRadarId&&distM<alertDist*0.6){lastAlertedRadarId=radar.id;speak(`Attention, ${cfg.label.toLowerCase()}${radar.speed?`, limite ${radar.speed} kilomètres heure`:''}, dans ${Math.round(distM)} mètres`);}
+  clearTimeout(radarAlertTimer); radarAlertTimer=setTimeout(()=>{if(lastAlertedRadarId===radar.id)hideRadarAlert();},7000);
+}
+
+function hideRadarAlert() {
+  const alert=document.getElementById('radar-alert');
+  alert.style.opacity='0'; alert.style.transform='translateY(20px)';
+  setTimeout(()=>{alert.classList.remove('show');alert.style.opacity='';alert.style.transform='';},300);
+  lastAlertedRadarId=null;
+}
+
+function playRadarBeep(distM) {
+  try {
+    const ctx=new(window.AudioContext||window.webkitAudioContext)(), osc=ctx.createOscillator(), gain=ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value=distM<100?1200:distM<200?900:660; osc.type='sine';
+    gain.gain.setValueAtTime(0.18,ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.18);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime+0.18);
+  } catch(e){}
+}
+
+// ════════════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════════════
+buildModelSelector();
+selectVariant('m3-prop', false);
+updateBattery(78);
