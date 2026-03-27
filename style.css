@@ -324,16 +324,43 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
 #wakelock-badge .wl-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:live-blink 1.5s ease-in-out infinite;}
 
 /* ── GPS marker ── */
-#gps-accuracy-ring{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;border:2px solid rgba(26,127,212,.35);background:rgba(26,127,212,.08);pointer-events:none;transition:width .6s,height .6s;}
-/* Supprimer le style de la flèche voiture et mettre un point bleu */
-#gps-arrow {
-  width: 14px;
-  height: 14px;
+
+@keyframes gps-breathe {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: .5; }
+  50%       { transform: translate(-50%, -50%) scale(1.5); opacity: .15; }
+}
+
+#gps-accuracy-ring {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: var(--blue);
+  border: 2px solid rgba(26, 127, 212, .5);
+  background: transparent;
+  pointer-events: none;
+  width: 60px; height: 60px;
+  transition: width .6s, height .6s;
+}
+
+#gps-arrow {
+  position: relative;
+  z-index: 1;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: #1a7fd4;
   border: 3px solid #fff;
-  box-shadow: 0 0 0 2px var(--blue);
-  /* Supprimez la ligne filter: drop-shadow(...) si elle était là */
+  box-shadow: 0 1px 6px rgba(26, 127, 212, .5);
+}
+
+#gps-arrow::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(26, 127, 212, .18);
+  border: 2px solid rgba(26, 127, 212, .5);
+  animation: gps-breathe 2s ease-in-out infinite;
 }
 
 /* ── MapLibre overrides ── */
