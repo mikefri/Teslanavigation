@@ -1,14 +1,13 @@
-name: Compilation des Radars
+name: Compilation des Radars CSV
 
 on:
   push:
-    # L'action se déclenche dès que vous modifiez un fichier dans le dossier data
     paths:
-      - 'data/**'
-  workflow_dispatch: # Permet de lancer l'action manuellement si besoin
+      - 'data/*.csv'
+  workflow_dispatch:
 
 permissions:
-  contents: write # Indispensable pour autoriser GitHub à enregistrer le JSON
+  contents: write
 
 jobs:
   build:
@@ -17,33 +16,30 @@ jobs:
       - name: Récupérer le code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # Récupère tout l'historique pour un pull/rebase propre
+          fetch-depth: 0
 
       - name: Configuration de Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
-      - name: Executer le script de fusion
-        # Remplacez 'compile_csv.py' par 'merge_kml.py' si vous utilisez encore des KML
-        run: python compile_csv.py 
+      - name: Executer la fusion CSV
+        run: python compile_data.py
 
-      - name: Commit et Push du fichier JSON mis à jour
+      - name: Commit et Push
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
-          # On ajoute le fichier généré
           git add radars_complet.json
           
-          # On vérifie s'il y a des changements avant de commit
+          # Vérifie si le fichier a changé
           if git diff --quiet && git diff --staged --quiet; then
-            echo "Aucun changement détecté."
+            echo "Pas de nouveaux radars à ajouter."
             exit 0
           fi
 
-          # On synchronise avec le serveur pour éviter l'erreur 'fetch first'
-          git pull --rebase origin main
-          
-          git commit -m "Mise à jour automatique de la base radar"
+          # On force la mise à jour pour éviter l'erreur de rejet
+          git pull origin main --rebase
+          git commit -m "Mise à jour base radars (CSV)"
           git push origin main
