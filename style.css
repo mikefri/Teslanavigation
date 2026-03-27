@@ -325,7 +325,16 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
 
 /* ── GPS marker ── */
 #gps-accuracy-ring{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;border:2px solid rgba(26,127,212,.35);background:rgba(26,127,212,.08);pointer-events:none;transition:width .6s,height .6s;}
-#gps-arrow{transition:transform .4s ease;filter:drop-shadow(0 3px 8px rgba(204,26,31,.55));}
+/* Supprimer le style de la flèche voiture et mettre un point bleu */
+#gps-arrow {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--blue);
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px var(--blue);
+  /* Supprimez la ligne filter: drop-shadow(...) si elle était là */
+}
 
 /* ── MapLibre overrides ── */
 .maplibregl-ctrl-attrib{background:rgba(250,249,247,.8)!important;color:#999!important;}
