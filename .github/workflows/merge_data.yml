@@ -30,16 +30,10 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          
           git add radars_complet.json
-          
-          # Vérifie si le fichier a changé
-          if git diff --quiet && git diff --staged --quiet; then
+          if git diff --staged --quiet; then
             echo "Pas de nouveaux radars à ajouter."
             exit 0
           fi
-
-          # On force la mise à jour pour éviter l'erreur de rejet
-          git pull origin main --rebase
           git commit -m "Mise à jour base radars (CSV)"
           git push origin main
