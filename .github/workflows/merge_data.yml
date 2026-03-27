@@ -5,6 +5,16 @@ on:
     paths:
       - 'data/**' # Se déclenche uniquement si le dossier data est modifié
 
+      # AJOUTER CES LIGNES ICI
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
 jobs:
   build:
     runs-on: ubuntu-latest
