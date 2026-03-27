@@ -700,21 +700,30 @@ let deviationTimer=null, lastRouteRecalc=0;
 const DEVIATION_THRESHOLD_M=300, RECALC_COOLDOWN_MS=30000;
 
 function buildArrowMarker() {
-  const wrap=document.createElement('div'); wrap.style.cssText='position:relative;width:48px;height:48px;cursor:pointer;';
-  const ring=document.createElement('div'); ring.id='gps-accuracy-ring';
-  ring.style.cssText='position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;border:2px solid rgba(204,26,31,.30);background:rgba(204,26,31,.07);pointer-events:none;width:48px;height:48px;transition:width .6s,height .6s;';
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'position:relative;width:24px;height:24px;cursor:pointer;';
+
+  const ring = document.createElement('div');
+  ring.id = 'gps-accuracy-ring';
+  ring.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;border:2px solid rgba(26,127,212,.30);background:rgba(26,127,212,.08);pointer-events:none;width:60px;height:60px;transition:width .6s,height .6s;';
   wrap.appendChild(ring);
-  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-  svg.setAttribute('id','gps-arrow'); svg.setAttribute('viewBox','0 0 48 48'); svg.setAttribute('width','48'); svg.setAttribute('height','48');
-  svg.style.cssText='position:relative;z-index:1;transition:transform .4s ease;filter:drop-shadow(0 3px 8px rgba(204,26,31,.55));';
-  svg.innerHTML=`<path d="M24 4 L30 16 L24 13 L18 16 Z" fill="rgba(204,26,31,0.25)"/><g transform="translate(24,26) scale(0.88)"><path d="M-7,-18 Q0,-22 7,-18 L8,-10 Q0,-12 -8,-10 Z" fill="#cc1a1f"/><rect x="-9" y="-10" width="18" height="14" rx="3" fill="#cc1a1f"/><path d="M-7,-10 Q0,-13 7,-10 L6,-5 Q0,-7 -6,-5 Z" fill="rgba(255,255,255,0.22)"/><path d="M-8,4 L8,4 L7,12 Q0,14 -7,12 Z" fill="#cc1a1f"/><line x1="-8" y1="4" x2="8" y2="4" stroke="rgba(0,0,0,0.18)" stroke-width="0.8"/><rect x="-12" y="-14" width="5" height="8" rx="2" fill="#1a1a1a"/><rect x="7" y="-14" width="5" height="8" rx="2" fill="#1a1a1a"/><rect x="-12" y="6" width="5" height="8" rx="2" fill="#1a1a1a"/><rect x="7" y="6" width="5" height="8" rx="2" fill="#1a1a1a"/><g fill="white" opacity="0.92"><rect x="-5" y="-8" width="10" height="1.5" rx="0.75"/><rect x="-1" y="-8" width="2" height="9" rx="1"/></g></g>`;
-  wrap.appendChild(svg); wrap.addEventListener('click',()=>{gpsFollowMap=true;}); return wrap;
+
+  const dot = document.createElement('div');
+  dot.id = 'gps-arrow';
+  dot.style.cssText = 'position:relative;z-index:1;width:14px;height:14px;border-radius:50%;background:#1a7fd4;border:3px solid #fff;box-shadow:0 0 0 2px rgba(26,127,212,.5);margin:5px;';
+  wrap.appendChild(dot);
+
+  wrap.addEventListener('click', () => { gpsFollowMap = true; });
+  return wrap;
 }
 
 function updateAccuracyRing(acc, zoom) {
-  const ring=document.getElementById('gps-accuracy-ring'); if(!ring||!map) return;
-  const mpp=156543.03392*Math.cos(lastGpsPos[1]*Math.PI/180)/Math.pow(2,zoom);
-  const px=Math.min(Math.max((acc/mpp)*2,36),200); ring.style.width=px+'px'; ring.style.height=px+'px';
+  const ring = document.getElementById('gps-accuracy-ring');
+  if (!ring || !map) return;
+  const mpp = 156543.03392 * Math.cos(lastGpsPos[1] * Math.PI / 180) / Math.pow(2, zoom);
+  const px = Math.min(Math.max((acc / mpp) * 2, 20), 200);
+  ring.style.width = px + 'px';
+  ring.style.height = px + 'px';
 }
 
 function headingToCardinal(deg) { return ['N','NE','E','SE','S','SO','O','NO'][Math.round(deg/45)%8]; }
@@ -750,11 +759,7 @@ function onGpsUpdate(pos) {
   if (!gpsMarker) gpsMarker=new maplibregl.Marker({element:buildArrowMarker(),anchor:'center'}).setLngLat([lng,lat]).addTo(map);
   else gpsMarker.setLngLat([lng,lat]);
   const hdg=(heading!==null&&heading!==undefined)?heading:lastGpsHeading;
-  if (hdg!==null&&hdg!==undefined) {
-    lastGpsHeading=hdg; const svg=document.getElementById('gps-arrow'); if(svg) svg.style.transform=`rotate(${hdg}deg)`;
-    document.getElementById('pill-hdg').textContent=headingToCardinal(hdg)+' '+Math.round(hdg)+'°';
-    document.getElementById('pill-hdg-wrap').style.display=''; document.getElementById('pill-sep-hdg').style.display='';
-  }
+  
   if (speed!==null&&speed!==undefined) {
     document.getElementById('pill-spd').textContent=Math.round(speed*3.6);
     document.getElementById('pill-speed').style.display=''; document.getElementById('pill-sep-speed').style.display='';
