@@ -1,21 +1,23 @@
-name: Fusion Automatique des Radars
+name: Compilation des Radars
 
 on:
   push:
+    # L'action se déclenche dès que vous modifiez un fichier dans le dossier data
     paths:
-      - 'data/**' # Se déclenche uniquement si le dossier data est modifié
+      - 'data/**'
+  workflow_dispatch: # Permet de lancer l'action manuellement si besoin
 
-      # AJOUTER CES LIGNES ICI
 permissions:
-  contents: write
-
+  contents: write # Indispensable pour autoriser GitHub à enregistrer le JSON
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout du code
+      - name: Récupérer le code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Récupère tout l'historique pour un pull/rebase propre
 
       - name: Configuration de Python
         uses: actions/setup-python@v4
@@ -23,12 +25,25 @@ jobs:
           python-version: '3.x'
 
       - name: Executer le script de fusion
-        run: python merge_kml.py
+        # Remplacez 'compile_csv.py' par 'merge_kml.py' si vous utilisez encore des KML
+        run: python compile_csv.py 
 
       - name: Commit et Push du fichier JSON mis à jour
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+          
+          # On ajoute le fichier généré
           git add radars_complet.json
-          git commit -m "Mise à jour automatique de la base radar" || exit 0
-          git push
+          
+          # On vérifie s'il y a des changements avant de commit
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "Aucun changement détecté."
+            exit 0
+          fi
+
+          # On synchronise avec le serveur pour éviter l'erreur 'fetch first'
+          git pull --rebase origin main
+          
+          git commit -m "Mise à jour automatique de la base radar"
+          git push origin main
