@@ -701,16 +701,15 @@ const DEVIATION_THRESHOLD_M=300, RECALC_COOLDOWN_MS=30000;
 
 function buildArrowMarker() {
   const wrap = document.createElement('div');
-  wrap.style.cssText = 'position:relative;width:24px;height:24px;cursor:pointer;';
+  wrap.style.cssText = 'position:relative;width:48px;height:48px;cursor:pointer;';
 
   const ring = document.createElement('div');
   ring.id = 'gps-accuracy-ring';
-  ring.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;border:2px solid rgba(26,127,212,.30);background:rgba(26,127,212,.08);pointer-events:none;width:60px;height:60px;transition:width .6s,height .6s;';
   wrap.appendChild(ring);
 
   const dot = document.createElement('div');
   dot.id = 'gps-arrow';
-  dot.style.cssText = 'position:relative;z-index:1;width:14px;height:14px;border-radius:50%;background:#1a7fd4;border:3px solid #fff;box-shadow:0 0 0 2px rgba(26,127,212,.5);margin:5px;';
+  dot.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);';
   wrap.appendChild(dot);
 
   wrap.addEventListener('click', () => { gpsFollowMap = true; });
