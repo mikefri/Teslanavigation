@@ -65,10 +65,12 @@ async function requestWakeLock() {
     return true;
   } catch (err) { return false; }
 }
+
 async function releaseWakeLock() {
   if (wakeLock) { try { await wakeLock.release(); } catch(e){} wakeLock = null; }
   document.getElementById('wakelock-badge').classList.remove('show');
 }
+
 document.addEventListener('visibilitychange', async () => {
   if (document.visibilityState === 'visible' && gpsTracking) await requestWakeLock();
 });
@@ -758,7 +760,12 @@ function onGpsUpdate(pos) {
   if (!gpsMarker) gpsMarker=new maplibregl.Marker({element:buildArrowMarker(),anchor:'center'}).setLngLat([lng,lat]).addTo(map);
   else gpsMarker.setLngLat([lng,lat]);
   const hdg=(heading!==null&&heading!==undefined)?heading:lastGpsHeading;
-  
+  if (hdg!==null&&hdg!==undefined) {
+    lastGpsHeading=hdg;
+    document.getElementById('pill-hdg').textContent=headingToCardinal(hdg)+' '+Math.round(hdg)+'°';
+    document.getElementById('pill-hdg-wrap').style.display='';
+    document.getElementById('pill-sep-hdg').style.display='';
+  }
   if (speed!==null&&speed!==undefined) {
     document.getElementById('pill-spd').textContent=Math.round(speed*3.6);
     document.getElementById('pill-speed').style.display=''; document.getElementById('pill-sep-speed').style.display='';
@@ -815,7 +822,7 @@ async function recalcFromCurrentPosition() {
 // ════════════════════════════════════════════════════════════════
 let radarVisible=false, radarLoaded=false, allRadars=[], radarMarkers=[], lastAlertedRadarId=null, radarAlertTimer=null, lastRadarBeepTime=0;
 const RADAR_ALERT_DIST_M=400, RADAR_ALERT_DIST_HIGHWAY_M=600;
-const RADAR_CACHE_KEY='radar_datagouv_v1', RADAR_CACHE_TTL=24*60*60*1000;
+const RADAR_CACHE_KEY='radar_mikefri_v1', RADAR_CACHE_TTL=24*60*60*1000;
 
 const RADAR_TYPES = {
   'Radar fixe':        {label:'Radar fixe',        icon:'🚨',color:'#cc1a1f'},
@@ -826,129 +833,156 @@ const RADAR_TYPES = {
   'unknown':           {label:'Contrôle vitesse',  icon:'📷',color:'#888'},
 };
 
-function parseRadarCSV(csv) {
-  const lines=csv.trim().split('\n'), headers=lines[0].split(','), idx={};
-  headers.forEach((h,i)=>idx[h.trim()]=i);
-  return lines.slice(1).reduce((acc,line)=>{
-    const cols=line.split(','), lat=parseFloat(cols[idx['latitude']]), lng=parseFloat(cols[idx['longitude']]);
-    if(!isNaN(lat)&&!isNaN(lng)) acc.push({id:'dgf_'+acc.length,type:cols[idx['type']]?.trim()||'unknown',lat,lng,speed:parseInt(cols[idx['vitesse_vehicules_legers_kmh']])||null,name:cols[idx['emplacement']]?.trim()||'',route:cols[idx['route']]?.trim()||'',direction:cols[idx['direction']]?.trim()||'',source:'data.gouv.fr'});
-    return acc;
-  },[]);
+function nomToType(nom) {
+  if (!nom) return 'unknown';
+  const n = nom.toLowerCase();
+  if (n.includes('tronçon') || n.includes('troncon')) return 'Radar de tronçon';
+  if (n.includes('feu'))                               return 'Radar feu rouge';
+  if (n.includes('mobile'))                            return 'Radar mobile';
+  if (n.includes('discriminant'))                      return 'Radar discriminant';
+  if (n.includes('fixe'))                              return 'Radar fixe';
+  return 'Radar fixe';
 }
 
-function radarInBounds(r,bounds){return r.lat>=bounds.getSouth()&&r.lat<=bounds.getNorth()&&r.lng>=bounds.getWest()&&r.lng<=bounds.getEast();}
-
-async function loadRadarsDataGouv(restore) {
-  try { const cached=sessionStorage.getItem(RADAR_CACHE_KEY); if(cached){const{ts,data}=JSON.parse(cached);if(Date.now()-ts<RADAR_CACHE_TTL){allRadars=data;restore();renderRadarMarkers();return true;}} } catch(e){}
-  const CORS_PROXIES=['https://corsproxy.io/?url=','https://api.allorigins.win/raw?url='];
-  const CSV_URL='https://www.data.gouv.fr/api/1/datasets/r/8a22b5a8-4b65-41be-891a-7c0aead4ba51';
-  for (const proxy of CORS_PROXIES) {
-    try {
-      const ctrl=new AbortController(), tid=setTimeout(()=>ctrl.abort(),12000);
-      const resp=await fetch(proxy+encodeURIComponent(CSV_URL),{signal:ctrl.signal}); clearTimeout(tid);
-      if(!resp.ok) continue;
-      const csv=await resp.text(); if(!csv.includes('latitude')) continue;
-      const parsed=parseRadarCSV(csv); if(parsed.length<100) continue;
-      try{sessionStorage.setItem(RADAR_CACHE_KEY,JSON.stringify({ts:Date.now(),data:parsed}));}catch(e){}
-      allRadars=parsed; restore(); renderRadarMarkers(); return true;
-    } catch(err) { console.warn('data.gouv proxy failed:', err.message); }
+async function loadRadarsMikefri() {
+  const URL = 'https://raw.githubusercontent.com/mikefri/Teslanavigation/main/radars_complet.json';
+  try {
+    const cached = sessionStorage.getItem(RADAR_CACHE_KEY);
+    if (cached) {
+      const { ts, data } = JSON.parse(cached);
+      if (Date.now() - ts < RADAR_CACHE_TTL) { allRadars = data; return true; }
+    }
+  } catch(e) {}
+  try {
+    const resp = await fetch(URL);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const geojson = await resp.json();
+    allRadars = geojson.features.map((f, i) => ({
+      id: 'mf_' + i,
+      type: nomToType(f.properties.nom),
+      lat: f.geometry.coordinates[1],
+      lng: f.geometry.coordinates[0],
+      speed: parseInt(f.properties.vitesse) || null,
+      name: f.properties.nom || '',
+      route: '',
+      direction: '',
+      source: 'mikefri/Teslanavigation'
+    }));
+    try { sessionStorage.setItem(RADAR_CACHE_KEY, JSON.stringify({ ts: Date.now(), data: allRadars })); } catch(e) {}
+    return true;
+  } catch(err) {
+    console.warn('Radar mikefri failed:', err.message);
+    return false;
   }
-  return false;
 }
 
-async function loadRadarsOSM(restore) {
-  const bounds=map.getBounds();
-  const s=Math.max(-90,bounds.getSouth()-0.3).toFixed(4),w=Math.max(-180,bounds.getWest()-0.3).toFixed(4),n=Math.min(90,bounds.getNorth()+0.3).toFixed(4),e=Math.min(180,bounds.getEast()+0.3).toFixed(4);
-  const query=`[out:json][timeout:10];node["highway"="speed_camera"](${s},${w},${n},${e});out body qt;`;
-  const mirrors=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://overpass.openstreetmap.ru/api/interpreter'];
-  let data=null;
-  for (const url of mirrors) {
-    try {
-      const ctrl=new AbortController(),tid=setTimeout(()=>ctrl.abort(),9000);
-      const resp=await fetch(url,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'data='+encodeURIComponent(query),signal:ctrl.signal}); clearTimeout(tid);
-      if(!resp.ok) continue; data=await resp.json(); break;
-    } catch(err){console.warn('OSM mirror failed:',err.message);}
-  }
-  restore();
-  if (!data||!data.elements||data.elements.length===0) { showToastError('Radars : aucun résultat pour cette zone'); radarLoaded=false; return false; }
-  const getType=tags=>{const t=(tags['enforcement']||tags['camera:type']||'').toLowerCase();if(t.includes('average')||t.includes('section'))return'Radar de tronçon';if(t.includes('red_light'))return'Radar feu rouge';if(t.includes('mobile'))return'Radar mobile';if(t.includes('speed')||tags['maxspeed'])return'Radar fixe';return'unknown';};
-  allRadars=data.elements.map(el=>{const tags=el.tags||{};return{id:el.id,type:getType(tags),lat:el.lat,lng:el.lon,speed:parseInt(tags.maxspeed)||null,name:tags.name||tags['name:fr']||'',route:'',direction:'',source:'OpenStreetMap'};});
-  renderRadarMarkers(); return true;
+function radarInBounds(r, bounds) {
+  return r.lat >= bounds.getSouth() && r.lat <= bounds.getNorth()
+      && r.lng >= bounds.getWest() && r.lng <= bounds.getEast();
 }
 
 async function loadRadars() {
-  radarLoaded=true;
-  const btn=document.getElementById('radar-toggle-btn'), origHTML=btn.innerHTML;
-  btn.innerHTML='<span style="font-size:11px;letter-spacing:1px;font-family:Orbitron,monospace">⏳ …</span>'; btn.style.pointerEvents='none';
-  const restore=()=>{btn.innerHTML=origHTML;btn.style.pointerEvents='';btn.classList.toggle('active',radarVisible);};
-  const ok=await loadRadarsDataGouv(restore);
-  if (!ok) { showToastError('data.gouv.fr indisponible — bascule sur OpenStreetMap'); await loadRadarsOSM(restore); }
+  radarLoaded = true;
+  const btn = document.getElementById('radar-toggle-btn'), origHTML = btn.innerHTML;
+  btn.innerHTML = '<span style="font-size:11px;letter-spacing:1px;font-family:Orbitron,monospace">⏳ …</span>';
+  btn.style.pointerEvents = 'none';
+  const restore = () => { btn.innerHTML = origHTML; btn.style.pointerEvents = ''; btn.classList.toggle('active', radarVisible); };
+  const ok = await loadRadarsMikefri();
+  restore();
+  if (!ok) { showToastError('Impossible de charger les radars.'); return; }
+  renderRadarMarkers();
 }
 
-let lastRadarBbox=null, radarReloading=false;
+let lastRadarBbox = null, radarReloading = false;
 async function reloadRadarsIfNeeded() {
-  if (!radarVisible||radarReloading) return;
-  const bounds=map.getBounds(), bbox=`${bounds.getSouth().toFixed(1)},${bounds.getWest().toFixed(1)},${bounds.getNorth().toFixed(1)},${bounds.getEast().toFixed(1)}`;
-  if (bbox===lastRadarBbox) return; lastRadarBbox=bbox;
-  if (allRadars.length>500) { renderRadarMarkers(); return; }
-  radarReloading=true; radarLoaded=false;
-  try { await loadRadars(); } finally { radarReloading=false; }
+  if (!radarVisible || radarReloading) return;
+  const bounds = map.getBounds(), bbox = `${bounds.getSouth().toFixed(1)},${bounds.getWest().toFixed(1)},${bounds.getNorth().toFixed(1)},${bounds.getEast().toFixed(1)}`;
+  if (bbox === lastRadarBbox) return;
+  lastRadarBbox = bbox;
+  renderRadarMarkers();
 }
 
 function renderRadarMarkers() {
-  radarMarkers.forEach(m=>m.remove()); radarMarkers=[]; if(!radarVisible) return;
-  const visible=allRadars.filter(r=>radarInBounds(r,map.getBounds().pad(0.1)));
-  visible.forEach(r=>{
-    const cfg=RADAR_TYPES[r.type]||RADAR_TYPES['unknown'];
-    const el=document.createElement('div');
-    el.style.cssText=`width:32px;height:32px;border-radius:50%;background:white;border:3px solid ${cfg.color};display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.22);transition:transform .15s;user-select:none;`;
-    el.textContent=cfg.icon; el.addEventListener('mouseenter',()=>el.style.transform='scale(1.3)'); el.addEventListener('mouseleave',()=>el.style.transform='scale(1)');
-    const srcBadge=r.source==='data.gouv.fr'?'🇫🇷 Ministère de l\'Intérieur':'🗺 OpenStreetMap';
-    const popup=new maplibregl.Popup({offset:20}).setHTML(`<div style="line-height:1.9"><b style="font-size:14px">${cfg.icon} ${cfg.label}</b>${r.speed?`<br><span style="color:var(--muted2)">Limite VL : </span><b style="color:#cc1a1f;font-family:'Orbitron',monospace">${r.speed} km/h</b>`:''}${r.route?`<br><span style="color:var(--muted2)">Route : </span><b>${r.route}</b>`:''}${r.direction?`<br><span style="color:var(--muted2)">Direction : </span>${r.direction}`:''}${r.name?`<br><span style="color:var(--muted2)">${r.name}</span>`:''}<br><span style="font-size:10px;color:var(--muted)">Source : ${srcBadge}</span></div>`);
-    radarMarkers.push(new maplibregl.Marker({element:el,anchor:'center'}).setLngLat([r.lng,r.lat]).setPopup(popup).addTo(map));
+  radarMarkers.forEach(m => m.remove()); radarMarkers = []; if (!radarVisible) return;
+  const visible = allRadars.filter(r => radarInBounds(r, map.getBounds().pad(0.1)));
+  visible.forEach(r => {
+    const cfg = RADAR_TYPES[r.type] || RADAR_TYPES['unknown'];
+    const el = document.createElement('div');
+    el.style.cssText = `width:32px;height:32px;border-radius:50%;background:white;border:3px solid ${cfg.color};display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.22);transition:transform .15s;user-select:none;`;
+    el.textContent = cfg.icon;
+    el.addEventListener('mouseenter', () => el.style.transform = 'scale(1.3)');
+    el.addEventListener('mouseleave', () => el.style.transform = 'scale(1)');
+    const popup = new maplibregl.Popup({offset:20}).setHTML(
+      `<div style="line-height:1.9">
+        <b style="font-size:14px">${cfg.icon} ${cfg.label}</b>
+        ${r.speed ? `<br><span style="color:var(--muted2)">Limite VL : </span><b style="color:#cc1a1f;font-family:'Orbitron',monospace">${r.speed} km/h</b>` : ''}
+        ${r.name ? `<br><span style="color:var(--muted2)">${r.name}</span>` : ''}
+        <br><span style="font-size:10px;color:var(--muted)">🇫🇷 mikefri/Teslanavigation</span>
+      </div>`
+    );
+    radarMarkers.push(new maplibregl.Marker({element:el, anchor:'center'}).setLngLat([r.lng, r.lat]).setPopup(popup).addTo(map));
   });
 }
 
 async function toggleRadarLayer() {
-  const btn=document.getElementById('radar-toggle-btn'); radarVisible=!radarVisible; btn.classList.toggle('active',radarVisible);
-  if (radarVisible) { await loadRadars(); map.on('moveend',reloadRadarsIfNeeded); }
-  else { map.off('moveend',reloadRadarsIfNeeded); radarMarkers.forEach(m=>m.remove()); radarMarkers=[]; hideRadarAlert(); }
+  const btn = document.getElementById('radar-toggle-btn');
+  radarVisible = !radarVisible;
+  btn.classList.toggle('active', radarVisible);
+  if (radarVisible) {
+    if (!radarLoaded) await loadRadars();
+    else renderRadarMarkers();
+    map.on('moveend', reloadRadarsIfNeeded);
+  } else {
+    map.off('moveend', reloadRadarsIfNeeded);
+    radarMarkers.forEach(m => m.remove()); radarMarkers = [];
+    hideRadarAlert();
+  }
 }
 
 function checkRadarProximity(userPos) {
-  if(!radarVisible||!allRadars.length) return;
-  let closest=null, closestDist=Infinity;
-  for(const r of allRadars){const d=hav(userPos,[r.lng,r.lat])*1000;if(d<closestDist){closestDist=d;closest=r;}}
-  if(!closest) return;
-  const alertDist=(closest.speed&&closest.speed>=110)?RADAR_ALERT_DIST_HIGHWAY_M:RADAR_ALERT_DIST_M;
-  if(closestDist<=alertDist) showRadarAlert(closest,closestDist,alertDist);
-  else if(closestDist>alertDist*2) hideRadarAlert();
+  if (!radarVisible || !allRadars.length) return;
+  let closest = null, closestDist = Infinity;
+  for (const r of allRadars) {
+    const d = hav(userPos, [r.lng, r.lat]) * 1000;
+    if (d < closestDist) { closestDist = d; closest = r; }
+  }
+  if (!closest) return;
+  const alertDist = (closest.speed && closest.speed >= 110) ? RADAR_ALERT_DIST_HIGHWAY_M : RADAR_ALERT_DIST_M;
+  if (closestDist <= alertDist) showRadarAlert(closest, closestDist, alertDist);
+  else if (closestDist > alertDist * 2) hideRadarAlert();
 }
 
 function showRadarAlert(radar, distM, alertDist=RADAR_ALERT_DIST_M) {
-  const cfg=RADAR_TYPES[radar.type]||RADAR_TYPES['unknown'];
-  document.getElementById('ra-stripe').style.background=cfg.color;
-  document.getElementById('ra-icon').textContent=cfg.icon;
-  document.getElementById('ra-type').textContent=cfg.label; document.getElementById('ra-type').style.color=cfg.color;
-  document.getElementById('ra-name').textContent=radar.name||'Contrôle de vitesse';
-  document.getElementById('ra-sub').textContent=radar.speed?`Limite : ${radar.speed} km/h`:'Vitesse limite non renseignée';
-  document.getElementById('ra-speed-circle').style.borderColor=cfg.color; document.getElementById('ra-speed-val').style.color=cfg.color;
-  document.getElementById('ra-speed-val').textContent=radar.speed||'?';
-  const d=distM>=1000?{val:(distM/1000).toFixed(1),unit:'km'}:{val:Math.round(distM/10)*10||Math.round(distM),unit:'m'};
-  document.getElementById('ra-dist-val').textContent=d.val; document.getElementById('ra-dist-unit').textContent=d.unit;
-  document.getElementById('ra-prox-fill').style.width=Math.min(100,Math.max(0,100-(distM/alertDist)*100))+'%';
+  const cfg = RADAR_TYPES[radar.type] || RADAR_TYPES['unknown'];
+  document.getElementById('ra-stripe').style.background = cfg.color;
+  document.getElementById('ra-icon').textContent = cfg.icon;
+  document.getElementById('ra-type').textContent = cfg.label;
+  document.getElementById('ra-type').style.color = cfg.color;
+  document.getElementById('ra-name').textContent = radar.name || 'Contrôle de vitesse';
+  document.getElementById('ra-sub').textContent = radar.speed ? `Limite : ${radar.speed} km/h` : 'Vitesse limite non renseignée';
+  document.getElementById('ra-speed-circle').style.borderColor = cfg.color;
+  document.getElementById('ra-speed-val').style.color = cfg.color;
+  document.getElementById('ra-speed-val').textContent = radar.speed || '?';
+  const d = distM >= 1000 ? {val:(distM/1000).toFixed(1),unit:'km'} : {val:Math.round(distM/10)*10||Math.round(distM),unit:'m'};
+  document.getElementById('ra-dist-val').textContent = d.val;
+  document.getElementById('ra-dist-unit').textContent = d.unit;
+  document.getElementById('ra-prox-fill').style.width = Math.min(100, Math.max(0, 100-(distM/alertDist)*100)) + '%';
   document.getElementById('radar-alert').classList.add('show');
-  const now=Date.now(), beepInterval=distM<100?300:distM<200?600:1400;
-  if(now-lastRadarBeepTime>beepInterval){lastRadarBeepTime=now;playRadarBeep(distM);}
-  if(radar.id!==lastAlertedRadarId&&distM<alertDist*0.6){lastAlertedRadarId=radar.id;speak(`Attention, ${cfg.label.toLowerCase()}${radar.speed?`, limite ${radar.speed} kilomètres heure`:''}, dans ${Math.round(distM)} mètres`);}
-  clearTimeout(radarAlertTimer); radarAlertTimer=setTimeout(()=>{if(lastAlertedRadarId===radar.id)hideRadarAlert();},7000);
+  const now = Date.now(), beepInterval = distM<100?300:distM<200?600:1400;
+  if (now-lastRadarBeepTime > beepInterval) { lastRadarBeepTime=now; playRadarBeep(distM); }
+  if (radar.id !== lastAlertedRadarId && distM < alertDist*0.6) {
+    lastAlertedRadarId = radar.id;
+    speak(`Attention, ${cfg.label.toLowerCase()}${radar.speed?`, limite ${radar.speed} kilomètres heure`:''}, dans ${Math.round(distM)} mètres`);
+  }
+  clearTimeout(radarAlertTimer);
+  radarAlertTimer = setTimeout(() => { if(lastAlertedRadarId===radar.id) hideRadarAlert(); }, 7000);
 }
 
 function hideRadarAlert() {
-  const alert=document.getElementById('radar-alert');
-  alert.style.opacity='0'; alert.style.transform='translateY(20px)';
-  setTimeout(()=>{alert.classList.remove('show');alert.style.opacity='';alert.style.transform='';},300);
-  lastAlertedRadarId=null;
+  const alert = document.getElementById('radar-alert');
+  alert.style.opacity = '0'; alert.style.transform = 'translateY(20px)';
+  setTimeout(() => { alert.classList.remove('show'); alert.style.opacity=''; alert.style.transform=''; }, 300);
+  lastAlertedRadarId = null;
 }
 
 function playRadarBeep(distM) {
