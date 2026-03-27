@@ -991,8 +991,23 @@ function renderRadarMarkers() {
     return;
   }
 
-  const bounds = map.getBounds().pad(0.15);
-  const visible = allRadars.filter(r => radarInBounds(r, bounds));
+  // ✅ Compatible TOUTES les versions MapLibre GL 2.x / 3.x / 4.x /5.x
+  const bounds = map.getBounds();
+  const padding = 0.15;
+  const deltaLat = (bounds.getNorth() - bounds.getSouth()) * padding;
+  const deltaLng = (bounds.getEast() - bounds.getWest()) * padding;
+  const expandedBounds = new maplibregl.LngLatBounds(
+    [bounds.getWest() - deltaLng, bounds.getSouth() - deltaLat],
+    [bounds.getEast() + deltaLng, bounds.getNorth() + deltaLat]
+  );
+
+  const visible = allRadars.filter(r => 
+    r.lat >= expandedBounds.getSouth() && 
+    r.lat <= expandedBounds.getNorth() &&
+    r.lng >= expandedBounds.getWest()  && 
+    r.lng <= expandedBounds.getEast()
+  );
+
   console.log('[Radars] ' + visible.length + '/' + allRadars.length + ' dans viewport');
 
   const toRender = visible.slice(0, 500);
