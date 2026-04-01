@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alertes Radar Temps Réel - Tesla</title>
+    <title>Alertes Radar Tesla - Liste Personnalisée</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -305,13 +305,40 @@
             box-shadow: 0 4px 12px rgba(204, 26, 31, 0.3);
         }
         
+        /* Filtres */
+        .filters {
+            padding: 15px;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .filter-btn {
+            background-color: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 8px 15px;
+            color: var(--text);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn.active {
+            background-color: var(--blue);
+            color: white;
+            border-color: var(--blue);
+        }
+        
         /* Responsive */
         @media (max-width: 480px) {
-            .controls {
+            .controls, .filters {
                 flex-direction: column;
             }
             
-            .toggle-btn {
+            .toggle-btn, .filter-btn {
                 width: 100%;
                 justify-content: center;
             }
@@ -340,7 +367,7 @@
             <span class="logo-t">T</span>
             <span class="logo-text">TESLA</span>
         </div>
-        <div class="subtitle">Alertes Radar Temps Réel</div>
+        <div class="subtitle">Alertes Radar - Liste Personnalisée</div>
     </div>
     
     <!-- Contrôles -->
@@ -353,10 +380,19 @@
             <div class="dot"></div>
             <span>Alertes vocales</span>
         </button>
-        <button class="toggle-btn" id="toggle-updates">
+        <button class="toggle-btn active" id="toggle-updates">
             <div class="dot"></div>
             <span>Mises à jour auto</span>
         </button>
+    </div>
+    
+    <!-- Filtres -->
+    <div class="filters">
+        <button class="filter-btn active" data-type="all">Tous</button>
+        <button class="filter-btn" data-type="fixed">Fixes</button>
+        <button class="filter-btn" data-type="redlight">Feux rouges</button>
+        <button class="filter-btn" data-type="section">Tronçons</button>
+        <button class="filter-btn" data-type="mobile">Mobiles</button>
     </div>
     
     <!-- Conteneur d'alertes -->
@@ -365,7 +401,7 @@
         <div id="alerts-list">
             <div class="loading">
                 <div class="spinner"></div>
-                <p>Recherche des radars à proximité...</p>
+                <p>Chargement des radars...</p>
             </div>
         </div>
         
@@ -383,10 +419,10 @@
     
     <!-- Pied de page -->
     <div class="footer">
-        <p>Système d'alertes radar Tesla Navigation - Temps réel</p>
+        <p>Système d'alertes radar Tesla Navigation - Données personnalisées</p>
         <p>⚠️ Respectez toujours les limitations de vitesse</p>
         <p style="margin-top: 10px; font-size: 10px;">
-            Données fournies par OpenStreetMap et community overpass
+            Données fournies par votre liste personnalisée
         </p>
     </div>
 
@@ -398,13 +434,15 @@
         let voiceAlerts = false;
         let autoUpdates = true;
         let currentRadars = [];
+        let allRadars = [];
+        let currentFilter = 'all';
         
         // Types de radars avec icônes
         const radarTypes = {
-            'speed_camera': { icon: '🚨', name: 'Radar fixe', color: '#cc1a1f' },
-            'traffic_camera': { icon: '🚦', name: 'Radar feu rouge', color: '#d29922' },
-            'checkpoint': { icon: '📏', name: 'Radar tronçon', color: '#bc8cff' },
-            'mobile_speed_camera': { icon: '🚐', name: 'Radar mobile', color: '#58a6ff' },
+            'fixed': { icon: '🚨', name: 'Radar fixe', color: '#cc1a1f' },
+            'redlight': { icon: '🚦', name: 'Radar feu rouge', color: '#d29922' },
+            'section': { icon: '📏', name: 'Radar tronçon', color: '#bc8cff' },
+            'mobile': { icon: '🚐', name: 'Radar mobile', color: '#58a6ff' },
             'default': { icon: '📷', name: 'Contrôle vitesse', color: '#8b949e' }
         };
         
@@ -416,6 +454,19 @@
             document.getElementById('toggle-updates').addEventListener('click', toggleAutoUpdates);
             document.getElementById('locate-btn').addEventListener('click', locateUser);
             
+            // Configuration des filtres
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.dataset.type;
+                    displayRadars();
+                });
+            });
+            
+            // Charger les radars depuis l'URL fournie
+            loadRadarsFromUrl();
+            
             // Démarrer la géolocalisation
             if (navigator.geolocation) {
                 startGeolocation();
@@ -426,6 +477,104 @@
             // Simulation de la batterie
             updateBatteryStatus();
         });
+        
+        // Charger les radars depuis l'URL
+        function loadRadarsFromUrl() {
+            updateStatus("Chargement des radars...");
+            
+            const radarUrl = 'https://raw.githubusercontent.com/mikefri/Teslanavigation/main/radars_complet.json';
+            
+            fetch(radarUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erreur de chargement des radars');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    processRadarData(data);
+                    updateStatus("Radars chargés");
+                })
+                .catch(error => {
+                    console.error("Erreur lors du chargement des radars:", error);
+                    showError("Impossible de charger les radars. Utilisation des données de démonstration.");
+                    // Charger des données de démonstration en cas d'erreur
+                    loadDemoRadars();
+                });
+        }
+        
+        // Traitement des données des radars
+        function processRadarData(data) {
+            if (!data || !data.features || data.features.length === 0) {
+                showError("Aucune donnée radar valide");
+                return;
+            }
+            
+            allRadars = [];
+            
+            // Traiter chaque radar
+            data.features.forEach(feature => {
+                if (feature.geometry && feature.geometry.coordinates) {
+                    const coords = feature.geometry.coordinates;
+                    const props = feature.properties || {};
+                    
+                    // Déterminer le type de radar
+                    let type = 'fixed';
+                    if (props.nom && props.nom.toLowerCase().includes('feu')) type = 'redlight';
+                    if (props.nom && props.nom.toLowerCase().includes('tronçon')) type = 'section';
+                    if (props.nom && props.nom.toLowerCase().includes('mobile')) type = 'mobile';
+                    
+                    allRadars.push({
+                        id: feature.id || Math.random().toString(36).substr(2, 9),
+                        type: type,
+                        lat: coords[1],
+                        lng: coords[0],
+                        name: props.nom || 'Radar',
+                        vitesse: props.vitesse || null,
+                        source: 'Liste personnalisée'
+                    });
+                }
+            });
+            
+            updateStatus(`${allRadars.length} radars chargés`);
+            
+            // Si nous avons déjà la position de l'utilisateur, afficher les radars
+            if (userLocation) {
+                findNearbyRadars();
+            }
+        }
+        
+        // Chargement de radars de démonstration
+        function loadDemoRadars() {
+            allRadars = [];
+            
+            // Générer des radars factices autour de Paris
+            for (let i = 0; i < 50; i++) {
+                // Position aléatoire autour de Paris (±0.5 degré)
+                const lat = 48.8566 + (Math.random() - 0.5);
+                const lng = 2.3522 + (Math.random() - 0.5);
+                
+                const types = ['fixed', 'fixed', 'fixed', 'redlight', 'section', 'mobile'];
+                const type = types[Math.floor(Math.random() * types.length)];
+                
+                allRadars.push({
+                    id: 'demo-' + i,
+                    type: type,
+                    lat: lat,
+                    lng: lng,
+                    name: `Radar ${type} ${i+1}`,
+                    vitesse: Math.round(30 + Math.random() * 90),
+                    source: 'Démo'
+                });
+            }
+            
+            updateStatus("Mode démonstration - 50 radars chargés");
+            
+            // Si nous avons déjà la position de l'utilisateur, afficher les radars
+            if (userLocation) {
+                findNearbyRadars();
+            }
+        }
         
         // Fonction pour démarrer la géolocalisation
         function startGeolocation() {
@@ -446,9 +595,9 @@
                     updateStatus("Localisation active");
                     updateBatteryStatus();
                     
-                    // Récupérer les radars à proximité
-                    if (radarsEnabled) {
-                        fetchNearbyRadars();
+                    // Trouver les radars à proximité
+                    if (radarsEnabled && allRadars.length > 0) {
+                        findNearbyRadars();
                     }
                 },
                 error => {
@@ -477,72 +626,29 @@
             );
         }
         
-        // Fonction pour récupérer les radars à proximité
-        function fetchNearbyRadars() {
-            if (!userLocation) return;
+        // Trouver les radars à proximité
+        function findNearbyRadars() {
+            if (!userLocation || allRadars.length === 0) return;
             
-            updateStatus("Recherche des radars...");
-            
-            // Utilisation de l'API Overpass pour récupérer les radars
-            const radius = 5000; // 5km radius
-            const overpassQuery = `
-                [out:json];
-                (
-                    node["highway"="speed_camera"](around:${radius},${userLocation.lat},${userLocation.lng});
-                    node["enforcement"="speed_camera"](around:${radius},${userLocation.lat},${userLocation.lng});
-                    node["surveillance"="speed_camera"](around:${radius},${userLocation.lat},${userLocation.lng});
-                );
-                out body;
-            `;
-            
-            const encodedQuery = encodeURIComponent(overpassQuery);
-            const url = `https://overpass-api.de/api/interpreter?data=${encodedQuery}`;
-            
-            fetch(url)
-                .then(response => response.json())
-                .then(data => processRadarData(data))
-                .catch(error => {
-                    console.error("Erreur lors de la récupération des radars:", error);
-                    // Simulation de données si l'API échoue
-                    simulateRadars();
-                });
-        }
-        
-        // Traitement des données des radars
-        function processRadarData(data) {
-            if (!data.elements || data.elements.length === 0) {
-                document.getElementById('alerts-list').innerHTML = `
-                    <p style="text-align: center; color: var(--muted); padding: 20px;">
-                        Aucun radar détecté à proximité
-                    </p>
-                `;
-                return;
-            }
+            updateStatus("Recherche des radars à proximité...");
             
             currentRadars = [];
             
-            // Traiter chaque radar
-            data.elements.forEach(radar => {
-                if (radar.lat && radar.lon) {
-                    const distance = calculateDistance(
-                        userLocation.lat, 
-                        userLocation.lng, 
-                        radar.lat, 
-                        radar.lon
-                    );
-                    
-                    // Ne garder que les radars à moins de 3km
-                    if (distance <= 3000) {
-                        const type = determineRadarType(radar.tags);
-                        currentRadars.push({
-                            id: radar.id,
-                            type: type,
-                            distance: distance,
-                            lat: radar.lat,
-                            lng: radar.lon,
-                            tags: radar.tags
-                        });
-                    }
+            // Trouver les radars à moins de 5km
+            allRadars.forEach(radar => {
+                const distance = calculateDistance(
+                    userLocation.lat, 
+                    userLocation.lng, 
+                    radar.lat, 
+                    radar.lng
+                );
+                
+                // Ne garder que les radars à moins de 5km
+                if (distance <= 5000) {
+                    currentRadars.push({
+                        ...radar,
+                        distance: distance
+                    });
                 }
             });
             
@@ -566,16 +672,33 @@
                 return;
             }
             
+            // Filtrer selon le type sélectionné
+            let filteredRadars = currentRadars;
+            if (currentFilter !== 'all') {
+                filteredRadars = currentRadars.filter(radar => radar.type === currentFilter);
+            }
+            
+            if (filteredRadars.length === 0) {
+                alertsList.innerHTML = `
+                    <p style="text-align: center; color: var(--muted); padding: 20px;">
+                        Aucun radar de type "${currentFilter}" à proximité
+                    </p>
+                `;
+                return;
+            }
+            
             let html = '';
             
-            currentRadars.forEach((radar, index) => {
+            filteredRadars.forEach((radar, index) => {
+                if (index >= 10) return; // Limiter à 10 résultats
+                
                 const radarInfo = radarTypes[radar.type] || radarTypes.default;
                 const distanceText = radar.distance < 1000 ? 
                     `${Math.round(radar.distance)} m` : 
                     `${(radar.distance / 1000).toFixed(1)} km`;
                 
                 // Pourcentage de proximité (pour la barre de progression)
-                const proximity = Math.max(0, 100 - (radar.distance / 30));
+                const proximity = Math.max(0, 100 - (radar.distance / 50));
                 
                 html += `
                     <div class="alert-card ${radar.distance < 500 ? 'pulse' : ''}">
@@ -587,11 +710,11 @@
                             <div class="alert-distance">${distanceText}</div>
                         </div>
                         <div class="alert-details">
-                            <div class="alert-location">Direction: ${getCardinalDirection(radar)}</div>
-                            ${radar.tags.maxspeed ? `
+                            <div class="alert-location">${radar.name}</div>
+                            ${radar.vitesse ? `
                                 <div class="alert-limit">
                                     <span>Limite:</span>
-                                    <strong>${radar.tags.maxspeed} km/h</strong>
+                                    <strong>${radar.vitesse} km/h</strong>
                                 </div>
                             ` : ''}
                             <div class="progress-bar">
@@ -608,7 +731,7 @@
             });
             
             alertsList.innerHTML = html;
-            updateStatus(`${currentRadars.length} radar(s) détecté(s)`);
+            updateStatus(`${filteredRadars.length} radar(s) à proximité`);
         }
         
         // Calcul de distance entre deux points (formule haversine)
@@ -622,41 +745,6 @@
                 Math.sin(dLon/2) * Math.sin(dLon/2);
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
             return R * c;
-        }
-        
-        // Déterminer le type de radar
-        function determineRadarType(tags) {
-            if (tags.highway === 'speed_camera') return 'speed_camera';
-            if (tags.enforcement === 'speed_camera') return 'speed_camera';
-            if (tags.surveillance === 'speed_camera') return 'speed_camera';
-            if (tags.enforcement === 'traffic') return 'traffic_camera';
-            if (tags.mobile === 'yes') return 'mobile_speed_camera';
-            return 'default';
-        }
-        
-        // Obtenir la direction cardinale
-        function getCardinalDirection(radar) {
-            if (!userLocation) return 'Inconnu';
-            
-            const bearing = calculateBearing(
-                userLocation.lat, 
-                userLocation.lng, 
-                radar.lat, 
-                radar.lng
-            );
-            
-            const directions = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
-            const index = Math.round(bearing / 45) % 8;
-            return directions[index];
-        }
-        
-        // Calculer l'angle de direction
-        function calculateBearing(lat1, lon1, lat2, lon2) {
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const y = Math.sin(dLon) * Math.cos(lat2 * Math.PI / 180);
-            const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
-                      Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos(dLon);
-            return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
         }
         
         // Alertes vocales
@@ -698,7 +786,7 @@
                     <p>${message}</p>
                 </div>
             `;
-            updateStatus("Erreur de localisation");
+            updateStatus("Erreur");
         }
         
         // Localiser l'utilisateur manuellement
@@ -713,7 +801,7 @@
                             accuracy: position.coords.accuracy
                         };
                         updateStatus("Position actualisée");
-                        fetchNearbyRadars();
+                        findNearbyRadars();
                     },
                     error => {
                         showError("Impossible de déterminer votre position");
@@ -728,8 +816,8 @@
             const button = document.getElementById('toggle-radars');
             button.classList.toggle('active', radarsEnabled);
             
-            if (radarsEnabled) {
-                fetchNearbyRadars();
+            if (radarsEnabled && userLocation) {
+                findNearbyRadars();
             } else {
                 document.getElementById('alerts-list').innerHTML = `
                     <p style="text-align: center; color: var(--muted); padding: 20px;">
@@ -770,56 +858,24 @@
             };
             
             updateStatus("Mode simulation");
-            fetchNearbyRadars();
+            
+            // Si nous avons des radars, les afficher
+            if (allRadars.length > 0) {
+                findNearbyRadars();
+            }
             
             // Simuler le mouvement
             setInterval(() => {
-                if (autoUpdates && userLocation) {
+                if (autoUpdates && userLocation && allRadars.length > 0) {
                     // Déplacer légèrement la position
                     userLocation.lat += (Math.random() - 0.5) * 0.001;
                     userLocation.lng += (Math.random() - 0.5) * 0.001;
                     
                     if (radarsEnabled) {
-                        fetchNearbyRadars();
+                        findNearbyRadars();
                     }
                 }
             }, 10000);
-        }
-        
-        // Simulation de radars (si l'API échoue)
-        function simulateRadars() {
-            currentRadars = [];
-            
-            // Générer des radars factices autour de la position
-            for (let i = 0; i < 5; i++) {
-                const distance = 200 + (Math.random() * 2800); // 200m - 3km
-                const angle = Math.random() * 2 * Math.PI;
-                
-                const lat = userLocation.lat + (distance / 111320) * Math.cos(angle);
-                const lng = userLocation.lng + (distance / (111320 * Math.cos(userLocation.lat * Math.PI/180))) * Math.sin(angle);
-                
-                const types = Object.keys(radarTypes);
-                const type = types[Math.floor(Math.random() * types.length)];
-                
-                currentRadars.push({
-                    id: i,
-                    type: type,
-                    distance: distance,
-                    lat: lat,
-                    lng: lng,
-                    tags: {
-                        maxspeed: Math.round(30 + Math.random() * 90) // 30-120 km/h
-                    }
-                });
-            }
-            
-            // Trier par distance
-            currentRadars.sort((a, b) => a.distance - b.distance);
-            
-            // Afficher les radars
-            displayRadars();
-            
-            updateStatus("Mode simulation - 5 radars détectés");
         }
     </script>
 </body>
