@@ -332,6 +332,120 @@
             border-color: var(--blue);
         }
         
+        /* Configuration des distances */
+        .settings-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--red);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+        
+        .settings-btn:hover {
+            transform: rotate(45deg);
+        }
+        
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background-color: var(--card-bg);
+            border-left: 1px solid var(--border);
+            padding: 20px;
+            overflow-y: auto;
+            transition: right 0.3s ease;
+            z-index: 200;
+        }
+        
+        .settings-panel.open {
+            right: 0;
+        }
+        
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .settings-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .close-settings {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .distance-control {
+            margin-bottom: 20px;
+        }
+        
+        .distance-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .distance-name {
+            font-weight: 600;
+        }
+        
+        .distance-value {
+            color: var(--muted);
+        }
+        
+        .distance-slider {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--border);
+            outline: none;
+            border-radius: 3px;
+        }
+        
+        .distance-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--red);
+            cursor: pointer;
+        }
+        
+        .settings-section {
+            margin-bottom: 25px;
+        }
+        
+        .settings-section-title {
+            font-size: 16px;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border);
+        }
+        
         /* Responsive */
         @media (max-width: 480px) {
             .controls, .filters {
@@ -345,6 +459,11 @@
             
             .alert-distance {
                 font-size: 20px;
+            }
+            
+            .settings-panel {
+                width: 100%;
+                right: -100%;
             }
         }
     </style>
@@ -417,6 +536,73 @@
         </div>
     </div>
     
+    <!-- Bouton de configuration -->
+    <button class="settings-btn" id="settings-btn">
+        <i class="fas fa-sliders-h"></i>
+    </button>
+    
+    <!-- Panneau de configuration -->
+    <div class="settings-panel" id="settings-panel">
+        <div class="settings-header">
+            <h2 class="settings-title">Configuration des alertes</h2>
+            <button class="close-settings" id="close-settings">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="settings-section">
+            <h3 class="settings-section-title">Distances d'alerte par type</h3>
+            
+            <div class="distance-control" id="distance-fixed">
+                <div class="distance-label">
+                    <span class="distance-name">Radars fixes</span>
+                    <span class="distance-value" id="value-fixed">1000 m</span>
+                </div>
+                <input type="range" min="100" max="5000" value="1000" class="distance-slider" data-type="fixed">
+            </div>
+            
+            <div class="distance-control" id="distance-redlight">
+                <div class="distance-label">
+                    <span class="distance-name">Feux rouges</span>
+                    <span class="distance-value" id="value-redlight">800 m</span>
+                </div>
+                <input type="range" min="100" max="5000" value="800" class="distance-slider" data-type="redlight">
+            </div>
+            
+            <div class="distance-control" id="distance-section">
+                <div class="distance-label">
+                    <span class="distance-name">Radars tronçons</span>
+                    <span class="distance-value" id="value-section">1500 m</span>
+                </div>
+                <input type="range" min="100" max="5000" value="1500" class="distance-slider" data-type="section">
+            </div>
+            
+            <div class="distance-control" id="distance-mobile">
+                <div class="distance-label">
+                    <span class="distance-name">Radars mobiles</span>
+                    <span class="distance-value" id="value-mobile">500 m</span>
+                </div>
+                <input type="range" min="100" max="5000" value="500" class="distance-slider" data-type="mobile">
+            </div>
+        </div>
+        
+        <div class="settings-section">
+            <h3 class="settings-section-title">Alertes vocales</h3>
+            
+            <div class="distance-control">
+                <div class="distance-label">
+                    <span class="distance-name">Distance alerte vocale</span>
+                    <span class="distance-value" id="value-voice">300 m</span>
+                </div>
+                <input type="range" min="50" max="1000" value="300" class="distance-slider" id="voice-distance">
+            </div>
+        </div>
+        
+        <button class="action-btn" id="save-settings">
+            <i class="fas fa-save"></i> Enregistrer les paramètres
+        </button>
+    </div>
+    
     <!-- Pied de page -->
     <div class="footer">
         <p>Système d'alertes radar Tesla Navigation - Données personnalisées</p>
@@ -436,6 +622,17 @@
         let currentRadars = [];
         let allRadars = [];
         let currentFilter = 'all';
+        
+        // Distances d'alerte par défaut pour chaque type de radar (en mètres)
+        let alertDistances = {
+            'fixed': 1000,
+            'redlight': 800,
+            'section': 1500,
+            'mobile': 500
+        };
+        
+        // Distance d'alerte vocale
+        let voiceAlertDistance = 300;
         
         // Types de radars avec icônes
         const radarTypes = {
@@ -464,6 +661,30 @@
                 });
             });
             
+            // Configuration du panneau de paramètres
+            document.getElementById('settings-btn').addEventListener('click', openSettings);
+            document.getElementById('close-settings').addEventListener('click', closeSettings);
+            document.getElementById('save-settings').addEventListener('click', saveSettings);
+            
+            // Configuration des sliders de distance
+            document.querySelectorAll('.distance-slider').forEach(slider => {
+                slider.addEventListener('input', function() {
+                    const type = this.dataset.type;
+                    const value = this.value;
+                    
+                    if (type) {
+                        // Mettre à jour la valeur affichée pour les types de radar
+                        document.getElementById(`value-${type}`).textContent = `${value} m`;
+                    } else if (this.id === 'voice-distance') {
+                        // Mettre à jour la valeur affichée pour la distance vocale
+                        document.getElementById('value-voice').textContent = `${value} m`;
+                    }
+                });
+            });
+            
+            // Charger les paramètres sauvegardés
+            loadSavedSettings();
+            
             // Charger les radars depuis l'URL fournie
             loadRadarsFromUrl();
             
@@ -477,6 +698,82 @@
             // Simulation de la batterie
             updateBatteryStatus();
         });
+        
+        // Charger les paramètres sauvegardés
+        function loadSavedSettings() {
+            const savedSettings = localStorage.getItem('teslaRadarSettings');
+            
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                
+                // Appliquer les distances d'alerte
+                if (settings.alertDistances) {
+                    alertDistances = settings.alertDistances;
+                    
+                    // Mettre à jour les sliders
+                    for (const type in alertDistances) {
+                        const slider = document.querySelector(`.distance-slider[data-type="${type}"]`);
+                        if (slider) {
+                            slider.value = alertDistances[type];
+                            document.getElementById(`value-${type}`).textContent = `${alertDistances[type]} m`;
+                        }
+                    }
+                }
+                
+                // Appliquer la distance d'alerte vocale
+                if (settings.voiceAlertDistance) {
+                    voiceAlertDistance = settings.voiceAlertDistance;
+                    document.getElementById('voice-distance').value = voiceAlertDistance;
+                    document.getElementById('value-voice').textContent = `${voiceAlertDistance} m`;
+                }
+            }
+        }
+        
+        // Ouvrir le panneau de paramètres
+        function openSettings() {
+            document.getElementById('settings-panel').classList.add('open');
+        }
+        
+        // Fermer le panneau de paramètres
+        function closeSettings() {
+            document.getElementById('settings-panel').classList.remove('open');
+        }
+        
+        // Sauvegarder les paramètres
+        function saveSettings() {
+            // Mettre à jour les distances d'alerte depuis les sliders
+            document.querySelectorAll('.distance-slider[data-type]').forEach(slider => {
+                const type = slider.dataset.type;
+                alertDistances[type] = parseInt(slider.value);
+            });
+            
+            // Mettre à jour la distance d'alerte vocale
+            voiceAlertDistance = parseInt(document.getElementById('voice-distance').value);
+            
+            // Sauvegarder dans le localStorage
+            const settings = {
+                alertDistances: alertDistances,
+                voiceAlertDistance: voiceAlertDistance
+            };
+            
+            localStorage.setItem('teslaRadarSettings', JSON.stringify(settings));
+            
+            // Fermer le panneau
+            closeSettings();
+            
+            // Recalculer les radars à proximité avec les nouvelles distances
+            if (userLocation && allRadars.length > 0) {
+                findNearbyRadars();
+            }
+            
+            // Afficher un message de confirmation
+            updateStatus("Paramètres enregistrés");
+            setTimeout(() => {
+                if (userLocation) {
+                    updateStatus("Localisation active");
+                }
+            }, 2000);
+        }
         
         // Charger les radars depuis l'URL
         function loadRadarsFromUrl() {
@@ -634,7 +931,7 @@
             
             currentRadars = [];
             
-            // Trouver les radars à moins de 5km
+            // Trouver les radars selon leur distance d'alerte spécifique
             allRadars.forEach(radar => {
                 const distance = calculateDistance(
                     userLocation.lat, 
@@ -643,8 +940,11 @@
                     radar.lng
                 );
                 
-                // Ne garder que les radars à moins de 5km
-                if (distance <= 5000) {
+                // Utiliser la distance d'alerte spécifique au type de radar
+                const alertDistance = alertDistances[radar.type] || 1000;
+                
+                // Ne garder que les radars à moins de la distance configurée
+                if (distance <= alertDistance) {
                     currentRadars.push({
                         ...radar,
                         distance: distance
@@ -698,10 +998,11 @@
                     `${(radar.distance / 1000).toFixed(1)} km`;
                 
                 // Pourcentage de proximité (pour la barre de progression)
-                const proximity = Math.max(0, 100 - (radar.distance / 50));
+                const alertDistance = alertDistances[radar.type] || 1000;
+                const proximity = Math.max(0, 100 - (radar.distance / alertDistance * 100));
                 
                 html += `
-                    <div class="alert-card ${radar.distance < 500 ? 'pulse' : ''}">
+                    <div class="alert-card ${radar.distance < (alertDistance * 0.2) ? 'pulse' : ''}">
                         <div class="alert-header">
                             <div class="alert-type">
                                 <span>${radarInfo.icon}</span>
@@ -725,7 +1026,7 @@
                 `;
                 
                 // Alertes vocales pour les radars très proches
-                if (voiceAlerts && radar.distance < 1000 && radar.distance > 50) {
+                if (voiceAlerts && radar.distance <= voiceAlertDistance && radar.distance > 50) {
                     speakAlert(radar, distanceText);
                 }
             });
