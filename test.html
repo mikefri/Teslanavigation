@@ -214,6 +214,23 @@
             color: var(--red);
         }
         
+        .alert-details {
+            margin-top: 10px;
+        }
+        
+        .alert-location {
+            font-size: 14px;
+            color: var(--muted);
+            margin-bottom: 5px;
+        }
+        
+        .alert-limit {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
         .progress-bar {
             height: 6px;
             background-color: #333;
@@ -229,7 +246,72 @@
             transition: width 0.5s ease;
         }
         
-        /* Settings panel */
+        /* Status bar */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 15px;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            font-size: 12px;
+            color: var(--muted);
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--green);
+        }
+        
+        /* Loading & Error */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--muted);
+        }
+        
+        .spinner {
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--red);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        .error-message {
+            background-color: rgba(204, 26, 31, 0.1);
+            border: 1px solid var(--red);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+            color: var(--red);
+        }
+        
+        /* Action button */
+        .action-btn {
+            background-color: var(--red);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            background-color: #b31519;
+            transform: translateY(-2px);
+        }
+        
+        /* Settings button */
         .settings-btn {
             position: fixed;
             bottom: 20px;
@@ -249,6 +331,7 @@
             z-index: 100;
         }
         
+        /* Settings panel */
         .settings-panel {
             position: fixed;
             top: 0;
@@ -267,42 +350,63 @@
             right: 0;
         }
         
-        /* Autres styles (status, loading, etc.) restent identiques */
-        .status-bar {
+        .settings-header {
             display: flex;
             justify-content: space-between;
-            padding: 10px 15px;
-            background-color: var(--card-bg);
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
             border-bottom: 1px solid var(--border);
-            font-size: 12px;
-            color: var(--muted);
         }
         
-        .loading, .error-message {
-            text-align: center;
-            padding: 20px;
-            color: var(--muted);
+        .distance-control {
+            margin-bottom: 20px;
         }
         
-        .error-message {
-            background-color: rgba(204, 26, 31, 0.1);
-            border: 1px solid var(--red);
+        .distance-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .distance-slider {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: var(--border);
+            border-radius: 3px;
+            outline: none;
+        }
+        
+        .distance-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--red);
+            cursor: pointer;
+        }
+        
+        .voice-selector {
+            width: 100%;
+            padding: 10px;
             border-radius: 8px;
-            color: var(--red);
+            background-color: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            margin-bottom: 15px;
         }
         
-        .action-btn {
-            background-color: var(--red);
+        .voice-test-btn {
+            background-color: var(--blue);
             color: white;
             border: none;
             border-radius: 20px;
-            padding: 12px 20px;
-            font-size: 16px;
-            font-weight: 600;
+            padding: 8px 15px;
+            font-size: 14px;
             cursor: pointer;
             width: 100%;
-            margin: 20px 0;
-            transition: all 0.3s ease;
+            margin-bottom: 15px;
         }
         
         @keyframes pulse {
@@ -316,19 +420,11 @@
             100% { transform: rotate(360deg); }
         }
         
-        .spinner {
-            border: 3px solid var(--border);
-            border-top: 3px solid var(--red);
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
-        
-        /* Responsive */
         @media (max-width: 480px) {
-            .settings-panel { width: 100%; right: -100%; }
+            .settings-panel {
+                width: 100%;
+                right: -100%;
+            }
         }
     </style>
 </head>
@@ -356,20 +452,33 @@
     <!-- Contrôles compacts -->
     <div class="compact-controls">
         <div class="control-group">
-            <button class="compact-btn active" id="toggle-radars"><i class="fas fa-radar"></i> Radars</button>
-            <button class="compact-btn" id="toggle-voice"><i class="fas fa-volume-up"></i> Voix</button>
-            <button class="compact-btn active" id="toggle-updates"><i class="fas fa-sync"></i> MAJ Auto</button>
+            <button class="compact-btn active" id="toggle-radars" title="Activer/désactiver les radars">
+                <i class="fas fa-radar"></i> Radars
+            </button>
+            <button class="compact-btn" id="toggle-voice" title="Activer/désactiver les alertes vocales">
+                <i class="fas fa-volume-up"></i> Voix
+            </button>
+            <button class="compact-btn active" id="toggle-updates" title="Activer/désactiver les mises à jour">
+                <i class="fas fa-sync"></i> MAJ Auto
+            </button>
         </div>
         <div class="control-group">
-            <button class="compact-btn" id="toggle-filters-btn"><i class="fas fa-filter"></i> Filtres</button>
+            <button class="compact-btn" id="toggle-filters-btn" title="Afficher/masquer les filtres">
+                <i class="fas fa-filter"></i> Filtres
+            </button>
         </div>
     </div>
     
     <!-- Filtres -->
     <div class="filters-container">
         <div class="filters-header" id="filters-header">
-            <div class="filters-title"><i class="fas fa-filter"></i> Filtrer par type de radar</div>
-            <button class="toggle-filters" id="toggle-filters"><i class="fas fa-chevron-down"></i></button>
+            <div class="filters-title">
+                <i class="fas fa-filter"></i>
+                <span>Filtrer par type de radar</span>
+            </div>
+            <button class="toggle-filters" id="toggle-filters">
+                <i class="fas fa-chevron-down"></i>
+            </button>
         </div>
         <div class="filters" id="filters">
             <button class="filter-btn active" data-type="all">Tous</button>
@@ -380,7 +489,7 @@
         </div>
     </div>
     
-    <!-- Conteneur d'alertes -->
+    <!-- Conteneur principal -->
     <div class="alertes-container">
         <h2 class="section-title"><i class="fas fa-radar"></i> Alertes à proximité</h2>
         <div id="alerts-list">
@@ -403,17 +512,22 @@
     </div>
     
     <!-- Bouton paramètres -->
-    <button class="settings-btn" id="settings-btn"><i class="fas fa-sliders-h"></i></button>
+    <button class="settings-btn" id="settings-btn">
+        <i class="fas fa-sliders-h"></i>
+    </button>
     
-    <!-- Panneau paramètres -->
+    <!-- Panneau de configuration -->
     <div class="settings-panel" id="settings-panel">
         <div class="settings-header">
             <h2 class="settings-title">Configuration des alertes</h2>
-            <button class="close-settings" id="close-settings"><i class="fas fa-times"></i></button>
+            <button class="close-settings" id="close-settings">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
         
         <div class="settings-section">
             <h3 class="settings-section-title">Distances d'alerte par type</h3>
+            
             <div class="distance-control">
                 <div class="distance-label">
                     <span class="distance-name">Radars fixes</span>
@@ -421,17 +535,75 @@
                 </div>
                 <input type="range" min="100" max="5000" value="1000" class="distance-slider" data-type="fixed">
             </div>
-            <!-- Répéter pour les autres types (redlight, section, mobile) -->
-            <!-- ... (je les ai gardés identiques) -->
+            
+            <div class="distance-control">
+                <div class="distance-label">
+                    <span class="distance-name">Feux rouges</span>
+                    <span class="distance-value" id="value-redlight">800 m</span>
+                </div>
+                <input type="range" min="100" max="5000" value="800" class="distance-slider" data-type="redlight">
+            </div>
+            
+            <div class="distance-control">
+                <div class="distance-label">
+                    <span class="distance-name">Radars tronçons</span>
+                    <span class="distance-value" id="value-section">1500 m</span>
+                </div>
+                <input type="range" min="100" max="5000" value="1500" class="distance-slider" data-type="section">
+            </div>
+            
+            <div class="distance-control">
+                <div class="distance-label">
+                    <span class="distance-name">Radars mobiles</span>
+                    <span class="distance-value" id="value-mobile">500 m</span>
+                </div>
+                <input type="range" min="100" max="5000" value="500" class="distance-slider" data-type="mobile">
+            </div>
         </div>
         
-        <!-- Le reste du panneau settings est identique à ton code original (je ne l'ai pas tout recopié ici pour brevité, mais il est corrigé dans la version complète) -->
+        <div class="settings-section">
+            <h3 class="settings-section-title">Alertes vocales</h3>
+            
+            <div class="distance-control">
+                <div class="distance-label">
+                    <span class="distance-name">Distance alerte vocale</span>
+                    <span class="distance-value" id="value-voice">300 m</span>
+                </div>
+                <input type="range" min="50" max="1000" value="300" class="distance-slider" id="voice-distance">
+            </div>
+            
+            <div class="distance-control">
+                <div class="distance-label">
+                    <span class="distance-name">Voix française</span>
+                </div>
+                <select class="voice-selector" id="voice-selector">
+                    <option value="auto">Détection automatique</option>
+                    <option value="thomas">Thomas (masculin)</option>
+                    <option value="amélie">Amélie (féminin)</option>
+                    <option value="michelle">Michelle (féminin)</option>
+                    <option value="antoine">Antoine (masculin)</option>
+                </select>
+            </div>
+            
+            <button class="voice-test-btn" id="voice-test-btn">
+                <i class="fas fa-volume-up"></i> Tester la voix
+            </button>
+        </div>
         
-        <button class="action-btn" id="save-settings"><i class="fas fa-save"></i> Enregistrer les paramètres</button>
+        <button class="action-btn" id="save-settings">
+            <i class="fas fa-save"></i> Enregistrer les paramètres
+        </button>
     </div>
     
+    <!-- Footer -->
+    <div class="footer" style="padding:20px; text-align:center; color:var(--muted); font-size:12px; border-top:1px solid var(--border); margin-top:20px;">
+        <p>Système d'alertes radar Tesla Navigation - Données personnalisées</p>
+        <p>⚠️ Respectez toujours les limitations de vitesse</p>
+        <p style="margin-top:10px; font-size:10px;">Données fournies par votre liste personnalisée</p>
+    </div>
+
     <script>
-        // === Variables globales ===
+        // Variables globales
         let userLocation = null;
         let watchId = null;
         let radarsEnabled = true;
@@ -460,42 +632,54 @@
             default:  { icon: '📷', name: 'Contrôle vitesse', color: '#8b949e' }
         };
 
-        // === Initialisation ===
-        document.addEventListener('DOMContentLoaded', () => {
-            // Boutons
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Boutons principaux
             document.getElementById('toggle-radars').addEventListener('click', toggleRadars);
             document.getElementById('toggle-voice').addEventListener('click', toggleVoiceAlerts);
             document.getElementById('toggle-updates').addEventListener('click', toggleAutoUpdates);
             document.getElementById('locate-btn').addEventListener('click', locateUser);
-            document.getElementById('settings-btn').addEventListener('click', () => document.getElementById('settings-panel').classList.add('open'));
-            document.getElementById('close-settings').addEventListener('click', () => document.getElementById('settings-panel').classList.remove('open'));
-            document.getElementById('save-settings').addEventListener('click', saveSettings);
-            document.getElementById('voice-test-btn').addEventListener('click', testVoice);
-
+            
             // Filtres
             document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
+                btn.addEventListener('click', function() {
                     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    currentFilter = btn.dataset.type;
+                    this.classList.add('active');
+                    currentFilter = this.dataset.type;
                     displayRadars();
                 });
             });
-
+            
+            // Panneau paramètres
+            document.getElementById('settings-btn').addEventListener('click', () => {
+                document.getElementById('settings-panel').classList.add('open');
+            });
+            document.getElementById('close-settings').addEventListener('click', () => {
+                document.getElementById('settings-panel').classList.remove('open');
+            });
+            document.getElementById('save-settings').addEventListener('click', saveSettings);
+            document.getElementById('voice-test-btn').addEventListener('click', testVoice);
+            
             // Sliders
             document.querySelectorAll('.distance-slider').forEach(slider => {
-                slider.addEventListener('input', () => {
-                    const type = slider.dataset.type;
-                    const val = slider.value;
-                    if (type) document.getElementById(`value-${type}`).textContent = `${val} m`;
-                    else if (slider.id === 'voice-distance') document.getElementById('value-voice').textContent = `${val} m`;
+                slider.addEventListener('input', function() {
+                    const type = this.dataset.type;
+                    const value = this.value;
+                    if (type) {
+                        document.getElementById(`value-${type}`).textContent = `${value} m`;
+                    } else if (this.id === 'voice-distance') {
+                        document.getElementById('value-voice').textContent = `${value} m`;
+                    }
                 });
             });
-
-            document.getElementById('voice-selector').addEventListener('change', e => selectedVoice = e.target.value);
-
-            // Filtres masquage
-            const toggleFilters = () => {
+            
+            // Sélecteur de voix
+            document.getElementById('voice-selector').addEventListener('change', function() {
+                selectedVoice = this.value;
+            });
+            
+            // Gestion des filtres (masquer/afficher)
+            const toggleFiltersFunc = () => {
                 filtersVisible = !filtersVisible;
                 const filtersEl = document.getElementById('filters');
                 const icon = document.getElementById('toggle-filters').querySelector('i');
@@ -507,99 +691,233 @@
                     icon.className = 'fas fa-chevron-up';
                 }
             };
-            document.getElementById('toggle-filters').addEventListener('click', toggleFilters);
-            document.getElementById('filters-header').addEventListener('click', toggleFilters);
-            document.getElementById('toggle-filters-btn').addEventListener('click', toggleFilters);
-
+            
+            document.getElementById('toggle-filters').addEventListener('click', toggleFiltersFunc);
+            document.getElementById('filters-header').addEventListener('click', toggleFiltersFunc);
+            document.getElementById('toggle-filters-btn').addEventListener('click', toggleFiltersFunc);
+            
+            // Charger paramètres + données
             loadSavedSettings();
             loadRadarsFromUrl();
-
-            if (navigator.geolocation) startGeolocation();
-            else showError("Géolocalisation non supportée");
-
+            
+            // Géolocalisation
+            if (navigator.geolocation) {
+                startGeolocation();
+            } else {
+                showError("La géolocalisation n'est pas supportée par votre navigateur.");
+            }
+            
             updateBatteryStatus();
         });
 
-        // === Fonctions corrigées ===
+        // ====================== FONCTIONS ======================
+
+        function toggleFilters() {
+            // déjà géré dans DOMContentLoaded
+        }
+
+        function loadSavedSettings() {
+            const saved = localStorage.getItem('teslaRadarSettings');
+            if (!saved) return;
+            
+            const settings = JSON.parse(saved);
+            
+            if (settings.alertDistances) {
+                alertDistances = settings.alertDistances;
+                Object.keys(alertDistances).forEach(type => {
+                    const slider = document.querySelector(`.distance-slider[data-type="${type}"]`);
+                    if (slider) {
+                        slider.value = alertDistances[type];
+                        document.getElementById(`value-${type}`).textContent = `${alertDistances[type]} m`;
+                    }
+                });
+            }
+            
+            if (settings.voiceAlertDistance) {
+                voiceAlertDistance = settings.voiceAlertDistance;
+                document.getElementById('voice-distance').value = voiceAlertDistance;
+                document.getElementById('value-voice').textContent = `${voiceAlertDistance} m`;
+            }
+            
+            if (settings.selectedVoice) {
+                selectedVoice = settings.selectedVoice;
+                document.getElementById('voice-selector').value = selectedVoice;
+            }
+            
+            if (typeof settings.filtersVisible !== 'undefined') {
+                filtersVisible = settings.filtersVisible;
+                if (!filtersVisible) {
+                    const filtersEl = document.getElementById('filters');
+                    filtersEl.classList.add('hidden');
+                    document.getElementById('toggle-filters').querySelector('i').className = 'fas fa-chevron-up';
+                }
+            }
+        }
+
+        function saveSettings() {
+            // Mise à jour des distances depuis les sliders
+            document.querySelectorAll('.distance-slider[data-type]').forEach(slider => {
+                const type = slider.dataset.type;
+                alertDistances[type] = parseInt(slider.value);
+            });
+            
+            voiceAlertDistance = parseInt(document.getElementById('voice-distance').value);
+            selectedVoice = document.getElementById('voice-selector').value;
+            
+            const settings = {
+                alertDistances: alertDistances,
+                voiceAlertDistance: voiceAlertDistance,
+                selectedVoice: selectedVoice,
+                filtersVisible: filtersVisible
+            };
+            
+            localStorage.setItem('teslaRadarSettings', JSON.stringify(settings));
+            
+            document.getElementById('settings-panel').classList.remove('open');
+            updateStatus("Paramètres enregistrés");
+            
+            if (userLocation) findNearbyRadars();
+        }
+
+        function testVoice() {
+            if (!('speechSynthesis' in window)) {
+                updateStatus("Synthèse vocale non supportée");
+                return;
+            }
+            
+            const utterance = new SpeechSynthesisUtterance("Ceci est un test de l'alerte vocale pour les radars.");
+            utterance.lang = 'fr-FR';
+            speechSynthesis.speak(utterance);
+        }
+
         function loadRadarsFromUrl() {
+            updateStatus("Chargement des radars...");
             const url = 'https://raw.githubusercontent.com/mikefri/Teslanavigation/main/radars_complet.json';
+            
             fetch(url)
-                .then(res => {
-                    if (!res.ok) throw new Error('Erreur réseau');
-                    return res.json();
+                .then(response => {
+                    if (!response.ok) throw new Error('Erreur de chargement');
+                    return response.json();
                 })
-                .then(data => processRadarData(data))
-                .catch(err => {
-                    console.error(err);
-                    showError("Impossible de charger les radars. Mode démo activé.");
+                .then(data => {
+                    processRadarData(data);
+                })
+                .catch(error => {
+                    console.error(error);
+                    showError("Impossible de charger les radars. Mode démonstration activé.");
                     loadDemoRadars();
                 });
         }
 
         function processRadarData(data) {
             allRadars = [];
-            if (!data?.features) return;
-
+            if (!data || !data.features) return;
+            
             data.features.forEach(feature => {
-                if (!feature.geometry?.coordinates) return;
+                if (!feature.geometry || !feature.geometry.coordinates) return;
+                
                 const [lng, lat] = feature.geometry.coordinates;
                 const props = feature.properties || {};
-
                 let type = 'fixed';
+                
                 const nom = (props.nom || '').toLowerCase();
                 if (nom.includes('feu') || nom.includes('rouge')) type = 'redlight';
                 else if (nom.includes('tronçon') || nom.includes('troncon')) type = 'section';
                 else if (nom.includes('mobile')) type = 'mobile';
-
+                
                 allRadars.push({
-                    id: feature.id || Math.random().toString(36).slice(2),
-                    type,
-                    lat,
-                    lng,
-                    name: props.nom || 'Radar inconnu',
+                    id: feature.id || Math.random().toString(36).substr(2, 9),
+                    type: type,
+                    lat: lat,
+                    lng: lng,
+                    name: props.nom || 'Radar',
                     vitesse: props.vitesse || null
                 });
             });
-
+            
             updateStatus(`${allRadars.length} radars chargés`);
             if (userLocation) findNearbyRadars();
         }
 
         function loadDemoRadars() {
-            // ... (ton code démo reste valide)
+            allRadars = [];
+            for (let i = 0; i < 50; i++) {
+                const lat = 48.8566 + (Math.random() - 0.5) * 0.5;
+                const lng = 2.3522 + (Math.random() - 0.5) * 0.5;
+                const types = ['fixed', 'redlight', 'section', 'mobile'];
+                const type = types[Math.floor(Math.random() * types.length)];
+                
+                allRadars.push({
+                    id: 'demo-' + i,
+                    type: type,
+                    lat: lat,
+                    lng: lng,
+                    name: `Radar ${type} ${i+1}`,
+                    vitesse: Math.round(30 + Math.random() * 90)
+                });
+            }
+            updateStatus("Mode démonstration - 50 radars chargés");
+            if (userLocation) findNearbyRadars();
+        }
+
+        function startGeolocation() {
+            updateStatus("Localisation en cours...");
+            if (watchId) navigator.geolocation.clearWatch(watchId);
+            
+            watchId = navigator.geolocation.watchPosition(
+                position => {
+                    userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                        accuracy: position.coords.accuracy
+                    };
+                    updateStatus("Localisation active");
+                    if (radarsEnabled && allRadars.length > 0) findNearbyRadars();
+                },
+                error => {
+                    console.error("Erreur géolocalisation:", error);
+                    showError("Localisation échouée. Mode simulation activé.");
+                    simulateLocation();
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+            );
         }
 
         function findNearbyRadars() {
-            if (!userLocation || !allRadars.length) return;
-
+            if (!userLocation || allRadars.length === 0) return;
+            
             currentRadars = allRadars.map(radar => {
                 const distance = calculateDistance(userLocation.lat, userLocation.lng, radar.lat, radar.lng);
                 return { ...radar, distance };
             }).filter(radar => radar.distance <= (alertDistances[radar.type] || 1000))
               .sort((a, b) => a.distance - b.distance);
-
+            
             displayRadars();
         }
 
         function displayRadars() {
             const container = document.getElementById('alerts-list');
-            let filtered = currentRadars;
+            let filteredRadars = currentRadars;
+            
             if (currentFilter !== 'all') {
-                filtered = currentRadars.filter(r => r.type === currentFilter);
+                filteredRadars = currentRadars.filter(r => r.type === currentFilter);
             }
-
-            if (!filtered.length) {
-                container.innerHTML = `<p style="text-align:center;color:var(--muted);padding:20px;">Aucun radar détecté</p>`;
+            
+            if (filteredRadars.length === 0) {
+                container.innerHTML = `<p style="text-align:center;color:var(--muted);padding:20px;">Aucun radar détecté à proximité</p>`;
                 return;
             }
-
+            
             let html = '';
-            filtered.slice(0, 10).forEach(radar => {
+            filteredRadars.slice(0, 10).forEach(radar => {
                 const info = radarTypes[radar.type] || radarTypes.default;
-                const distText = radar.distance < 1000 ? `${Math.round(radar.distance)} m` : `${(radar.distance/1000).toFixed(1)} km`;
+                const distanceText = radar.distance < 1000 
+                    ? `${Math.round(radar.distance)} m` 
+                    : `${(radar.distance / 1000).toFixed(1)} km`;
+                
                 const alertDist = alertDistances[radar.type] || 1000;
                 const proximity = Math.max(0, 100 - (radar.distance / alertDist * 100));
-
+                
                 html += `
                     <div class="alert-card ${radar.distance < alertDist * 0.2 ? 'pulse' : ''}">
                         <div class="alert-header">
@@ -607,7 +925,7 @@
                                 <span>${info.icon}</span>
                                 <span>${info.name}</span>
                             </div>
-                            <div class="alert-distance">${distText}</div>
+                            <div class="alert-distance">${distanceText}</div>
                         </div>
                         <div class="alert-details">
                             <div class="alert-location">${radar.name}</div>
@@ -618,34 +936,93 @@
                         </div>
                     </div>
                 `;
-
-                if (voiceAlerts && radar.distance <= voiceAlertDistance) {
-                    speakAlert(radar, distText);
+                
+                if (voiceAlerts && radar.distance <= voiceAlertDistance && radar.distance > 30) {
+                    speakAlert(radar, distanceText);
                 }
             });
-
+            
             container.innerHTML = html;
+            updateStatus(`${filteredRadars.length} radar(s) à proximité`);
         }
 
         function calculateDistance(lat1, lon1, lat2, lon2) {
             const R = 6371000;
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2)**2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2)**2;
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
         }
 
         function speakAlert(radar, distanceText) {
             if (!('speechSynthesis' in window)) return;
             const utterance = new SpeechSynthesisUtterance(`Attention, ${radarTypes[radar.type].name} à ${distanceText}`);
             utterance.lang = 'fr-FR';
-            // configureVoice(utterance); // tu peux la réactiver si besoin
             speechSynthesis.speak(utterance);
         }
 
-        // Les autres fonctions (saveSettings, loadSavedSettings, testVoice, toggle*, etc.) ont été corrigées de la même manière.
+        function updateStatus(text) {
+            document.getElementById('status-text').textContent = text;
+        }
 
-        // Pour la version complète sans coupure, dis-moi si tu veux que je te fournisse tout le <script> corrigé en une seule fois.
+        function updateBatteryStatus() {
+            if ('getBattery' in navigator) {
+                navigator.getBattery().then(b => {
+                    document.getElementById('battery-status').textContent = `🔋 ${Math.round(b.level * 100)}%`;
+                });
+            } else {
+                const level = Math.floor(Math.random() * 41) + 60;
+                document.getElementById('battery-status').textContent = `🔋 ${level}%`;
+            }
+        }
+
+        function showError(message) {
+            const container = document.getElementById('alerts-list');
+            container.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        function locateUser() {
+            if (!navigator.geolocation) return;
+            updateStatus("Localisation en cours...");
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                    updateStatus("Position actualisée");
+                    findNearbyRadars();
+                },
+                () => showError("Impossible de déterminer votre position")
+            );
+        }
+
+        function toggleRadars() {
+            radarsEnabled = !radarsEnabled;
+            document.getElementById('toggle-radars').classList.toggle('active', radarsEnabled);
+            if (radarsEnabled && userLocation) findNearbyRadars();
+        }
+
+        function toggleVoiceAlerts() {
+            voiceAlerts = !voiceAlerts;
+            document.getElementById('toggle-voice').classList.toggle('active', voiceAlerts);
+        }
+
+        function toggleAutoUpdates() {
+            autoUpdates = !autoUpdates;
+            document.getElementById('toggle-updates').classList.toggle('active', autoUpdates);
+        }
+
+        function simulateLocation() {
+            userLocation = { lat: 48.8566, lng: 2.3522 };
+            updateStatus("Mode simulation activé");
+            if (allRadars.length > 0) findNearbyRadars();
+        }
     </script>
 </body>
 </html>
