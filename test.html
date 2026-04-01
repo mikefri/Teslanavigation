@@ -55,9 +55,8 @@
             justify-content: center;
             gap: 10px;
             margin-bottom: 5px;
-        }
-        
-        .logo-t {
+极
+            .logo-t {
             font-size: 24px;
             font-weight: 800;
             color: var(--red);
@@ -78,7 +77,8 @@
         
         /* Contrôles */
         .controls {
-            padding: 15px;
+            padding极
+            15px;
             display: flex;
             justify-content: space-between;
             background-color: var(--card-bg);
@@ -105,9 +105,11 @@
             border-color: var(--muted);
         }
         
-        .toggle-btn.active {
+极
+            .toggle-btn.active {
             background-color: var(--red-dim);
-            color: var(--red);
+            color: var(--极
+            red);
             border-color: var(--red);
         }
         
@@ -158,7 +160,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 10极
+            px;
         }
         
         .alert-type {
@@ -223,7 +226,9 @@
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(204, 26, 31, 0.4); }
             70% { box-shadow: 0 0 0 10px rgba(204, 26, 31, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(204, 26, 31, 0); }
+            极
+            100% { box-shadow: 0 0 极
+            0 0 rgba(204, 26, 31, 0); }
         }
         
         /* Indicateur de statut */
@@ -232,7 +237,8 @@
             justify-content: space-between;
             padding: 10px 15px;
             background-color: var(--card-bg);
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1极
+            px solid var(--border);
             font-size: 12px;
             color: var(--muted);
         }
@@ -241,6 +247,7 @@
             display: flex;
             align-items: center;
             gap: 5px;
+极
         }
         
         .status-dot {
@@ -308,7 +315,8 @@
         /* Filtres */
         .filters {
             padding: 15px;
-            background-color: var(--card-bg);
+            background-color: var(--card极
+            -bg);
             border-bottom: 1px solid var(--border);
             display: flex;
             flex-wrap: wrap;
@@ -392,6 +400,7 @@
         .close-settings {
             background: none;
             border: none;
+           极
             color: var(--text);
             font-size: 20px;
             cursor: pointer;
@@ -446,6 +455,33 @@
             border-bottom: 1px solid var(--border);
         }
         
+        /* Sélecteur de voix */
+        .voice-selector {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            margin-bottom: 15px;
+        }
+        
+        .voice-test-btn {
+            background-color: var(--blue);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        
+        .voice-test-btn:hover {
+            background-color: #3d8be0;
+        }
+        
         /* Responsive */
         @media (max-width: 480px) {
             .controls, .filters {
@@ -472,7 +508,8 @@
     <!-- Barre de statut -->
     <div class="status-bar">
         <div class="status-item">
-            <div class="status-dot"></div>
+            <div class极
+            ="status-dot"></div>
             <span id="status-text">En attente de géolocalisation...</span>
         </div>
         <div class="status-item">
@@ -493,7 +530,8 @@
     <div class="controls">
         <button class="toggle-btn active" id="toggle-radars">
             <div class="dot"></div>
-            <span>Radars</span>
+            <极
+            span>Radars</span>
         </button>
         <button class="toggle-btn" id="toggle-voice">
             <div class="dot"></div>
@@ -507,9 +545,11 @@
     
     <!-- Filtres -->
     <div class="filters">
-        <button class="filter-btn active" data-type="all">Tous</button>
+        <button class="filter-btn active极
+        " data-type="all">Tous</button>
         <button class="filter-btn" data-type="fixed">Fixes</button>
-        <button class="filter-btn" data-type="redlight">Feux rouges</button>
+        <极
+        button class="filter-btn" data-type="redlight">Feux rouges</button>
         <button class="filter-btn" data-type="section">Tronçons</button>
         <button class="filter-btn" data-type="mobile">Mobiles</button>
     </div>
@@ -520,7 +560,8 @@
         <div id="alerts-list">
             <div class="loading">
                 <div class="spinner"></div>
-                <p>Chargement des radars...</p>
+                <p>Chargement des radars...</极
+                p>
             </div>
         </div>
         
@@ -546,7 +587,8 @@
         <div class="settings-header">
             <h2 class="settings-title">Configuration des alertes</h2>
             <button class="close-settings" id="close-settings">
-                <i class="fas fa-times"></i>
+                <i class="fas fa-times"></极
+                i>
             </button>
         </div>
         
@@ -582,7 +624,8 @@
                     <span class="distance-name">Radars mobiles</span>
                     <span class="distance-value" id="value-mobile">500 m</span>
                 </div>
-                <input type="range" min="100" max="5000" value="500" class="distance-slider" data-type="mobile">
+                <input type="range" min="100" max="500极
+                0" value="500" class="distance-slider" data-type="mobile">
             </div>
         </div>
         
@@ -596,6 +639,23 @@
                 </div>
                 <input type="range" min="50" max="1000" value="300" class="distance-slider" id="voice-distance">
             </div>
+            
+            <div class="distance-control">
+                <div class="distance-label">
+                    <span class="distance-name">Voix française</span>
+                </div>
+                <select class="voice-selector" id="voice-selector">
+                    <option value="auto">Détection automatique</option>
+                    <option value="thomas">Thomas (masculin)</option>
+                    <option value="amélie">Amélie (féminin)</option>
+                    <option value="michelle">Michelle (féminin)</option>
+                    <option value="antoine">Antoine (masculin)</option>
+                </select>
+            </div>
+            
+            <button class="voice-test-btn" id="voice-test-btn">
+                <i class="fas fa-volume-up"></i> Tester la voix
+            </button>
         </div>
         
         <button class="action-btn" id="save-settings">
@@ -634,6 +694,9 @@
         // Distance d'alerte vocale
         let voiceAlertDistance = 300;
         
+        // Voix sélectionnée
+        let selectedVoice = 'auto';
+        
         // Types de radars avec icônes
         const radarTypes = {
             'fixed': { icon: '🚨', name: 'Radar fixe', color: '#cc1a1f' },
@@ -648,7 +711,8 @@
             // Configuration des boutons
             document.getElementById('toggle-radars').addEventListener('click', toggleRadars);
             document.getElementById('toggle-voice').addEventListener('click', toggleVoiceAlerts);
-            document.getElementById('toggle-updates').addEventListener('click', toggleAutoUpdates);
+            document.getElementById('toggle-updates').addEventListener('click', toggle极
+            AutoUpdates);
             document.getElementById('locate-btn').addEventListener('click', locateUser);
             
             // Configuration des filtres
@@ -665,6 +729,7 @@
             document.getElementById('settings-btn').addEventListener('click', openSettings);
             document.getElementById('close-settings').addEventListener('click', closeSettings);
             document.getElementById('save-settings').addEventListener('click', saveSettings);
+            document.getElementById('voice-test-btn').addEventListener('click', testVoice);
             
             // Configuration des sliders de distance
             document.querySelectorAll('.distance-slider').forEach(slider => {
@@ -680,6 +745,11 @@
                         document.getElementById('value-voice').textContent = `${value} m`;
                     }
                 });
+            });
+            
+            // Configuration du sélecteur de voix
+            document.getElementById('voice-selector').addEventListener('change', function() {
+                selectedVoice = this.value;
             });
             
             // Charger les paramètres sauvegardés
@@ -726,6 +796,12 @@
                     document.getElementById('voice-distance').value = voiceAlertDistance;
                     document.getElementById('value-voice').textContent = `${voiceAlertDistance} m`;
                 }
+                
+                // Appliquer la voix sélectionnée
+                if (settings.selectedVoice) {
+                    selectedVoice = settings.selectedVoice;
+                    document.getElementById('voice-selector').value = selectedVoice;
+                }
             }
         }
         
@@ -739,6 +815,59 @@
             document.getElementById('settings-panel').classList.remove('open');
         }
         
+        // Tester la voix sélectionnée
+        function testVoice() {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(
+                    "Ceci est un test de l'alerte vocale pour les radars"
+                );
+                
+                // Configurer la voix en fonction de la sélection
+                configureVoice(utterance);
+                
+                utterance.lang = 'fr-FR';
+                speechSynthesis.speak(utterance);
+            } else {
+                updateStatus("Synthèse vocale non supportée");
+            }
+        }
+        
+        // Configurer la voix en fonction de la sélection
+        function configureVoice(utterance) {
+            if (selectedVoice === 'auto') {
+                // Laisser le navigateur choisir la voix par défaut
+                return;
+            }
+            
+            // Trouver la voix correspondante
+            const voices = speechSynthesis.getVoices();
+            let foundVoice = null;
+            
+            // Recherche selon le type de voix sélectionné
+            for (const voice of voices) {
+                if (voice.lang.startsWith('fr')) {
+                    if (selectedVoice === 'thomas' && voice.name.toLowerCase().includes('thomas')) {
+                        foundVoice = voice;
+                        break;
+                    } else if (selectedVoice === 'amélie' && voice.name.toLowerCase().includes('amélie')) {
+                        foundVoice = voice;
+                        break;
+                    } else if (selectedVoice === 'michelle' && voice.name.toLowerCase().includes('michelle')) {
+                        foundVoice = voice;
+                        break;
+                    } else if (selectedVoice === 'antoine' && voice.name.toLowerCase().includes('antoine')) {
+                        foundVoice = voice;
+                        break;
+                    }
+                }
+            }
+            
+            // Si une voix spécifique est trouvée, l'utiliser
+            if (foundVoice) {
+                utterance.voice = foundVoice;
+            }
+        }
+        
         // Sauvegarder les paramètres
         function saveSettings() {
             // Mettre à jour les distances d'alerte depuis les sliders
@@ -750,10 +879,14 @@
             // Mettre à jour la distance d'alerte vocale
             voiceAlertDistance = parseInt(document.getElementById('voice-distance').value);
             
+            // Mettre à jour la voix sélectionnée
+            selectedVoice = document.getElementById('voice-selector').value;
+            
             // Sauvegarder dans le localStorage
             const settings = {
                 alertDistances: alertDistances,
-                voiceAlertDistance: voiceAlertDistance
+                voiceAlertDistance: voiceAlertDistance,
+                selectedVoice: selectedVoice
             };
             
             localStorage.setItem('teslaRadarSettings', JSON.stringify(settings));
@@ -801,7 +934,8 @@
         }
         
         // Traitement des données des radars
-        function processRadarData(data) {
+        function processRadar极
+        Data(data) {
             if (!data || !data.features || data.features.length === 0) {
                 showError("Aucune donnée radar valide");
                 return;
@@ -843,13 +977,15 @@
         
         // Chargement de radars de démonstration
         function loadDemoRadars() {
-            allRadars = [];
+            all极
+            Radars = [];
             
             // Générer des radars factices autour de Paris
             for (let i = 0; i < 50; i++) {
                 // Position aléatoire autour de Paris (±0.5 degré)
                 const lat = 48.8566 + (Math.random() - 0.5);
-                const lng = 2.3522 + (Math.random() - 0.5);
+                const lng = 2.3522 + (极
+                Math.random() - 0.5);
                 
                 const types = ['fixed', 'fixed', 'fixed', 'redlight', 'section', 'mobile'];
                 const type = types[Math.floor(Math.random() * types.length)];
@@ -901,7 +1037,8 @@
                     console.error("Erreur de géolocalisation:", error);
                     
                     switch(error.code) {
-                        case error.PERMISSION_DENIED:
+                        case error.PERMISSION极
+                        _DENIED:
                             showError("Autorisation de localisation refusée");
                             break;
                         case error.POSITION_UNAVAILABLE:
@@ -989,7 +1126,8 @@
             
             let html = '';
             
-            filteredRadars.forEach((radar, index) => {
+            filteredRadars.forEach((radar, index极
+            ) => {
                 if (index >= 10) return; // Limiter à 10 résultats
                 
                 const radarInfo = radarTypes[radar.type] || radarTypes.default;
@@ -1019,9 +1157,11 @@
                                 </div>
                             ` : ''}
                             <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${proximity}%"></div>
+                                <div class="progress-f极
+                                ill" style="width: ${proximity}%"></div>
                             </div>
-                        </div>
+                        </极
+                        div>
                     </div>
                 `;
                 
@@ -1039,9 +1179,11 @@
         function calculateDistance(lat1, lon1, lat2, lon2) {
             const R = 6371000; // Rayon de la Terre en mètres
             const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.P极
+            I / 180;
             const a = 
-                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.sin(dLat/2) * Math.sin(d极
+                Lat/2) +
                 Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
                 Math.sin(dLon/2) * Math.sin(dLon/2);
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
@@ -1054,6 +1196,10 @@
                 const utterance = new SpeechSynthesisUtterance(
                     `Attention, ${radarTypes[radar.type].name} à ${distanceText}`
                 );
+                
+                // Configurer la voix
+                configureVoice(utterance);
+                
                 utterance.lang = 'fr-FR';
                 speechSynthesis.speak(utterance);
             }
@@ -1066,7 +1212,8 @@
         
         // Mettre à jour le statut de la batterie
         function updateBatteryStatus() {
-            if ('getBattery' in navigator) {
+            if ('get极
+            Battery' in navigator) {
                 navigator.getBattery().then(battery => {
                     const level = Math.round(battery.level * 100);
                     document.getElementById('battery-status').textContent = `🔋 ${level}%`;
@@ -1155,7 +1302,8 @@
             userLocation = {
                 lat: 48.8566,
                 lng: 2.3522,
-                accuracy: 100
+                accuracy极
+                : 100
             };
             
             updateStatus("Mode simulation");
