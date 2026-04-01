@@ -7,7 +7,1312 @@
   <link href="https://unpkg.com/maplibre-gl@5.20.1/dist/maplibre-gl.css" rel="stylesheet"/>
   <script src="https://unpkg.com/maplibre-gl@5.20.1/dist/maplibre-gl.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="style.css"/>
+  <style>
+    :root {
+      --bg: #171a21;
+      --sidebar: #212833;
+      --card: #2c3442;
+      --text: #ececec;
+      --text-muted: #8c95a6;
+      --blue: #3e6ae1;
+      --green: #34a853;
+      --red: #ea3b2d;
+      --orange: #fa8c1e;
+      --border: #3e434d;
+      --hover: #2f3847;
+      --map-overlay: rgba(23, 26, 33, 0.85);
+    }
+
+    .light-theme {
+      --bg: #f5f7fa;
+      --sidebar: #ffffff;
+      --card: #f0f3f8;
+      --text: #2e384d;
+      --text-muted: #7b879d;
+      --blue: #3e6ae1;
+      --green: #34a853;
+      --red: #ea3b2d;
+      --orange: #fa8c1e;
+      --border: #e1e6ef;
+      --hover: #e9edf5;
+      --map-overlay: rgba(245, 247, 250, 0.92);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    #app {
+      display: flex;
+      height: 100vh;
+      position: relative;
+    }
+
+    /* Sidebar */
+    #sidebar {
+      width: 380px;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+      height: 100%;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+    }
+
+    #header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .logo-t {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--blue);
+      margin-right: 8px;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .logo-text {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      color: var(--text);
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .logo-tag {
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+
+    #tabs {
+      display: flex;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab {
+      padding: 14px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      opacity: 0.7;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+
+    .tab.active {
+      opacity: 1;
+      border-bottom: 2px solid var(--blue);
+    }
+
+    .tab:hover {
+      opacity: 1;
+      background: var(--hover);
+    }
+
+    .panel {
+      display: none;
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .panel.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    /* Model Selector */
+    #model-selector {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+    }
+
+    .ms-header {
+      margin-bottom: 16px;
+    }
+
+    .section-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .model-families {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .model-family {
+      padding: 10px 16px;
+      background: var(--hover);
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+
+    .model-family.active {
+      background: var(--blue);
+      color: white;
+      border-color: var(--blue);
+    }
+
+    #variant-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .variant {
+      padding: 12px 16px;
+      background: var(--hover);
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .variant.active {
+      background: var(--blue);
+      color: white;
+    }
+
+    .variant-range {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .variant.active .variant-range {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Battery */
+    #battery-block {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+    }
+
+    .bat-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .bat-pct {
+      font-size: 24px;
+      font-weight: 600;
+      font-family: 'Orbitron', sans-serif;
+      color: var(--blue);
+    }
+
+    .bat-right {
+      text-align: right;
+    }
+
+    .bat-km-val {
+      font-size: 14px;
+    }
+
+    .bat-track {
+      height: 6px;
+      background: var(--hover);
+      border-radius: 3px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .bat-fill {
+      height: 100%;
+      background: var(--blue);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    .bat-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .bat-row label {
+      font-size: 14px;
+      color: var(--text-muted);
+      min-width: 100px;
+    }
+
+    #bat-slider {
+      flex: 1;
+      height: 5px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--hover);
+      outline: none;
+      border-radius: 3px;
+    }
+
+    #bat-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--blue);
+      cursor: pointer;
+      border: 2px solid var(--sidebar);
+    }
+
+    /* Options */
+    #options-row {
+      display: flex;
+      background: var(--card);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      align-items: center;
+      border: 1px solid var(--border);
+    }
+
+    .opt-block {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .opt-lbl {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .opt-sep {
+      width: 1px;
+      height: 30px;
+      background: var(--border);
+      margin: 0 16px;
+    }
+
+    #charge-grp {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+
+    #charge-target {
+      flex: 1;
+      height: 5px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--hover);
+      outline: none;
+      border-radius: 3px;
+    }
+
+    #charge-target::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--green);
+      cursor: pointer;
+      border: 2px solid var(--sidebar);
+    }
+
+    #charge-target-val {
+      font-size: 14px;
+      font-weight: 500;
+      min-width: 30px;
+      text-align: right;
+      color: var(--green);
+    }
+
+    /* Toggle Switch */
+    .toggle {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .tslider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--hover);
+      transition: .4s;
+      border-radius: 24px;
+    }
+
+    .tslider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .tslider {
+      background-color: var(--blue);
+    }
+
+    input:checked + .tslider:before {
+      transform: translateX(26px);
+    }
+
+    /* Route Form */
+    #route-form {
+      margin-bottom: 20px;
+    }
+
+    .input-wrap {
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .input-wrap input {
+      width: 100%;
+      padding: 14px 14px 14px 38px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+    }
+
+    .input-wrap input:focus {
+      border-color: var(--blue);
+    }
+
+    .input-wrap input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .dot {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      top: 50%;
+      transform: translateY(-50%);
+      left: 16px;
+    }
+
+    .dot.start {
+      background: var(--green);
+    }
+
+    .dot.end {
+      background: var(--red);
+    }
+
+    .v-line {
+      height: 12px;
+      width: 1px;
+      background: var(--border);
+      margin-left: 20px;
+      margin-bottom: 12px;
+    }
+
+    #go-btn, #reset-btn, #guidance-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 8px;
+    }
+
+    #go-btn {
+      background: var(--blue);
+      color: white;
+      box-shadow: 0 4px 12px rgba(62, 106, 225, 0.3);
+    }
+
+    #go-btn:hover {
+      background: #2c5ac7;
+      transform: translateY(-1px);
+    }
+
+    #reset-btn {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    #reset-btn:hover {
+      background: var(--hover);
+      color: var(--text);
+    }
+
+    #guidance-btn {
+      background: var(--green);
+      color: white;
+      display: none;
+    }
+
+    #guidance-btn:hover {
+      background: #2c8e46;
+      transform: translateY(-1px);
+    }
+
+    /* Suggestions */
+    .suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      z-index: 100;
+      max-height: 200px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .suggestion {
+      padding: 12px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .suggestion:last-child {
+      border-bottom: none;
+    }
+
+    .suggestion:hover {
+      background: var(--hover);
+    }
+
+    /* Route Summary */
+    #route-summary {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+    }
+
+    .sum-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .scard {
+      background: var(--hover);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .scard-val {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .scard-val.plain {
+      color: var(--text);
+    }
+
+    .scard-val.blue {
+      color: var(--blue);
+    }
+
+    .scard-val.ok {
+      color: var(--green);
+    }
+
+    .scard-lbl {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .sum-detail {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* Timeline */
+    #timeline {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #hint {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .hint-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+
+    #tl-content {
+      width: 100%;
+    }
+
+    .tl-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--blue);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #tl-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .tl-item {
+      display: flex;
+      gap: 12px;
+      padding: 12px;
+      background: var(--hover);
+      border-radius: 8px;
+      position: relative;
+    }
+
+    .tl-item:before {
+      content: "";
+      position: absolute;
+      left: 29px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .tl-item:first-child:before {
+      top: 50%;
+    }
+
+    .tl-item:last-child:before {
+      bottom: 50%;
+    }
+
+    .tl-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--blue);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 12px;
+      z-index: 1;
+      flex-shrink: 0;
+    }
+
+    .tl-detail {
+      flex: 1;
+    }
+
+    .tl-name {
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .tl-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Map Area */
+    #map-area {
+      flex: 1;
+      position: relative;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Sidebar Toggle */
+    #sidebar-toggle {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 100;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--map-overlay);
+      border: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    #sidebar-toggle .bar {
+      width: 18px;
+      height: 2px;
+      background: var(--text);
+      position: relative;
+      transition: all 0.3s;
+    }
+
+    #sidebar-toggle .bar:before,
+    #sidebar-toggle .bar:after {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 2px;
+      background: var(--text);
+      transition: all 0.3s;
+    }
+
+    #sidebar-toggle .bar:before {
+      transform: translateY(-5px);
+    }
+
+    #sidebar-toggle .bar:after {
+      transform: translateY(5px);
+    }
+
+    /* Top Pill */
+    #top-pill {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--map-overlay);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+      z-index: 90;
+      backdrop-filter: blur(4px);
+    }
+
+    .pill-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .pill-val {
+      font-weight: 500;
+    }
+
+    .pill-sep {
+      color: var(--text-muted);
+    }
+
+    .pill-speed {
+      display: none;
+    }
+
+    #pill-gps-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--green);
+      font-weight: 500;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s infinite;
+    }
+
+    /* Buttons */
+    #sc-toggle-btn, #radar-toggle-btn {
+      position: absolute;
+      right: 20px;
+      background: var(--map-overlay);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      z-index: 90;
+      backdrop-filter: blur(4px);
+    }
+
+    #sc-toggle-btn {
+      top: 80px;
+    }
+
+    #radar-toggle-btn {
+      top: 130px;
+    }
+
+    .dot-ind {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--blue);
+    }
+
+    .dot-ind-r {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--orange);
+    }
+
+    /* Locate Button */
+    #locate-btn, #gps-live-btn {
+      position: absolute;
+      bottom: 100px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--map-overlay);
+      border: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      color: var(--text);
+      z-index: 90;
+      font-size: 18px;
+    }
+
+    #locate-btn {
+      left: 20px;
+    }
+
+    #gps-live-btn {
+      left: 70px;
+    }
+
+    /* Style Toggle */
+    #style-toggle {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      display: flex;
+      gap: 8px;
+      background: var(--map-overlay);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px;
+      z-index: 90;
+      backdrop-filter: blur(4px);
+    }
+
+    .map-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .map-btn.active {
+      background: var(--blue);
+      color: white;
+    }
+
+    /* Guidance Bar */
+    #guidance-bar {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 600px;
+      background: var(--map-overlay);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 100;
+      backdrop-filter: blur(4px);
+      display: none;
+    }
+
+    #gb-maneuver {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 60px;
+    }
+
+    #gb-arrow-svg {
+      width: 50px;
+      height: 50px;
+    }
+
+    #gb-dist-big {
+      font-size: 24px;
+      font-weight: 600;
+      font-family: 'Orbitron', sans-serif;
+      margin-top: 4px;
+    }
+
+    #gb-dist-unit {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    #gb-instruction {
+      flex: 1;
+    }
+
+    #gb-step-txt {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    #gb-road-name {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    #gb-step-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    #gb-eta {
+      text-align: right;
+      min-width: 80px;
+    }
+
+    #gb-eta-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    #gb-eta-time {
+      font-size: 18px;
+      font-weight: 600;
+      font-family: 'Orbitron', sans-serif;
+      margin-bottom: 4px;
+    }
+
+    #gb-rem-dist {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    #gb-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: var(--blue);
+      border-radius: 0 0 12px 12px;
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+
+    #gb-stop {
+      position: absolute;
+      top: -40px;
+      right: 0;
+      background: var(--red);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* Toast */
+    #deviation-toast {
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--orange);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 100;
+      display: none;
+      box-shadow: 0 4px 12px rgba(250, 140, 30, 0.3);
+      animation: slideIn 0.3s ease;
+    }
+
+    /* Radar Alert */
+    #radar-alert {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 300px;
+      background: var(--map-overlay);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      z-index: 100;
+      display: none;
+      backdrop-filter: blur(4px);
+    }
+
+    #ra-stripe {
+      height: 4px;
+      background: var(--orange);
+      width: 100%;
+    }
+
+    #ra-body {
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    #ra-icon {
+      font-size: 24px;
+    }
+
+    #ra-info {
+      flex: 1;
+    }
+
+    #ra-type {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    #ra-name {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    #ra-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    #ra-dist-wrap {
+      text-align: center;
+      min-width: 50px;
+    }
+
+    #ra-dist-val {
+      font-size: 20px;
+      font-weight: 600;
+      font-family: 'Orbitron', sans-serif;
+      color: var(--orange);
+    }
+
+    #ra-dist-unit {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    #ra-speed-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #ra-speed-circle {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: 3px solid var(--orange);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #ra-speed-val {
+      font-size: 16px;
+      font-weight: 600;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    #ra-speed-unit {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    #ra-prox-bar {
+      height: 4px;
+      background: var(--hover);
+      width: 100%;
+    }
+
+    #ra-prox-fill {
+      height: 100%;
+      background: var(--orange);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Wakelock Badge */
+    #wakelock-badge {
+      position: absolute;
+      bottom: 160px;
+      left: 20px;
+      background: var(--map-overlay);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 90;
+      display: none;
+      backdrop-filter: blur(4px);
+    }
+
+    .wl-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s infinite;
+    }
+
+    /* Loading Overlay */
+    #loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      transition: opacity 0.5s ease;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(62, 106, 225, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--blue);
+      animation: spin 1s ease-in-out infinite;
+      margin-bottom: 20px;
+    }
+
+    .loading-text {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      letter-spacing: 2px;
+      color: var(--text);
+    }
+
+    /* Theme Toggle */
+    #theme-toggle {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--map-overlay);
+      border: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 90;
+      font-size: 18px;
+      backdrop-filter: blur(4px);
+    }
+
+    /* Connection Status */
+    #connection-status {
+      position: absolute;
+      top: 20px;
+      right: 70px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--map-overlay);
+      border: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 90;
+      font-size: 18px;
+      backdrop-filter: blur(4px);
+      color: var(--green);
+    }
+
+    #connection-status.offline {
+      color: var(--text-muted);
+    }
+
+    #connection-status .conn-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      position: relative;
+    }
+
+    #connection-status:not(.offline) .conn-dot {
+      animation: pulse 2s infinite;
+    }
+
+    /* Animations */
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from { 
+        opacity: 0;
+        transform: translate(-50%, -20px);
+      }
+      to { 
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      #sidebar {
+        width: 340px;
+      }
+      
+      .panel {
+        padding: 20px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      #sidebar {
+        position: absolute;
+        left: -380px;
+        transition: left 0.3s ease;
+      }
+      
+      #sidebar.active {
+        left: 0;
+      }
+      
+      #map-area {
+        width: 100%;
+      }
+      
+      #top-pill {
+        font-size: 11px;
+        padding: 6px 12px;
+      }
+    }
+  </style>
 </head>
 <body>
 <div id="app">
@@ -15,6 +1320,14 @@
   <button id="sidebar-toggle" onclick="toggleSidebar()">
     <span class="bar"></span>
   </button>
+
+  <!-- Theme Toggle -->
+  <div id="theme-toggle" onclick="toggleTheme()">🌙</div>
+  
+  <!-- Connection Status -->
+  <div id="connection-status" title="Connectivité en temps réel">
+    <div class="conn-dot"></div>
+  </div>
 
   <!-- ── SIDEBAR ── -->
   <div id="sidebar">
@@ -273,6 +1586,313 @@
   <div class="loading-text" id="loading-text">CALCUL EN COURS…</div>
 </div>
 
-<script src="app.js"></script>
+<script>
+  // Variables globales
+  let map, currentStyle = 'bright', currentTheme = 'dark';
+  let isOnline = true;
+  
+  // Initialisation
+  document.addEventListener('DOMContentLoaded', function() {
+    initApp();
+    initMap();
+    loadThemePreference();
+    simulateConnectionStatus();
+  });
+  
+  // Initialisation de l'application
+  function initApp() {
+    // Initialiser les modèles Tesla
+    initModelSelector();
+    
+    // Mettre à jour l'interface en fonction du thème
+    updateThemeUI();
+  }
+  
+  // Initialisation de la carte
+  function initMap() {
+    // Style de carte par défaut
+    const mapStyle = 'https://api.maptiler.com/maps/streets/style.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL';
+    
+    // Création de la carte
+    map = new maplibregl.Map({
+      container: 'map',
+      style: mapStyle,
+      center: [2.3522, 48.8566], // Paris
+      zoom: 5,
+      attributionControl: false
+    });
+    
+    // Ajouter les contrôles de navigation
+    map.addControl(new maplibregl.NavigationControl(), 'top-right');
+    
+    // Simulation de chargement
+    map.on('load', function() {
+      setTimeout(() => {
+        document.getElementById('loading').style.opacity = '0';
+        setTimeout(() => {
+          document.getElementById('loading').style.display = 'none';
+        }, 500);
+      }, 1500);
+    });
+  }
+  
+  // Basculer entre thème clair/sombre
+  function toggleTheme() {
+    const body = document.body;
+    const themeToggle = document.getElementById('theme-toggle');
+    
+    if (currentTheme === 'dark') {
+      body.classList.add('light-theme');
+      currentTheme = 'light';
+      themeToggle.innerHTML = '☀️';
+      localStorage.setItem('theme', 'light');
+    } else {
+      body.classList.remove('light-theme');
+      currentTheme = 'dark';
+      themeToggle.innerHTML = '🌙';
+      localStorage.setItem('theme', 'dark');
+    }
+    
+    // Mettre à jour les éléments d'interface spécifiques
+    updateThemeUI();
+  }
+  
+  // Charger la préférence de thème
+  function loadThemePreference() {
+    const savedTheme = localStorage.getItem('theme');
+    const themeToggle = document.getElementById('theme-toggle');
+    
+    if (savedTheme === 'light') {
+      document.body.classList.add('light-theme');
+      currentTheme = 'light';
+      themeToggle.innerHTML = '☀️';
+    } else {
+      document.body.classList.remove('light-theme');
+      currentTheme = 'dark';
+      themeToggle.innerHTML = '🌙';
+    }
+  }
+  
+  // Mettre à jour l'interface en fonction du thème
+  function updateThemeUI() {
+    // Mettre à jour la carte si nécessaire
+    if (map) {
+      if (currentTheme === 'dark') {
+        setStyle('dark');
+      } else {
+        setStyle('bright');
+      }
+    }
+  }
+  
+  // Simuler le statut de connexion
+  function simulateConnectionStatus() {
+    const connectionStatus = document.getElementById('connection-status');
+    
+    setInterval(() => {
+      // Simulation aléatoire de statut de connexion
+      if (Math.random() > 0.1) { // 90% de temps en ligne
+        if (!isOnline) {
+          isOnline = true;
+          connectionStatus.classList.remove('offline');
+          showToast('Connexion rétablie', 'success');
+        }
+      } else {
+        if (isOnline) {
+          isOnline = false;
+          connectionStatus.classList.add('offline');
+          showToast('Connexion perdue', 'warning');
+        }
+      }
+    }, 5000);
+  }
+  
+  // Afficher une notification toast
+  function showToast(message, type = 'info') {
+    // Créer l'élément toast s'il n'existe pas
+    let toast = document.getElementById('custom-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'custom-toast';
+      toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+      `;
+      document.body.appendChild(toast);
+    }
+    
+    // Définir la couleur en fonction du type
+    const colors = {
+      info: { bg: '#3e6ae1', color: 'white' },
+      success: { bg: '#34a853', color: 'white' },
+      warning: { bg: '#fa8c1e', color: 'white' },
+      error: { bg: '#ea3b2d', color: 'white' }
+    };
+    
+    toast.style.background = colors[type].bg;
+    toast.style.color = colors[type].color;
+    toast.innerHTML = message;
+    
+    // Afficher le toast
+    toast.style.transform = 'translateX(0)';
+    
+    // Cacher après 3 secondes
+    setTimeout(() => {
+      toast.style.transform = 'translateX(100%)';
+    }, 3000);
+  }
+  
+  // Fonctions existantes (simulées)
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('active');
+  }
+  
+  function switchTab(tabName) {
+    console.log('Switch to tab:', tabName);
+    // Implémentation réelle ici
+  }
+  
+  function initModelSelector() {
+    // Simulation de l'initialisation du sélecteur de modèle
+    console.log('Model selector initialized');
+  }
+  
+  function updateBattery(value) {
+    document.getElementById('bat-pct').textContent = value + '%';
+    document.getElementById('bat-fill').style.width = value + '%';
+    document.getElementById('pill-batt').textContent = value + '%';
+  }
+  
+  function updateChargeTarget(value) {
+    document.getElementById('charge-target-val').textContent = value + '%';
+  }
+  
+  function calcRoute() {
+    // Simulation de calcul d'itinéraire
+    document.getElementById('loading').style.display = 'flex';
+    document.getElementById('loading-text').textContent = 'CALCUL DE L\'ITINÉRAIRE...';
+    
+    setTimeout(() => {
+      document.getElementById('loading').style.opacity = '0';
+      setTimeout(() => {
+        document.getElementById('loading').style.display = 'none';
+      }, 500);
+      
+      // Afficher les résultats simulés
+      document.getElementById('s-dist').textContent = '342 km';
+      document.getElementById('s-time').textContent = '3h45';
+      document.getElementById('s-stops').textContent = '2';
+      document.getElementById('s-batt').textContent = '15%';
+      
+      document.getElementById('guidance-btn').style.display = 'block';
+      
+      showToast('Itinéraire calculé avec succès', 'success');
+    }, 2000);
+  }
+  
+  function startGuidance() {
+    document.getElementById('guidance-bar').style.display = 'flex';
+    document.getElementById('pill-speed').style.display = 'flex';
+    document.getElementById('pill-sep-speed').style.display = 'inline';
+    document.getElementById('pill-hdg-wrap').style.display = 'flex';
+    document.getElementById('pill-sep-hdg').style.display = 'inline';
+    
+    // Simuler la mise à jour des données de guidage
+    simulateGuidance();
+  }
+  
+  function simulateGuidance() {
+    const instructions = [
+      { distance: 200, instruction: "Tournez à gauche", road: "Avenue des Champs-Élysées" },
+      { distance: 500, instruction: "Prenez la sortie", road: "Périphérique Est" },
+      { distance: 1000, instruction: "Continuez tout droit", road: "A6" },
+      { distance: 300, instruction: "Sortie à droite", road: "N104" }
+    ];
+    
+    let index = 0;
+    
+    const updateGuidance = () => {
+      if (index >= instructions.length) index = 0;
+      
+      const instruction = instructions[index];
+      document.getElementById('gb-dist-big').textContent = instruction.distance;
+      document.getElementById('gb-step-txt').textContent = instruction.instruction;
+      document.getElementById('gb-road-name').textContent = instruction.road;
+      document.getElementById('gb-eta-time').textContent = '10:45';
+      document.getElementById('gb-rem-dist').textContent = '142 km';
+      
+      // Simuler la vitesse et la direction
+      document.getElementById('pill-spd').textContent = Math.floor(Math.random() * 50 + 70);
+      document.getElementById('pill-hdg').textContent = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.floor(Math.random() * 8)];
+      
+      index++;
+    };
+    
+    updateGuidance();
+    setInterval(updateGuidance, 5000);
+  }
+  
+  function setStyle(style) {
+    currentStyle = style;
+    // Implémentation réelle du changement de style de carte
+    console.log('Map style changed to:', style);
+  }
+  
+  // Simuler d'autres fonctions nécessaires
+  function stopGuidance() {
+    document.getElementById('guidance-bar').style.display = 'none';
+  }
+  
+  function locateMe() {
+    showToast('Localisation en cours...', 'info');
+  }
+  
+  function toggleGpsTracking() {
+    const badge = document.getElementById('wakelock-badge');
+    badge.style.display = badge.style.display === 'none' ? 'flex' : 'none';
+  }
+  
+  function toggleScLayer() {
+    showToast('Superchargeurs affichés', 'info');
+  }
+  
+  function toggleRadarLayer() {
+    const radarAlert = document.getElementById('radar-alert');
+    radarAlert.style.display = radarAlert.style.display === 'none' ? 'block' : 'none';
+    
+    if (radarAlert.style.display === 'block') {
+      // Simuler la détection de radar
+      setTimeout(() => {
+        document.getElementById('ra-name').textContent = 'Radar fixe';
+        document.getElementById('ra-sub').textContent = 'Limitée à 90 km/h';
+        document.getElementById('ra-dist-val').textContent = '350';
+        
+        // Animation de proximité
+        let width = 100;
+        const interval = setInterval(() => {
+          width -= 2;
+          document.getElementById('ra-prox-fill').style.width = width + '%';
+          
+          if (width <= 0) {
+            clearInterval(interval);
+            radarAlert.style.display = 'none';
+          }
+        }, 100);
+      }, 1000);
+    }
+  }
+</script>
 </body>
 </html>
