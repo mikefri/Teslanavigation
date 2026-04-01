@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fonctionnement des Alertes Radar</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    
+    header {
+      background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      font-size: 1.2rem;
+      opacity: 0.8;
+    }
+    
+    .content {
+      padding: 30px;
+    }
+    
+    .section {
+      margin-bottom: 40px;
+    }
+    
+    h2 {
+      color: #16213e;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e94560;
+    }
+    
+    .workflow {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin: 30px 0;
+    }
+    
+    .step {
+      flex: 0 0 30%;
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      border-left: 4px solid #e94560;
+      transition: transform 0.3s;
+    }
+    
+    .step:hover {
+      transform: translateY(-5px);
+    }
+    
+    .step-number {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      background: #e94560;
+      color: white;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 30px;
+      margin-right: 10px;
+    }
+    
+    .radar-types {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+    
+    .radar-type {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .radar-icon {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    
+    .demo {
+      background: #1a1a2e;
+      color: white;
+      padding: 30px;
+      border-radius: 10px;
+      margin: 30px 0;
+    }
+    
+    .alert {
+      background: rgba(233, 69, 96, 0.2);
+      border: 1px solid #e94560;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+      display: flex;
+      align-items: center;
+    }
+    
+    .alert-icon {
+      font-size: 2.5rem;
+      margin-right: 20px;
+    }
+    
+    .alert-content {
+      flex: 1;
+    }
+    
+    .progress-bar {
+      height: 10px;
+      background: #ddd;
+      border-radius: 5px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #0f9b0f 0%, #e94560 100%);
+      width: 30%;
+    }
+    
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #16213e;
+      color: white;
+    }
+    
+    @media (max-width: 768px) {
+      .step {
+        flex: 0 0 100%;
+      }
+      
+      .workflow {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Système d'Alerte Radar</h1>
+      <p class="subtitle">Comment fonctionnent les alertes radar dans l'application Tesla Navigation</p>
+    </header>
+    
+    <div class="content">
+      <div class="section">
+        <h2>Fonctionnement général</h2>
+        <p>Le système d'alerte radar utilise une combinaison de données en temps réel et de géolocalisation pour avertir le conducteur de la présence de radars sur son trajet.</p>
+        
+        <div class="workflow">
+          <div class="step">
+            <h3><span class="step-number">1</span>Collecte des données</h3>
+            <p>L'application charge une base de données de radars à partir de sources fiables (comme le projet MikeFri/Teslanavigation).</p>
+          </div>
+          
+          <div class="step">
+            <h3><span class="step-number">2</span>Géolocalisation</h3>
+            <p>Le GPS du véhicule suit la position en temps réel et la compare avec les emplacements des radars.</p>
+          </div>
+          
+          <div class="step">
+            <h3><span class="step-number">3</span>Détection de proximité</h3>
+            <p>L'application calcule la distance entre le véhicule et chaque radar pour déterminer si une alerte est nécessaire.</p>
+          </div>
+          
+          <div class="step">
+            <h3><span class="step-number">4</span>Alerte visuelle et sonore</h3>
+            <p>Quand un radar est détecté à proximité, une alerte s'affiche à l'écran et un signal sonore est émis.</p>
+          </div>
+          
+          <div class="step">
+            <h3><span class="step-number">5</span>Alertes vocales</h3>
+            <p>Pour les radars très proches, une alerte vocale décrit le type de radar et la distance.</p>
+          </div>
+          
+          <div class="step">
+            <h3><span class="step-number">6</span>Mise à jour en temps réel</h3>
+            <p>Le système se met à jour constamment en fonction de la position et de la vitesse du véhicule.</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="section">
+        <h2>Types de radars détectés</h2>
+        <p>Le système peut identifier plusieurs types de radars avec des alertes spécifiques pour chacun :</p>
+        
+        <div class="radar-types">
+          <div class="radar-type">
+            <div class="radar-icon">🚨</div>
+            <h3>Radar fixe</h3>
+            <p>Radars installés de manière permanente sur le bord des routes. Détection à 400m.</p>
+          </div>
+          
+          <div class="radar-type">
+            <div class="radar-icon">🚦</div>
+            <h3>Radar feu rouge</h3>
+            <p>Détecte les franchissements de feux rouges. Détection à 400m.</p>
+          </div>
+          
+          <div class="radar-type">
+            <div class="radar-icon">📏</div>
+            <h3>Radar de tronçon</h3>
+            <p>Mesure la vitesse moyenne sur une section de route. Détection à 600m sur autoroute.</p>
+          </div>
+          
+          <div class="radar-type">
+            <div class="radar-icon">🚐</div>
+            <h3>Radar mobile</h3>
+            <p>Radars mobiles ou embarqués dans des véhicules. Détection à 400m.</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="section">
+        <h2>Démonstration d'alerte</h2>
+        <p>Voici une simulation de l'alerte radar telle qu'elle apparaît dans l'application :</p>
+        
+        <div class="demo">
+          <h3>Alerte Radar Active</h3>
+          <div class="alert">
+            <div class="alert-icon">🚨</div>
+            <div class="alert-content">
+              <h3>Radar fixe détecté</h3>
+              <p>Limite de vitesse : 90 km/h</p>
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+              <p>Distance : 250 mètres</p>
+            </div>
+          </div>
+          
+          <p>En situation réelle, cette alerte serait accompagnée :</p>
+          <ul>
+            <li>D'un signal sonore (bip)</li>
+            <li>D'une alerte vocale "Attention, radar fixe, 250 mètres"</li>
+            <li>D'une indication sur la carte</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="section">
+        <h2>Personnalisation</h2>
+        <p>L'application permet de personnaliser les alertes radar :</p>
+        
+        <ul>
+          <li>Activation/désactivation des alertes sonores</li>
+          <li>Réglage de la distance d'alerte</li>
+          <li>Choix des types de radars à signaler</li>
+          <li>Ajustement du volume des alertes vocales</li>
+        </ul>
+      </div>
+    </div>
+    
+    <footer>
+      <p>Système d'alerte radar intégré à l'application Tesla Navigation</p>
+      <p>© 2023 Tesla Navigation System</p>
+    </footer>
+  </div>
+
+  <script>
+    // Simulation de la barre de progression
+    function animateProgressBar() {
+      const fill = document.querySelector('.progress-fill');
+      let width = 30;
+      const interval = setInterval(() => {
+        width -= 1;
+        fill.style.width = width + '%';
+        
+        if (width <= 5) {
+          clearInterval(interval);
+          setTimeout(() => {
+            fill.style.width = '30%';
+            setTimeout(animateProgressBar, 500);
+          }, 500);
+        }
+      }, 100);
+    }
+    
+    // Démarrer l'animation
+    document.addEventListener('DOMContentLoaded', animateProgressBar);
+  </script>
+</body>
+</html>
