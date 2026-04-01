@@ -563,6 +563,178 @@
             line-height:2;
         }
 
+        /* ── RADAR POPUP ─────────────────────────────── */
+        .radar-popup {
+            position: fixed;
+            bottom: -100%;
+            left: 0; right: 0;
+            z-index: 300;
+            padding: 0 14px 24px;
+            transition: bottom .4s cubic-bezier(.2,.9,.3,1);
+            pointer-events: none;
+        }
+        .radar-popup.visible {
+            bottom: 0;
+            pointer-events: all;
+        }
+
+        .popup-card {
+            border-radius: 20px;
+            padding: 22px 24px 20px;
+            border: 1px solid var(--popup-color, var(--red));
+            background: var(--bg);
+            box-shadow:
+                0 -4px 60px rgba(0,0,0,.8),
+                0 0 0 1px var(--popup-color, var(--red)),
+                inset 0 0 80px rgba(0,0,0,.3);
+            position: relative;
+            overflow: hidden;
+        }
+        /* big colored glow behind the card */
+        .popup-card::before {
+            content:'';
+            position:absolute;
+            top:-60px; left:-40px; right:-40px; bottom:-40px;
+            background: radial-gradient(ellipse at 50% 0%, var(--popup-color, var(--red)) 0%, transparent 65%);
+            opacity: .08;
+            pointer-events:none;
+        }
+
+        /* dismiss handle */
+        .popup-handle {
+            width:40px; height:4px;
+            background: rgba(255,255,255,.2);
+            border-radius:2px;
+            margin: 0 auto 18px;
+        }
+
+        /* top row: icon + type + dismiss btn */
+        .popup-top {
+            display:flex; align-items:center; gap:14px;
+            margin-bottom: 18px;
+        }
+        .popup-icon {
+            font-size: 40px;
+            line-height:1;
+            filter: drop-shadow(0 0 12px var(--popup-color, var(--red)));
+        }
+        .popup-type-block { flex:1; }
+        .popup-type-name {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--popup-color, var(--red));
+            line-height:1.1;
+        }
+        .popup-type-sub {
+            font-family: var(--mono);
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+        .popup-dismiss {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            border: 1px solid var(--border2);
+            background: var(--surface2);
+            color: var(--muted);
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer;
+            font-size:13px;
+            flex-shrink:0;
+            transition: all .2s;
+        }
+        .popup-dismiss:hover { color:var(--text); border-color:var(--text); }
+
+        /* center: BIG distance */
+        .popup-distance-wrap {
+            text-align:center;
+            margin-bottom: 18px;
+            padding: 14px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .popup-dist-label {
+            font-family: var(--mono);
+            font-size: 10px;
+            letter-spacing: 4px;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .popup-dist-num {
+            font-family: var(--mono);
+            font-size: 72px;
+            font-weight: 700;
+            line-height: 1;
+            color: var(--popup-color, var(--red));
+            letter-spacing: -2px;
+            text-shadow: 0 0 40px var(--popup-color, var(--red));
+            transition: color .3s;
+        }
+        .popup-dist-unit {
+            font-family: var(--mono);
+            font-size: 16px;
+            color: var(--muted);
+            letter-spacing: 3px;
+            margin-top: 2px;
+        }
+
+        /* bottom row: name + speed badge */
+        .popup-bottom {
+            display: flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            margin-bottom: 14px;
+        }
+        .popup-name {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--muted);
+            letter-spacing:.5px;
+            flex:1;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
+        }
+        .popup-speed {
+            font-family: var(--mono);
+            font-size: 20px;
+            font-weight: 700;
+            padding: 6px 16px;
+            border-radius: 8px;
+            border: 2px solid var(--popup-color, var(--red));
+            color: var(--popup-color, var(--red));
+            background: var(--red-dim);
+            white-space:nowrap;
+            flex-shrink:0;
+            text-shadow: 0 0 12px var(--popup-color, var(--red));
+        }
+        .popup-speed span {
+            font-size: 10px;
+            letter-spacing:1px;
+            display:block;
+            text-align:center;
+            opacity:.7;
+        }
+
+        /* progress bar */
+        .popup-bar {
+            height: 5px;
+            background: var(--border);
+            border-radius:3px;
+            overflow:hidden;
+        }
+        .popup-bar-fill {
+            height:100%;
+            border-radius:3px;
+            background: var(--popup-color, var(--red));
+            box-shadow: 0 0 10px var(--popup-color, var(--red));
+            transition: width .5s ease;
+        }
+
         /* ── HISTORY ─────────────────────────────────── */
         .hist-item {
             display:flex; align-items:center; gap:10px;
@@ -645,6 +817,37 @@
     </div>
     <div id="history-list">
         <div class="state-box" style="padding:16px;">Aucune alerte récente</div>
+    </div>
+</div>
+
+<!-- RADAR POPUP -->
+<div class="radar-popup" id="radar-popup">
+    <div class="popup-card" id="popup-card">
+        <div class="popup-handle"></div>
+        <div class="popup-top">
+            <div class="popup-icon" id="popup-icon">🚨</div>
+            <div class="popup-type-block">
+                <div class="popup-type-name" id="popup-type-name">Radar fixe</div>
+                <div class="popup-type-sub" id="popup-type-sub">FIXED · DÉTECTÉ</div>
+            </div>
+            <button class="popup-dismiss" id="popup-dismiss" title="Masquer">
+                <i class="fas fa-chevron-down"></i>
+            </button>
+        </div>
+        <div class="popup-distance-wrap">
+            <div class="popup-dist-label">Distance</div>
+            <div class="popup-dist-num" id="popup-dist-num">—</div>
+            <div class="popup-dist-unit" id="popup-dist-unit">MÈTRES</div>
+        </div>
+        <div class="popup-bottom">
+            <div class="popup-name" id="popup-name">—</div>
+            <div class="popup-speed" id="popup-speed" style="display:none;">
+                <span>LIMITE</span>— km/h
+            </div>
+        </div>
+        <div class="popup-bar">
+            <div class="popup-bar-fill" id="popup-bar-fill" style="width:0%"></div>
+        </div>
     </div>
 </div>
 
@@ -844,6 +1047,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupFilters();
     setupPanel();
     setupButtons();
+    setupPopup();
     initVoices();
     loadRadars();
     startGeo();
@@ -1247,6 +1451,15 @@ function findNearby() {
     // ── BEEP: sync rate to closest radar ─────────────────────────────
     syncBeepRate();
 
+    // ── POPUP: show/update/hide ───────────────────────────────────────
+    syncPopup();
+
+    // If the popup radar is no longer in nearbyRadars, close it
+    if (popupRadarId && !nearbyRadars.find(r => r.id === popupRadarId)) {
+        hidePopup();
+        popupDismissed = false;
+    }
+
     // ── HISTORY ───────────────────────────────────────────────────────
     nearbyRadars.forEach(r => {
         if (r.distance <= 100 && !alertHistory.find(h => h.id === r.id && Date.now() - h.ts < 120000)) {
@@ -1257,6 +1470,102 @@ function findNearby() {
 
     renderAlerts();
     renderHistory();
+}
+
+// =====================================================================
+// RADAR POPUP
+// =====================================================================
+let popupRadarId  = null;   // ID of the radar currently shown in popup
+let popupDismissed = false; // user manually closed it → don't reopen same radar
+
+function setupPopup() {
+    document.getElementById('popup-dismiss').addEventListener('click', () => {
+        popupDismissed = true;
+        hidePopup();
+    });
+}
+
+function showPopup(radar) {
+    const info = TYPES[radar.type] || TYPES.default;
+    const ad   = alertDist[radar.type] || 1000;
+    const prox = Math.max(0, Math.min(100, Math.round((1 - radar.distance / ad) * 100)));
+    const distTxt = radar.distance < 1000
+        ? Math.round(radar.distance)
+        : (radar.distance / 1000).toFixed(1);
+    const unit = radar.distance < 1000 ? 'MÈTRES' : 'KILOMÈTRES';
+
+    // Color per type
+    const card = document.getElementById('popup-card');
+    card.style.setProperty('--popup-color', info.color);
+
+    document.getElementById('popup-icon').textContent      = info.icon;
+    document.getElementById('popup-type-name').textContent = info.label;
+    document.getElementById('popup-type-name').style.color = info.color;
+    document.getElementById('popup-type-sub').textContent  = radar.type.toUpperCase() + ' · DÉTECTÉ';
+    document.getElementById('popup-dist-num').textContent  = distTxt;
+    document.getElementById('popup-dist-num').style.color  = info.color;
+    document.getElementById('popup-dist-num').style.textShadow = `0 0 40px ${info.color}`;
+    document.getElementById('popup-dist-unit').textContent = unit;
+    document.getElementById('popup-name').textContent      = radar.name;
+    document.getElementById('popup-bar-fill').style.width  = prox + '%';
+    document.getElementById('popup-bar-fill').style.background = info.color;
+    document.getElementById('popup-bar-fill').style.boxShadow  = `0 0 10px ${info.color}`;
+
+    const speedEl = document.getElementById('popup-speed');
+    if (radar.vitesse) {
+        speedEl.style.display = 'block';
+        speedEl.style.borderColor = info.color;
+        speedEl.style.color = info.color;
+        speedEl.innerHTML = `<span>LIMITE</span>${radar.vitesse} km/h`;
+    } else {
+        speedEl.style.display = 'none';
+    }
+
+    document.getElementById('radar-popup').classList.add('visible');
+    popupRadarId = radar.id;
+}
+
+function updatePopup(radar) {
+    // Just refresh the distance + bar without re-animating the whole popup
+    if (radar.id !== popupRadarId) return;
+    const ad  = alertDist[radar.type] || 1000;
+    const prox = Math.max(0, Math.min(100, Math.round((1 - radar.distance / ad) * 100)));
+    const distTxt = radar.distance < 1000
+        ? Math.round(radar.distance)
+        : (radar.distance / 1000).toFixed(1);
+    const unit = radar.distance < 1000 ? 'MÈTRES' : 'KILOMÈTRES';
+
+    document.getElementById('popup-dist-num').textContent  = distTxt;
+    document.getElementById('popup-dist-unit').textContent = unit;
+    document.getElementById('popup-bar-fill').style.width  = prox + '%';
+}
+
+function hidePopup() {
+    document.getElementById('radar-popup').classList.remove('visible');
+    popupRadarId = null;
+}
+
+// Called from findNearby — decides whether to show/update/hide popup
+function syncPopup() {
+    if (nearbyRadars.length === 0) {
+        hidePopup();
+        popupDismissed = false;
+        return;
+    }
+
+    const closest = nearbyRadars[0];
+
+    // If user dismissed this specific radar, skip until it clears range
+    if (popupDismissed && closest.id === popupRadarId) return;
+
+    // New radar detected → reset dismissed flag and show
+    if (closest.id !== popupRadarId) {
+        popupDismissed = false;
+        showPopup(closest);
+    } else {
+        // Same radar, just update distance
+        updatePopup(closest);
+    }
 }
 
 // =====================================================================
