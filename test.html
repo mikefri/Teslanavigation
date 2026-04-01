@@ -3,28 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alertes Radar - Tesla Navigation</title>
+    <title>Alertes Radar Temps Réel - Tesla</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Variables et reset */
         :root {
             --red: #cc1a1f;
             --red-dim: rgba(204, 26, 31, .10);
             --red-glow: rgba(204, 26, 31, .35);
-            --bg: #1a1a1a;
-            --card-bg: #2a2a2a;
-            --text: #ffffff;
-            --muted: #aaa;
-            --green: #1b9e57;
-            --orange: #c97c10;
-            --blue: #1a7fd4;
-            --purple: #7c4bc2;
+            --bg: #0d1117;
+            --card-bg: #161b22;
+            --text: #f0f6fc;
+            --muted: #8b949e;
+            --green: #3fb950;
+            --orange: #d29922;
+            --blue: #58a6ff;
+            --purple: #bc8cff;
+            --border: #30363d;
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
@@ -38,13 +39,14 @@
         
         /* Header */
         .header {
-            background: linear-gradient(to bottom, #000000, #1a1a1a);
+            background: linear-gradient(to bottom, #000000, #161b22);
             padding: 16px;
             text-align: center;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
             z-index: 100;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
         }
         
         .logo {
@@ -59,6 +61,7 @@
             font-size: 24px;
             font-weight: 800;
             color: var(--red);
+            text-shadow: 0 0 10px var(--red-glow);
         }
         
         .logo-text {
@@ -78,13 +81,15 @@
             padding: 15px;
             display: flex;
             justify-content: space-between;
-            background-color: #222;
-            border-bottom: 1px solid #333;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
         .toggle-btn {
-            background-color: var(--card-bg);
-            border: none;
+            background-color: var(--bg);
+            border: 1px solid var(--border);
             border-radius: 20px;
             padding: 10px 15px;
             color: var(--text);
@@ -92,11 +97,18 @@
             align-items: center;
             gap: 8px;
             font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-btn:hover {
+            border-color: var(--muted);
         }
         
         .toggle-btn.active {
             background-color: var(--red-dim);
             color: var(--red);
+            border-color: var(--red);
         }
         
         .dot {
@@ -104,6 +116,7 @@
             height: 10px;
             border-radius: 50%;
             background-color: var(--muted);
+            transition: all 0.3s ease;
         }
         
         .toggle-btn.active .dot {
@@ -114,6 +127,8 @@
         /* Alertes */
         .alertes-container {
             padding: 15px;
+            max-width: 600px;
+            margin: 0 auto;
         }
         
         .section-title {
@@ -130,6 +145,13 @@
             padding: 15px;
             margin-bottom: 15px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+        
+        .alert-card.pulse {
+            animation: pulse 2s infinite;
+            border-color: var(--red);
         }
         
         .alert-header {
@@ -151,6 +173,7 @@
             font-size: 24px;
             font-weight: 700;
             font-variant-numeric: tabular-nums;
+            color: var(--red);
         }
         
         .alert-details {
@@ -183,6 +206,7 @@
             border-radius: 3px;
             width: 30%;
             background: linear-gradient(90deg, var(--green), var(--orange), var(--red));
+            transition: width 0.5s ease;
         }
         
         /* Footer */
@@ -191,20 +215,15 @@
             text-align: center;
             color: var(--muted);
             font-size: 12px;
-            border-top: 1px solid #333;
+            border-top: 1px solid var(--border);
             margin-top: 20px;
         }
         
         /* Animation d'alerte */
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.6; }
-            100% { opacity: 1; }
-        }
-        
-        .alert-card.pulse {
-            animation: pulse 2s infinite;
-            border: 1px solid var(--red);
+            0% { box-shadow: 0 0 0 0 rgba(204, 26, 31, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(204, 26, 31, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(204, 26, 31, 0); }
         }
         
         /* Indicateur de statut */
@@ -212,8 +231,8 @@
             display: flex;
             justify-content: space-between;
             padding: 10px 15px;
-            background-color: #222;
-            border-bottom: 1px solid #333;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border);
             font-size: 12px;
             color: var(--muted);
         }
@@ -230,6 +249,77 @@
             border-radius: 50%;
             background-color: var(--green);
         }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--muted);
+        }
+        
+        .spinner {
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--red);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Message d'erreur */
+        .error-message {
+            background-color: rgba(204, 26, 31, 0.1);
+            border: 1px solid var(--red);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px;
+            text-align: center;
+            color: var(--red);
+        }
+        
+        /* Bouton d'action */
+        .action-btn {
+            background-color: var(--red);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            background-color: #b31519;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(204, 26, 31, 0.3);
+        }
+        
+        /* Responsive */
+        @media (max-width: 480px) {
+            .controls {
+                flex-direction: column;
+            }
+            
+            .toggle-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .alert-distance {
+                font-size: 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -237,10 +327,10 @@
     <div class="status-bar">
         <div class="status-item">
             <div class="status-dot"></div>
-            <span>Connecté</span>
+            <span id="status-text">En attente de géolocalisation...</span>
         </div>
         <div class="status-item">
-            <span>🔋 78%</span>
+            <span id="battery-status">🔋 ...</span>
         </div>
     </div>
     
@@ -250,164 +340,487 @@
             <span class="logo-t">T</span>
             <span class="logo-text">TESLA</span>
         </div>
-        <div class="subtitle">Alertes Radar</div>
+        <div class="subtitle">Alertes Radar Temps Réel</div>
     </div>
     
     <!-- Contrôles -->
     <div class="controls">
-        <button class="toggle-btn active">
+        <button class="toggle-btn active" id="toggle-radars">
             <div class="dot"></div>
             <span>Radars</span>
         </button>
-        <button class="toggle-btn">
+        <button class="toggle-btn" id="toggle-voice">
             <div class="dot"></div>
             <span>Alertes vocales</span>
+        </button>
+        <button class="toggle-btn" id="toggle-updates">
+            <div class="dot"></div>
+            <span>Mises à jour auto</span>
         </button>
     </div>
     
     <!-- Conteneur d'alertes -->
     <div class="alertes-container">
-        <h2 class="section-title">🚨 Alertes à proximité</h2>
-        
-        <!-- Alerte 1 -->
-        <div class="alert-card pulse">
-            <div class="alert-header">
-                <div class="alert-type">
-                    <span>🚨</span>
-                    <span>Radar fixe</span>
-                </div>
-                <div class="alert-distance">250 m</div>
-            </div>
-            <div class="alert-details">
-                <div class="alert-location">Route Nationale 7 - Direction Sud</div>
-                <div class="alert-limit">
-                    <span>Limite:</span>
-                    <strong>90 km/h</strong>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill"></div>
-                </div>
+        <h2 class="section-title"><i class="fas fa-radar"></i> Alertes à proximité</h2>
+        <div id="alerts-list">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Recherche des radars à proximité...</p>
             </div>
         </div>
         
-        <!-- Alerte 2 -->
-        <div class="alert-card">
-            <div class="alert-header">
-                <div class="alert-type">
-                    <span>🚦</span>
-                    <span>Radar feu rouge</span>
-                </div>
-                <div class="alert-distance">500 m</div>
-            </div>
-            <div class="alert-details">
-                <div class="alert-location">Avenue Victor Hugo - Carrefour Central</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 50%"></div>
-                </div>
-            </div>
-        </div>
+        <button class="action-btn" id="locate-btn">
+            <i class="fas fa-location-crosshairs"></i> Actualiser ma position
+        </button>
         
-        <!-- Alerte 3 -->
-        <div class="alert-card">
-            <div class="alert-header">
-                <div class="alert-type">
-                    <span>📏</span>
-                    <span>Radar tronçon</span>
-                </div>
-                <div class="alert-distance">1.2 km</div>
-            </div>
-            <div class="alert-details">
-                <div class="alert-location">Autoroute A6 - Entre sorties 12 et 14</div>
-                <div class="alert-limit">
-                    <span>Limite:</span>
-                    <strong>110 km/h</strong>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 70%"></div>
-                </div>
-            </div>
-        </div>
-        
-        <h2 class="section-title" style="margin-top: 25px;">📋 Alertes récentes</h2>
-        
-        <!-- Alerte passée 1 -->
-        <div class="alert-card">
-            <div class="alert-header">
-                <div class="alert-type">
-                    <span>🚐</span>
-                    <span>Radar mobile</span>
-                </div>
-                <div class="alert-distance">Dépassé</div>
-            </div>
-            <div class="alert-details">
-                <div class="alert-location">Départementale 56 - Hauteur du km 12</div>
-                <div class="alert-limit">
-                    <span>Limite:</span>
-                    <strong>80 km/h</strong>
-                </div>
-            </div>
+        <h2 class="section-title" style="margin-top: 25px;"><i class="fas fa-history"></i> Historique des alertes</h2>
+        <div id="history-list">
+            <p style="text-align: center; color: var(--muted); padding: 20px;">
+                Aucune alerte récente pour le moment
+            </p>
         </div>
     </div>
     
     <!-- Pied de page -->
     <div class="footer">
-        <p>Système d'alertes radar Tesla Navigation</p>
+        <p>Système d'alertes radar Tesla Navigation - Temps réel</p>
         <p>⚠️ Respectez toujours les limitations de vitesse</p>
+        <p style="margin-top: 10px; font-size: 10px;">
+            Données fournies par OpenStreetMap et community overpass
+        </p>
     </div>
 
     <script>
-        // Simulation de mises à jour en temps réel
+        // Variables globales
+        let userLocation = null;
+        let watchId = null;
+        let radarsEnabled = true;
+        let voiceAlerts = false;
+        let autoUpdates = true;
+        let currentRadars = [];
+        
+        // Types de radars avec icônes
+        const radarTypes = {
+            'speed_camera': { icon: '🚨', name: 'Radar fixe', color: '#cc1a1f' },
+            'traffic_camera': { icon: '🚦', name: 'Radar feu rouge', color: '#d29922' },
+            'checkpoint': { icon: '📏', name: 'Radar tronçon', color: '#bc8cff' },
+            'mobile_speed_camera': { icon: '🚐', name: 'Radar mobile', color: '#58a6ff' },
+            'default': { icon: '📷', name: 'Contrôle vitesse', color: '#8b949e' }
+        };
+        
+        // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
-            const distanceElement = document.querySelector('.alert-distance');
-            const progressFill = document.querySelector('.progress-fill');
-            let distance = 250;
+            // Configuration des boutons
+            document.getElementById('toggle-radars').addEventListener('click', toggleRadars);
+            document.getElementById('toggle-voice').addEventListener('click', toggleVoiceAlerts);
+            document.getElementById('toggle-updates').addEventListener('click', toggleAutoUpdates);
+            document.getElementById('locate-btn').addEventListener('click', locateUser);
             
-            // Simulation de la diminution de distance
-            const updateDistance = setInterval(() => {
-                distance -= 10;
-                if (distance <= 0) {
-                    distance = 0;
-                    clearInterval(updateDistance);
+            // Démarrer la géolocalisation
+            if (navigator.geolocation) {
+                startGeolocation();
+            } else {
+                showError("La géolocalisation n'est pas supportée par votre navigateur");
+            }
+            
+            // Simulation de la batterie
+            updateBatteryStatus();
+        });
+        
+        // Fonction pour démarrer la géolocalisation
+        function startGeolocation() {
+            updateStatus("Localisation en cours...");
+            
+            if (watchId) {
+                navigator.geolocation.clearWatch(watchId);
+            }
+            
+            watchId = navigator.geolocation.watchPosition(
+                position => {
+                    userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                        accuracy: position.coords.accuracy
+                    };
                     
-                    // Changer l'affichage une fois le radar dépassé
-                    setTimeout(() => {
-                        distanceElement.textContent = "Dépassé";
-                        document.querySelector('.pulse').classList.remove('pulse');
-                    }, 1000);
-                } else {
-                    distanceElement.textContent = distance + " m";
-                    progressFill.style.width = (100 - (distance / 250 * 100)) + '%';
+                    updateStatus("Localisation active");
+                    updateBatteryStatus();
+                    
+                    // Récupérer les radars à proximité
+                    if (radarsEnabled) {
+                        fetchNearbyRadars();
+                    }
+                },
+                error => {
+                    console.error("Erreur de géolocalisation:", error);
+                    
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            showError("Autorisation de localisation refusée");
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            showError("Impossible de déterminer votre position");
+                            break;
+                        case error.TIMEOUT:
+                            showError("Délai de localisation dépassé");
+                            break;
+                    }
+                    
+                    // Mode simulation si la géolocalisation échoue
+                    simulateLocation();
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 60000
                 }
-            }, 1500);
+            );
+        }
+        
+        // Fonction pour récupérer les radars à proximité
+        function fetchNearbyRadars() {
+            if (!userLocation) return;
             
-            // Simulation de nouvelles alertes
-            setTimeout(() => {
-                const alertesContainer = document.querySelector('.alertes-container');
-                const newAlert = document.createElement('div');
-                newAlert.className = 'alert-card';
-                newAlert.innerHTML = `
-                    <div class="alert-header">
-                        <div class="alert-type">
-                            <span>🚗</span>
-                            <span>Zone de contrôle</span>
+            updateStatus("Recherche des radars...");
+            
+            // Utilisation de l'API Overpass pour récupérer les radars
+            const radius = 5000; // 5km radius
+            const overpassQuery = `
+                [out:json];
+                (
+                    node["highway"="speed_camera"](around:${radius},${userLocation.lat},${userLocation.lng});
+                    node["enforcement"="speed_camera"](around:${radius},${userLocation.lat},${userLocation.lng});
+                    node["surveillance"="speed_camera"](around:${radius},${userLocation.lat},${userLocation.lng});
+                );
+                out body;
+            `;
+            
+            const encodedQuery = encodeURIComponent(overpassQuery);
+            const url = `https://overpass-api.de/api/interpreter?data=${encodedQuery}`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => processRadarData(data))
+                .catch(error => {
+                    console.error("Erreur lors de la récupération des radars:", error);
+                    // Simulation de données si l'API échoue
+                    simulateRadars();
+                });
+        }
+        
+        // Traitement des données des radars
+        function processRadarData(data) {
+            if (!data.elements || data.elements.length === 0) {
+                document.getElementById('alerts-list').innerHTML = `
+                    <p style="text-align: center; color: var(--muted); padding: 20px;">
+                        Aucun radar détecté à proximité
+                    </p>
+                `;
+                return;
+            }
+            
+            currentRadars = [];
+            
+            // Traiter chaque radar
+            data.elements.forEach(radar => {
+                if (radar.lat && radar.lon) {
+                    const distance = calculateDistance(
+                        userLocation.lat, 
+                        userLocation.lng, 
+                        radar.lat, 
+                        radar.lon
+                    );
+                    
+                    // Ne garder que les radars à moins de 3km
+                    if (distance <= 3000) {
+                        const type = determineRadarType(radar.tags);
+                        currentRadars.push({
+                            id: radar.id,
+                            type: type,
+                            distance: distance,
+                            lat: radar.lat,
+                            lng: radar.lon,
+                            tags: radar.tags
+                        });
+                    }
+                }
+            });
+            
+            // Trier par distance
+            currentRadars.sort((a, b) => a.distance - b.distance);
+            
+            // Afficher les radars
+            displayRadars();
+        }
+        
+        // Afficher les radars
+        function displayRadars() {
+            const alertsList = document.getElementById('alerts-list');
+            
+            if (currentRadars.length === 0) {
+                alertsList.innerHTML = `
+                    <p style="text-align: center; color: var(--muted); padding: 20px;">
+                        Aucun radar détecté à proximité
+                    </p>
+                `;
+                return;
+            }
+            
+            let html = '';
+            
+            currentRadars.forEach((radar, index) => {
+                const radarInfo = radarTypes[radar.type] || radarTypes.default;
+                const distanceText = radar.distance < 1000 ? 
+                    `${Math.round(radar.distance)} m` : 
+                    `${(radar.distance / 1000).toFixed(1)} km`;
+                
+                // Pourcentage de proximité (pour la barre de progression)
+                const proximity = Math.max(0, 100 - (radar.distance / 30));
+                
+                html += `
+                    <div class="alert-card ${radar.distance < 500 ? 'pulse' : ''}">
+                        <div class="alert-header">
+                            <div class="alert-type">
+                                <span>${radarInfo.icon}</span>
+                                <span>${radarInfo.name}</span>
+                            </div>
+                            <div class="alert-distance">${distanceText}</div>
                         </div>
-                        <div class="alert-distance">2.5 km</div>
-                    </div>
-                    <div class="alert-details">
-                        <div class="alert-location">Entrée de ville - Saint-Michel</div>
-                        <div class="alert-limit">
-                            <span>Limite:</span>
-                            <strong>50 km/h</strong>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 20%"></div>
+                        <div class="alert-details">
+                            <div class="alert-location">Direction: ${getCardinalDirection(radar)}</div>
+                            ${radar.tags.maxspeed ? `
+                                <div class="alert-limit">
+                                    <span>Limite:</span>
+                                    <strong>${radar.tags.maxspeed} km/h</strong>
+                                </div>
+                            ` : ''}
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${proximity}%"></div>
+                            </div>
                         </div>
                     </div>
                 `;
                 
-                alertesContainer.appendChild(newAlert);
-            }, 8000);
-        });
+                // Alertes vocales pour les radars très proches
+                if (voiceAlerts && radar.distance < 1000 && radar.distance > 50) {
+                    speakAlert(radar, distanceText);
+                }
+            });
+            
+            alertsList.innerHTML = html;
+            updateStatus(`${currentRadars.length} radar(s) détecté(s)`);
+        }
+        
+        // Calcul de distance entre deux points (formule haversine)
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371000; // Rayon de la Terre en mètres
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+        
+        // Déterminer le type de radar
+        function determineRadarType(tags) {
+            if (tags.highway === 'speed_camera') return 'speed_camera';
+            if (tags.enforcement === 'speed_camera') return 'speed_camera';
+            if (tags.surveillance === 'speed_camera') return 'speed_camera';
+            if (tags.enforcement === 'traffic') return 'traffic_camera';
+            if (tags.mobile === 'yes') return 'mobile_speed_camera';
+            return 'default';
+        }
+        
+        // Obtenir la direction cardinale
+        function getCardinalDirection(radar) {
+            if (!userLocation) return 'Inconnu';
+            
+            const bearing = calculateBearing(
+                userLocation.lat, 
+                userLocation.lng, 
+                radar.lat, 
+                radar.lng
+            );
+            
+            const directions = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
+            const index = Math.round(bearing / 45) % 8;
+            return directions[index];
+        }
+        
+        // Calculer l'angle de direction
+        function calculateBearing(lat1, lon1, lat2, lon2) {
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const y = Math.sin(dLon) * Math.cos(lat2 * Math.PI / 180);
+            const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
+                      Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos(dLon);
+            return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+        }
+        
+        // Alertes vocales
+        function speakAlert(radar, distanceText) {
+            if ('speechSynthesis' in window && voiceAlerts) {
+                const utterance = new SpeechSynthesisUtterance(
+                    `Attention, ${radarTypes[radar.type].name} à ${distanceText}`
+                );
+                utterance.lang = 'fr-FR';
+                speechSynthesis.speak(utterance);
+            }
+        }
+        
+        // Mettre à jour le statut
+        function updateStatus(text) {
+            document.getElementById('status-text').textContent = text;
+        }
+        
+        // Mettre à jour le statut de la batterie
+        function updateBatteryStatus() {
+            if ('getBattery' in navigator) {
+                navigator.getBattery().then(battery => {
+                    const level = Math.round(battery.level * 100);
+                    document.getElementById('battery-status').textContent = `🔋 ${level}%`;
+                });
+            } else {
+                // Simulation de batterie
+                const level = Math.floor(Math.random() * 41) + 60; // 60-100%
+                document.getElementById('battery-status').textContent = `🔋 ${level}%`;
+            }
+        }
+        
+        // Afficher une erreur
+        function showError(message) {
+            const alertsList = document.getElementById('alerts-list');
+            alertsList.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>${message}</p>
+                </div>
+            `;
+            updateStatus("Erreur de localisation");
+        }
+        
+        // Localiser l'utilisateur manuellement
+        function locateUser() {
+            if (navigator.geolocation) {
+                updateStatus("Localisation en cours...");
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        userLocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                            accuracy: position.coords.accuracy
+                        };
+                        updateStatus("Position actualisée");
+                        fetchNearbyRadars();
+                    },
+                    error => {
+                        showError("Impossible de déterminer votre position");
+                    }
+                );
+            }
+        }
+        
+        // Activer/désactiver les radars
+        function toggleRadars() {
+            radarsEnabled = !radarsEnabled;
+            const button = document.getElementById('toggle-radars');
+            button.classList.toggle('active', radarsEnabled);
+            
+            if (radarsEnabled) {
+                fetchNearbyRadars();
+            } else {
+                document.getElementById('alerts-list').innerHTML = `
+                    <p style="text-align: center; color: var(--muted); padding: 20px;">
+                        Détection des radars désactivée
+                    </p>
+                `;
+                updateStatus("Radars désactivés");
+            }
+        }
+        
+        // Activer/désactiver les alertes vocales
+        function toggleVoiceAlerts() {
+            voiceAlerts = !voiceAlerts;
+            document.getElementById('toggle-voice').classList.toggle('active', voiceAlerts);
+        }
+        
+        // Activer/désactiver les mises à jour automatiques
+        function toggleAutoUpdates() {
+            autoUpdates = !autoUpdates;
+            document.getElementById('toggle-updates').classList.toggle('active', autoUpdates);
+            
+            if (autoUpdates) {
+                startGeolocation();
+            } else if (watchId) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+                updateStatus("Mises à jour manuelles");
+            }
+        }
+        
+        // Simulation de localisation (si la géolocalisation échoue)
+        function simulateLocation() {
+            // Position par défaut (Paris)
+            userLocation = {
+                lat: 48.8566,
+                lng: 2.3522,
+                accuracy: 100
+            };
+            
+            updateStatus("Mode simulation");
+            fetchNearbyRadars();
+            
+            // Simuler le mouvement
+            setInterval(() => {
+                if (autoUpdates && userLocation) {
+                    // Déplacer légèrement la position
+                    userLocation.lat += (Math.random() - 0.5) * 0.001;
+                    userLocation.lng += (Math.random() - 0.5) * 0.001;
+                    
+                    if (radarsEnabled) {
+                        fetchNearbyRadars();
+                    }
+                }
+            }, 10000);
+        }
+        
+        // Simulation de radars (si l'API échoue)
+        function simulateRadars() {
+            currentRadars = [];
+            
+            // Générer des radars factices autour de la position
+            for (let i = 0; i < 5; i++) {
+                const distance = 200 + (Math.random() * 2800); // 200m - 3km
+                const angle = Math.random() * 2 * Math.PI;
+                
+                const lat = userLocation.lat + (distance / 111320) * Math.cos(angle);
+                const lng = userLocation.lng + (distance / (111320 * Math.cos(userLocation.lat * Math.PI/180))) * Math.sin(angle);
+                
+                const types = Object.keys(radarTypes);
+                const type = types[Math.floor(Math.random() * types.length)];
+                
+                currentRadars.push({
+                    id: i,
+                    type: type,
+                    distance: distance,
+                    lat: lat,
+                    lng: lng,
+                    tags: {
+                        maxspeed: Math.round(30 + Math.random() * 90) // 30-120 km/h
+                    }
+                });
+            }
+            
+            // Trier par distance
+            currentRadars.sort((a, b) => a.distance - b.distance);
+            
+            // Afficher les radars
+            displayRadars();
+            
+            updateStatus("Mode simulation - 5 radars détectés");
+        }
     </script>
 </body>
 </html>
