@@ -606,7 +606,8 @@
 <!-- QUICK BAR -->
 <div class="quick-bar">
     <button class="q-btn on" id="btn-radars"><i class="fas fa-circle-dot"></i> Radars</button>
-    <button class="q-btn" id="btn-voice"><i class="fas fa-volume-up"></i> Voix</button>
+    <button class="q-btn" id="btn-voice"><i class="fas fa-comment-dots"></i> Voix</button>
+    <button class="q-btn" id="btn-beep"><i class="fas fa-bell"></i> Bips</button>
     <button class="q-btn on" id="btn-updates"><i class="fas fa-rotate"></i> Auto</button>
     <div class="q-sep"></div>
     <button class="q-btn" id="btn-filters"><i class="fas fa-sliders"></i> Filtres</button>
@@ -718,7 +719,10 @@
         </div>
 
         <button class="test-btn" id="voice-test-btn">
-            <i class="fas fa-volume-up"></i> Tester la voix sélectionnée
+            <i class="fas fa-comment-dots"></i> Tester la voix
+        </button>
+        <button class="test-btn" id="beep-test-btn" style="margin-top:8px;border-color:var(--orange);color:var(--orange);background:rgba(245,158,11,.1);">
+            <i class="fas fa-bell"></i> Tester les bips progressifs
         </button>
     </div>
 
@@ -747,12 +751,81 @@ let currentFilter = 'all';
 let allRadars     = [];
 let nearbyRadars  = [];
 let alertHistory  = [];
-let spokenIds     = new Set();
+let spokenIds     = new Set(); // kept for compatibility
 let selectedVoice = null; // SpeechSynthesisVoice object
 let availableVoices = [];
 
 let alertDist = { fixed:1000, redlight:800, section:1500, mobile:500 };
 let voiceDist = 300;
+let beepEnabled = false;
+
+// ── BEEP ENGINE ──────────────────────────────────────────────────────
+// Uses Web Audio API to generate beeps without any audio file.
+// Beep interval shrinks as the closest radar approaches.
+// Zones (% of alert distance consumed):
+//   0–40%  → no beep
+//   40–65% → slow  (every 3 s)
+//   65–80% → medium (every 1.2 s)
+//   80–92% → fast  (every 0.4 s)
+//   92–100%→ continuous (50 ms between beeps)
+let audioCtx = null;
+let beepInterval = null;   // setInterval handle
+let currentBeepMs = 0;     // current interval in ms (0 = off)
+
+function getAudioCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+}
+
+function playBeep(freq = 880, durationMs = 80, volume = 0.35) {
+    try {
+        const ctx = getAudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(volume, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + durationMs / 1000);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + durationMs / 1000);
+    } catch(e) { /* ignore if AudioContext blocked */ }
+}
+
+// Call this every time position updates to sync beep rate to closest radar
+function syncBeepRate() {
+    if (!beepEnabled || nearbyRadars.length === 0) {
+        stopBeepLoop();
+        return;
+    }
+    const closest = nearbyRadars[0];
+    const ad = alertDist[closest.type] || 1000;
+    const pct = 1 - (closest.distance / ad); // 0 = far, 1 = on top
+
+    let targetMs = 0; // 0 = no beep
+    let freq = 880;
+    if (pct >= 0.92) { targetMs = 50;   freq = 1200; } // continuous — very close
+    else if (pct >= 0.80) { targetMs = 400;  freq = 1050; } // fast
+    else if (pct >= 0.65) { targetMs = 1200; freq = 920;  } // medium
+    else if (pct >= 0.40) { targetMs = 3000; freq = 800;  } // slow
+    // else: too far, no beep
+
+    if (targetMs === 0) { stopBeepLoop(); return; }
+
+    // Only restart if interval changed significantly (±20%)
+    if (Math.abs(targetMs - currentBeepMs) / (currentBeepMs || 1) > 0.2 || !beepInterval) {
+        stopBeepLoop();
+        currentBeepMs = targetMs;
+        playBeep(freq); // immediate first beep
+        beepInterval = setInterval(() => playBeep(freq), targetMs);
+    }
+}
+
+function stopBeepLoop() {
+    if (beepInterval) { clearInterval(beepInterval); beepInterval = null; }
+    currentBeepMs = 0;
+}
 
 const TYPES = {
     fixed:    { icon:'🚨', label:'Radar fixe',      color:'#e8262c', bg:'rgba(232,38,44,.15)' },
@@ -935,12 +1008,27 @@ function setupButtons() {
         radarsEnabled = !radarsEnabled;
         this.classList.toggle('on', radarsEnabled);
         if (radarsEnabled && userLocation) findNearby();
+        else stopBeepLoop();
     });
 
     document.getElementById('btn-voice').addEventListener('click', function() {
         voiceEnabled = !voiceEnabled;
         this.classList.toggle('on-blue', voiceEnabled);
         if (voiceEnabled) speak('Alertes vocales activées');
+    });
+
+    document.getElementById('btn-beep').addEventListener('click', function() {
+        beepEnabled = !beepEnabled;
+        this.classList.toggle('on-blue', beepEnabled);
+        if (beepEnabled) {
+            // Unlock AudioContext (required after user gesture on mobile)
+            getAudioCtx().resume().then(() => {
+                playBeep(880, 100, 0.3);
+                syncBeepRate();
+            });
+        } else {
+            stopBeepLoop();
+        }
     });
 
     document.getElementById('btn-updates').addEventListener('click', function() {
@@ -963,8 +1051,24 @@ function setupButtons() {
     document.getElementById('voice-test-btn').addEventListener('click', () => {
         const wasEnabled = voiceEnabled;
         voiceEnabled = true;
-        speak("Attention, radar fixe dans 500 mètres, vitesse limitée à 80 km/h.");
+        speak("Attention, radar fixe dans 500 mètres, limite 80 kilomètres heure.");
         voiceEnabled = wasEnabled;
+    });
+
+    document.getElementById('beep-test-btn').addEventListener('click', () => {
+        // Demo: plays slow → medium → fast → continuous sequence
+        getAudioCtx().resume().then(() => {
+            const seq = [
+                [800, 3000], [920, 1200], [1050, 400], [1200, 50]
+            ];
+            let i = 0;
+            playBeep(seq[0][0], 80);
+            const demo = setInterval(() => {
+                i++;
+                if (i >= seq.length) { clearInterval(demo); return; }
+                playBeep(seq[i][0], 80);
+            }, 800);
+        });
     });
 
     document.getElementById('save-btn').addEventListener('click', saveSettings);
@@ -1099,27 +1203,53 @@ function loadDemo() {
 // =====================================================================
 // FIND NEARBY
 // =====================================================================
+
+// Tiered voice thresholds per radar (spoken once per threshold crossing)
+// Key: radarId, Value: Set of thresholds already announced
+const spokenThresholds = {}; // { radarId: Set<threshold> }
+const VOICE_THRESHOLDS = [1000, 500, 200, 100]; // metres
+
 function findNearby() {
     if (!userLocation || allRadars.length === 0) return;
+
     nearbyRadars = allRadars
         .map(r => ({ ...r, distance: haversine(userLocation.lat, userLocation.lng, r.lat, r.lng) }))
         .filter(r => r.distance <= (alertDist[r.type] || 1000))
         .sort((a, b) => a.distance - b.distance);
-    
-    // Voice alerts (avoid re-speaking same radar too often)
+
+    // ── VOICE: tiered announcements ───────────────────────────────────
     nearbyRadars.forEach(r => {
-        if (voiceEnabled && r.distance <= voiceDist && r.distance > 30 && !spokenIds.has(r.id)) {
-            spokenIds.add(r.id);
-            const info = TYPES[r.type] || TYPES.default;
-            const d = r.distance < 1000 ? Math.round(r.distance) + ' mètres' : (r.distance/1000).toFixed(1) + ' kilomètres';
-            speak(`Attention, ${info.label} dans ${d}${r.vitesse ? ', limite ' + r.vitesse + ' km/h' : ''}.`);
+        if (!spokenThresholds[r.id]) spokenThresholds[r.id] = new Set();
+        const announced = spokenThresholds[r.id];
+
+        // Find the lowest threshold we just crossed
+        for (const thr of VOICE_THRESHOLDS) {
+            if (r.distance <= thr && !announced.has(thr)) {
+                announced.add(thr);
+                if (voiceEnabled) {
+                    const info = TYPES[r.type] || TYPES.default;
+                    const dTxt = thr >= 1000
+                        ? (thr / 1000) + ' kilomètre'
+                        : thr + ' mètres';
+                    const vitTxt = r.vitesse ? `, limite ${r.vitesse} kilomètres heure` : '';
+                    speak(`Attention, ${info.label} dans ${dTxt}${vitTxt}.`);
+                }
+                break; // only one announcement per position update
+            }
         }
-        if (r.distance > voiceDist) spokenIds.delete(r.id);
+
+        // Reset thresholds when radar goes out of range (so it re-announces next time)
+        if (r.distance > (alertDist[r.type] || 1000) * 0.98) {
+            delete spokenThresholds[r.id];
+        }
     });
 
-    // Add to history
+    // ── BEEP: sync rate to closest radar ─────────────────────────────
+    syncBeepRate();
+
+    // ── HISTORY ───────────────────────────────────────────────────────
     nearbyRadars.forEach(r => {
-        if (r.distance <= 80 && !alertHistory.find(h => h.id === r.id && Date.now() - h.ts < 120000)) {
+        if (r.distance <= 100 && !alertHistory.find(h => h.id === r.id && Date.now() - h.ts < 120000)) {
             alertHistory.unshift({ ...r, ts: Date.now() });
             alertHistory = alertHistory.slice(0, 20);
         }
